@@ -27,3 +27,4 @@ ingress:
 
   # 3. Regla por defecto para rechazar tráfico huérfano o no reconocido
   - service: http_status:404
+
