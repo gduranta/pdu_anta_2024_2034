@@ -32,6 +32,7 @@ if (requireNamespace("pagedown", quietly = TRUE)) {
 }
 
 options(shiny.maxRequestSize = 25 * 1024^2)
+options(shiny.sanitize.errors = TRUE) # Blindaje CWE-209: Oculta stack traces y rutas del sistema ante errores no capturados
 
 # ------------------------------------------------------------------------------
 # BLINDAJE DE CIBERSEGURIDAD SEC-05: POLÍTICAS DE ENMARCADO Y ENCABEZADOS HTTP

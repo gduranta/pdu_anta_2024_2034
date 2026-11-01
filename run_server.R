@@ -4,6 +4,7 @@
 options(shiny.host = "0.0.0.0")
 options(shiny.port = 3838)
 options(shiny.launch.browser = FALSE)
+options(shiny.sanitize.errors = TRUE) # Blindaje CWE-209: Oculta rutas internas y stack traces en consola del cliente
 
 # Blindaje de Ciberseguridad SEC-05: Políticas de Enmarcado HTTP (CWE-1021)
 shiny::shinyOptions(
