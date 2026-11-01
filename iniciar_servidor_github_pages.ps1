@@ -7,7 +7,7 @@ $raiz = Split-Path -Parent $MyInvocation.MyCommand.Definition
 Set-Location $raiz
 
 Write-Host "==============================================================================" -ForegroundColor DarkGreen
-Write-Host " GEOVISOR PDU ANTA (2024 - 2034) - SERVIDOR CONEXIÓN GITHUB PAGES" -ForegroundColor Green
+Write-Host " GEOVISOR PDU ANTA (2024 - 2034) - SERVIDOR CONEXION GITHUB PAGES" -ForegroundColor Green
 Write-Host " Municipalidad Provincial de Anta - Gerencia de Desarrollo Urbano y Rural" -ForegroundColor Gray
 Write-Host "==============================================================================" -ForegroundColor DarkGreen
 Write-Host ""
@@ -22,14 +22,25 @@ if (-not (Test-Path $cloudflared)) {
 
 # 2. Localizar Rscript
 $rscriptCmd = "Rscript.exe"
-if (-not (Get-Command "Rscript.exe" -ErrorAction SilentlyContinue)) {
-    $rCandidate = Get-ChildItem "C:\Program Files\R" -Filter "Rscript.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
-    if ($rCandidate) { $rscriptCmd = $rCandidate }
+$candidatos = @(
+    "C:\Program Files\R\R-4.6.1\bin\x64\Rscript.exe",
+    "C:\Program Files\R\R-4.6.1\bin\Rscript.exe"
+)
+foreach ($c in $candidatos) {
+    if (Test-Path $c) {
+        $rscriptCmd = $c
+        break
+    }
+}
+if ($rscriptCmd -eq "Rscript.exe") {
+    $rFound = Get-ChildItem "C:\Program Files\R" -Filter "Rscript.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+    if ($rFound) { $rscriptCmd = $rFound }
 }
 
-# 3. Iniciar R Shiny en segundo plano (host 0.0.0.0 para red municipal + tunel)
+# 3. Iniciar R Shiny en segundo plano (host 0.0.0.0 para red local y tunel)
 Write-Host "[1/3] Iniciando motor del GeoVisor en puerto $Puerto..." -ForegroundColor Cyan
-$rProcess = Start-Process -FilePath $rscriptCmd -ArgumentList "-e `"shiny::runApp(appDir='.', host='0.0.0.0', port=$Puerto)`"" -PassThru -NoNewWindow
+$runServerScript = Join-Path $raiz "run_server.R"
+$rProcess = Start-Process -FilePath $rscriptCmd -ArgumentList $runServerScript -PassThru -NoNewWindow
 
 Start-Sleep -Seconds 3
 
@@ -39,9 +50,10 @@ $cfLog = Join-Path $raiz "outputs\cloudflared_live.log"
 if (-not (Test-Path (Join-Path $raiz "outputs"))) { New-Item -ItemType Directory -Path (Join-Path $raiz "outputs") -Force | Out-Null }
 if (Test-Path $cfLog) { Remove-Item $cfLog -Force }
 
-$cfProcess = Start-Process -FilePath $cloudflared -ArgumentList "tunnel --url http://127.0.0.1:$Puerto" -RedirectStandardError $cfLog -PassThru -NoNewWindow
+$cfArgs = @("tunnel", "--url", "http://127.0.0.1:$Puerto")
+$cfProcess = Start-Process -FilePath $cloudflared -ArgumentList $cfArgs -RedirectStandardError $cfLog -PassThru -NoNewWindow
 
-# Esperar a que cloudflared genere la URL
+# Esperar a que cloudflared genere la URL publica
 $urlPublica = ""
 $intentos = 0
 while ($intentos -lt 25 -and [string]::IsNullOrEmpty($urlPublica)) {
@@ -51,47 +63,53 @@ while ($intentos -lt 25 -and [string]::IsNullOrEmpty($urlPublica)) {
         $lineas = Get-Content $cfLog -ErrorAction SilentlyContinue
         foreach ($linea in $lineas) {
             if ($linea -match 'https://[a-zA-Z0-9-]+\.trycloudflare\.com') {
-                $urlPublica = $matches[0]
-                break
+                $candidata = $matches[0]
+                if ($candidata -notmatch 'api\.trycloudflare\.com') {
+                    $urlPublica = $candidata
+                    break
+                }
             }
         }
     }
 }
 
+$endpointFile = Join-Path $raiz "docs\server_endpoint.json"
+$ahora = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+
 if ([string]::IsNullOrEmpty($urlPublica)) {
-    Write-Host "[!] Advertencia: No se pudo capturar automáticamente la URL de Cloudflare en 25 segundos." -ForegroundColor Red
+    Write-Host "[!] Advertencia: No se pudo capturar automaticamente la URL de Cloudflare en 25 segundos." -ForegroundColor Red
     Write-Host "    Verifique el archivo outputs\cloudflared_live.log para copiarla manualmente." -ForegroundColor Yellow
 } else {
     Write-Host "    URL del tunel activo: $urlPublica" -ForegroundColor Green
     
     # 5. Actualizar docs\server_endpoint.json
-    $endpointFile = Join-Path $raiz "docs\server_endpoint.json"
-    $ahora = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
-    $jsonContent = @"
-{
-  "url": "$urlPublica",
-  "status": "online",
-  "updated_at": "$ahora",
-  "institucion": "Municipalidad Provincial de Anta",
-  "gerencia": "Gerencia de Desarrollo Urbano y Rural (GDUR)",
-  "proyecto": "Plan de Desarrollo Urbano de Anta (2024 - 2034)",
-  "ordenanza": "Ordenanza Municipal Nº 04-2025-A-MPA/C",
-  "mesa_de_partes": "mesadepartesvirtual@munianta.gob.pe"
-}
-"@
-    Set-Content -Path $endpointFile -Value $jsonContent -Encoding UTF8
+    $endpointData = [ordered]@{
+        url = $urlPublica
+        status = "online"
+        updated_at = $ahora
+        institucion = "Municipalidad Provincial de Anta"
+        gerencia = "Gerencia de Desarrollo Urbano y Rural (GDUR)"
+        proyecto = "Plan de Desarrollo Urbano de Anta (2024 - 2034)"
+        ordenanza = "Ordenanza Municipal No 04-2025-A-MPA/C"
+        mesa_de_partes = "mesadepartesvirtual@munianta.gob.pe"
+    }
+    $jsonContent = $endpointData | ConvertTo-Json -Depth 4
+    [System.IO.File]::WriteAllText($endpointFile, $jsonContent, [System.Text.Encoding]::UTF8)
     Write-Host "[3/3] Archivo docs\server_endpoint.json actualizado." -ForegroundColor Green
 
-    # 6. Sincronizar con GitHub si no se indicó -SinGitPush
+    # 6. Sincronizar con GitHub si no se indico -SinGitPush
     if (-not $SinGitPush) {
-        Write-Host "    Sincronizando con GitHub Pages (antapat/pdu_anta_2024_2034)..." -ForegroundColor Cyan
-        git add docs/server_endpoint.json
-        git commit -m "chore(pages): activar servidor en vivo en $urlPublica [skip ci]" --quiet
-        git push origin main --quiet
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "    Sincronización con GitHub completada exitosamente." -ForegroundColor Green
-        } else {
-            Write-Host "    Nota: No se pudo hacer push automático a GitHub (verifique credenciales de git)." -ForegroundColor Yellow
+        $cambios = git status --porcelain docs/server_endpoint.json
+        if ($cambios) {
+            Write-Host "    Sincronizando con GitHub Pages (antapat/pdu_anta_2024_2034)..." -ForegroundColor Cyan
+            git add docs/server_endpoint.json
+            git commit -m "chore(pages): activar servidor en vivo [skip ci]" --quiet
+            git push origin main
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "    Sincronizacion con GitHub completada exitosamente." -ForegroundColor Green
+            } else {
+                Write-Host "    Nota: No se pudo hacer push automatico a GitHub (verifique conexion o credenciales)." -ForegroundColor Yellow
+            }
         }
     }
 }
@@ -103,7 +121,7 @@ Write-Host ""
 Write-Host "   https://antapat.github.io/pdu_anta_2024_2034/" -ForegroundColor White -BackgroundColor DarkGreen
 Write-Host ""
 if (-not [string]::IsNullOrEmpty($urlPublica)) {
-    Write-Host " Enlace de tunel directo: $urlPublica" -ForegroundColor Gray
+    Write-Host " Enlace de tunel directo: $urlPublica" -ForegroundColor Cyan
 }
 Write-Host " Enlace de red local municipal: http://localhost:$Puerto" -ForegroundColor Gray
 Write-Host "==============================================================================" -ForegroundColor Green
@@ -131,27 +149,28 @@ try {
     }
 
     # Marcar fuera de linea en docs\server_endpoint.json
-    $endpointFile = Join-Path $raiz "docs\server_endpoint.json"
-    $ahora = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
-    $jsonOffline = @"
-{
-  "url": "",
-  "status": "offline",
-  "updated_at": "$ahora",
-  "institucion": "Municipalidad Provincial de Anta",
-  "gerencia": "Gerencia de Desarrollo Urbano y Rural (GDUR)",
-  "proyecto": "Plan de Desarrollo Urbano de Anta (2024 - 2034)",
-  "ordenanza": "Ordenanza Municipal Nº 04-2025-A-MPA/C",
-  "mesa_de_partes": "mesadepartesvirtual@munianta.gob.pe"
-}
-"@
-    Set-Content -Path $endpointFile -Value $jsonOffline -Encoding UTF8
+    $offlineAhora = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    $offlineData = [ordered]@{
+        url = ""
+        status = "offline"
+        updated_at = $offlineAhora
+        institucion = "Municipalidad Provincial de Anta"
+        gerencia = "Gerencia de Desarrollo Urbano y Rural (GDUR)"
+        proyecto = "Plan de Desarrollo Urbano de Anta (2024 - 2034)"
+        ordenanza = "Ordenanza Municipal No 04-2025-A-MPA/C"
+        mesa_de_partes = "mesadepartesvirtual@munianta.gob.pe"
+    }
+    $jsonOffline = $offlineData | ConvertTo-Json -Depth 4
+    [System.IO.File]::WriteAllText($endpointFile, $jsonOffline, [System.Text.Encoding]::UTF8)
     
     if (-not $SinGitPush) {
-        git add docs/server_endpoint.json
-        git commit -m "chore(pages): servidor fuera de linea [skip ci]" --quiet
-        git push origin main --quiet
+        $cambios = git status --porcelain docs/server_endpoint.json
+        if ($cambios) {
+            git add docs/server_endpoint.json
+            git commit -m "chore(pages): servidor fuera de linea [skip ci]" --quiet
+            git push origin main
+        }
     }
 
-    Write-Host "Servidor detenido correctamente. Estado fuera de línea registrado." -ForegroundColor Green
+    Write-Host "Servidor detenido correctamente. Estado fuera de linea registrado." -ForegroundColor Green
 }
