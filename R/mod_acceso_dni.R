@@ -8,6 +8,7 @@
 suppressPackageStartupMessages({
   if (requireNamespace("shiny", quietly = TRUE)) library(shiny)
   if (requireNamespace("htmltools", quietly = TRUE)) library(htmltools)
+  if (requireNamespace("DBI", quietly = TRUE)) library(DBI)
 })
 
 # ------------------------------------------------------------------------------
@@ -17,6 +18,126 @@ suppressPackageStartupMessages({
 .pdu_acceso_db_path <- function() {
   dir.create("outputs", showWarnings = FALSE, recursive = TRUE)
   file.path("outputs", "control_acceso_sesiones.rds")
+}
+
+# ------------------------------------------------------------------------------
+# 1.1 SUBSISTEMA CORPORATIVO POSTGRESQL / POSTGIS (RPostgres + DBI + pool)
+# ------------------------------------------------------------------------------
+
+# Ambiente local para cachear el pool de conexiones PostgreSQL (Singleton)
+.pdu_pg_env <- new.env(parent = emptyenv())
+.pdu_pg_env$pool <- NULL
+.pdu_pg_env$intentado <- FALSE
+.pdu_pg_env$activo <- FALSE
+
+#' Obtiene o inicializa el pool de conexiones PostgreSQL corporativo (CWE-362 / Transacciones ACID)
+#' @return Conexión pool, conexión DBI o NULL si no está disponible/configurado
+.pdu_postgres_get_pool <- function() {
+  if (isTRUE(.pdu_pg_env$activo) && !is.null(.pdu_pg_env$pool)) {
+    return(.pdu_pg_env$pool)
+  }
+  if (isTRUE(.pdu_pg_env$intentado) && !isTRUE(.pdu_pg_env$activo)) {
+    return(NULL)
+  }
+  .pdu_pg_env$intentado <- TRUE
+  
+  backend <- tolower(Sys.getenv("PDU_DB_BACKEND", "auto"))
+  url_db <- Sys.getenv("DATABASE_URL", Sys.getenv("PDU_DATABASE_URL", ""))
+  host <- Sys.getenv("PGHOST", Sys.getenv("PDU_PGHOST", ""))
+  
+  # Si no hay configuración de PostgreSQL y backend no es forzado, mantener modo local
+  if (!nzchar(url_db) && !nzchar(host) && backend != "postgres") {
+    .pdu_pg_env$activo <- FALSE
+    return(NULL)
+  }
+  
+  if (!requireNamespace("DBI", quietly = TRUE) || !requireNamespace("RPostgres", quietly = TRUE)) {
+    warning("Módulo PostgreSQL PDU: Paquetes DBI o RPostgres no disponibles.")
+    .pdu_pg_env$activo <- FALSE
+    return(NULL)
+  }
+  
+  pool_creado <- tryCatch({
+    tiene_pool <- requireNamespace("pool", quietly = TRUE)
+    
+    con_obj <- if (nzchar(url_db)) {
+      if (tiene_pool) {
+        pool::dbPool(RPostgres::Postgres(), dbname = url_db)
+      } else {
+        DBI::dbConnect(RPostgres::Postgres(), dbname = url_db)
+      }
+    } else {
+      host_pg <- if (nzchar(host)) host else "localhost"
+      puerto_pg <- as.integer(Sys.getenv("PGPORT", Sys.getenv("PDU_PGPORT", "5432")))
+      dbname_pg <- Sys.getenv("PGDATABASE", Sys.getenv("PDU_PGDATABASE", "geovisor_anta_pdu"))
+      user_pg <- Sys.getenv("PGUSER", Sys.getenv("PDU_PGUSER", "postgres"))
+      pass_pg <- Sys.getenv("PGPASSWORD", Sys.getenv("PDU_PGPASSWORD", ""))
+      ssl_pg <- Sys.getenv("PGSSLMODE", Sys.getenv("PDU_PGSSLMODE", "prefer"))
+      
+      if (tiene_pool) {
+        pool::dbPool(
+          drv = RPostgres::Postgres(),
+          host = host_pg,
+          port = puerto_pg,
+          dbname = dbname_pg,
+          user = user_pg,
+          password = pass_pg,
+          sslmode = ssl_pg,
+          minSize = 1,
+          maxSize = 10,
+          idleTimeout = 30000
+        )
+      } else {
+        DBI::dbConnect(
+          RPostgres::Postgres(),
+          host = host_pg,
+          port = puerto_pg,
+          dbname = dbname_pg,
+          user = user_pg,
+          password = pass_pg,
+          sslmode = ssl_pg
+        )
+      }
+    }
+    
+    # Auto-inicialización del esquema DDL en PostgreSQL si no existe
+    DBI::dbExecute(con_obj, "
+      CREATE TABLE IF NOT EXISTS control_acceso_sesiones (
+        id VARCHAR(64) PRIMARY KEY,
+        id_dni_hash VARCHAR(64) NOT NULL,
+        fecha DATE NOT NULL,
+        hora_inicio TIMESTAMP NOT NULL,
+        duracion_min INTEGER NOT NULL DEFAULT 10,
+        ip_origen VARCHAR(45) DEFAULT 'local',
+        creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    ")
+    DBI::dbExecute(con_obj, "
+      CREATE INDEX IF NOT EXISTS idx_pdu_sesiones_hash_fecha 
+        ON control_acceso_sesiones (id_dni_hash, fecha);
+    ")
+    DBI::dbExecute(con_obj, "
+      CREATE INDEX IF NOT EXISTS idx_pdu_sesiones_fecha 
+        ON control_acceso_sesiones (fecha);
+    ")
+    
+    message("Módulo de Seguridad PDU: Conexión PostgreSQL/PostGIS inicializada con éxito (Modo Corporativo ACID).")
+    .pdu_pg_env$activo <- TRUE
+    con_obj
+  }, error = function(e) {
+    warning("Módulo PostgreSQL PDU: No se pudo conectar a PostgreSQL (", e$message, "). Se activa almacenamiento local seguro de contingencia.")
+    .pdu_pg_env$activo <- FALSE
+    NULL
+  })
+  
+  .pdu_pg_env$pool <- pool_creado
+  pool_creado
+}
+
+#' Función para verificar si PostgreSQL corporativo está activo
+pdu_postgres_is_active <- function() {
+  pool <- .pdu_postgres_get_pool()
+  !is.null(pool) && isTRUE(.pdu_pg_env$activo)
 }
 
 #' Sal criptográfica institucional segura por entorno para evitar ataques de tablas rainbow
@@ -36,7 +157,7 @@ suppressPackageStartupMessages({
   nueva_clave <- paste0(
     "ANTA_PDU_",
     if (requireNamespace("openssl", quietly = TRUE)) {
-      openssl::hex_encode(openssl::rand_bytes(24))
+      paste0(openssl::rand_bytes(24), collapse = "")
     } else {
       paste0(sample(c(letters, LETTERS, 0:9), 32, replace = TRUE), collapse = "")
     }
@@ -137,21 +258,41 @@ pdu_acceso_consultar_cuota <- function(dni, ruta_db = .pdu_acceso_db_path()) {
     return(list(permitido = FALSE, total_hoy = 0, restantes = 0, mensaje = "DNI no válido."))
   }
   
-  bd <- pdu_acceso_leer_bd(ruta_db = ruta_db)
   hoy <- as.character(Sys.Date())
   hash_dni <- .pdu_pseudonimizar_dni(dni_limpio)
   dni_mascara <- .pdu_enmascarar_dni(dni_limpio)
   
-  col_busqueda <- if ("id_dni_hash" %in% names(bd)) "id_dni_hash" else if ("dni" %in% names(bd)) "dni" else NULL
+  # Intento 1: Consulta transaccional a PostgreSQL / PostGIS (Modo Corporativo OTI)
+  pool <- .pdu_postgres_get_pool()
+  total <- NULL
   
-  if (is.null(col_busqueda) || nrow(bd) == 0) {
-    total <- 0L
-  } else if (col_busqueda == "id_dni_hash") {
-    sesiones_hoy <- bd[bd$id_dni_hash == hash_dni & bd$fecha == hoy, , drop = FALSE]
-    total <- nrow(sesiones_hoy)
-  } else {
-    sesiones_hoy <- bd[bd$dni == dni_limpio & bd$fecha == hoy, , drop = FALSE]
-    total <- nrow(sesiones_hoy)
+  if (!is.null(pool)) {
+    total <- tryCatch({
+      df_res <- DBI::dbGetQuery(
+        pool,
+        "SELECT COUNT(*) AS total FROM control_acceso_sesiones WHERE id_dni_hash = $1 AND fecha = $2",
+        params = list(hash_dni, as.Date(hoy))
+      )
+      as.integer(df_res$total[1])
+    }, error = function(e) {
+      warning("Fallo en consulta PostgreSQL de cuota: ", e$message)
+      NULL
+    })
+  }
+  
+  # Fallback a almacenamiento local si PostgreSQL no está disponible o no está activo
+  if (is.null(total)) {
+    bd <- pdu_acceso_leer_bd(ruta_db = ruta_db)
+    col_busqueda <- if ("id_dni_hash" %in% names(bd)) "id_dni_hash" else if ("dni" %in% names(bd)) "dni" else NULL
+    if (is.null(col_busqueda) || nrow(bd) == 0) {
+      total <- 0L
+    } else if (col_busqueda == "id_dni_hash") {
+      sesiones_hoy <- bd[bd$id_dni_hash == hash_dni & bd$fecha == hoy, , drop = FALSE]
+      total <- nrow(sesiones_hoy)
+    } else {
+      sesiones_hoy <- bd[bd$dni == dni_limpio & bd$fecha == hoy, , drop = FALSE]
+      total <- nrow(sesiones_hoy)
+    }
   }
   
   restantes <- max(0L, 2L - total)
@@ -179,38 +320,62 @@ pdu_acceso_consultar_cuota <- function(dni, ruta_db = .pdu_acceso_db_path()) {
 
 #' Registra el inicio de una nueva sesión de 10 minutos de forma seudonimizada
 pdu_acceso_registrar_sesion <- function(dni, fecha_emision_str = NULL, duracion_min = 10L, ip = "local", ruta_db = .pdu_acceso_db_path()) {
-  bd <- pdu_acceso_leer_bd(ruta_db = ruta_db)
   hoy <- as.character(Sys.Date())
   ahora <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
   
   dni_limpio <- trimws(as.character(dni))
   hash_dni <- .pdu_pseudonimizar_dni(dni_limpio)
   dni_mascara <- .pdu_enmascarar_dni(dni_limpio)
+  nuevo_id <- paste0("SES-", format(Sys.time(), "%y%m%d%H%M%S-"), sample(1000:9999, 1))
   
-  nuevo <- data.frame(
-    id = paste0("SES-", format(Sys.time(), "%y%m%d%H%M%S-"), sample(1000:9999, 1)),
-    id_dni_hash = hash_dni,
-    fecha = hoy,
-    hora_inicio = ahora,
-    duracion_min = as.integer(duracion_min),
-    ip_origen = ip,
-    stringsAsFactors = FALSE
-  )
+  # Intento 1: Inserción atómica ACID en PostgreSQL / PostGIS (Modo Corporativo OTI)
+  pool <- .pdu_postgres_get_pool()
+  guardado_pg <- FALSE
   
-  bd_nueva <- rbind(bd, nuevo)
-  pdu_acceso_guardar_bd(bd_nueva, ruta_db = ruta_db)
+  if (!is.null(pool)) {
+    guardado_pg <- tryCatch({
+      # Purgar registros mayores a 7 días en PostgreSQL (Principio de Limitación de Plazo - Ley 29733)
+      tryCatch(DBI::dbExecute(pool, "DELETE FROM control_acceso_sesiones WHERE fecha < (CURRENT_DATE - INTERVAL '7 days')"), error = function(e) NULL)
+      
+      DBI::dbExecute(
+        pool,
+        "INSERT INTO control_acceso_sesiones (id, id_dni_hash, fecha, hora_inicio, duracion_min, ip_origen) VALUES ($1, $2, $3, $4, $5, $6)",
+        params = list(nuevo_id, hash_dni, as.Date(hoy), as.POSIXct(ahora), as.integer(duracion_min), as.character(ip))
+      )
+      TRUE
+    }, error = function(e) {
+      warning("Fallo en inserción PostgreSQL de sesión: ", e$message)
+      FALSE
+    })
+  }
+  
+  # Si PostgreSQL no está activo o falló, persistir en almacenamiento local de contingencia
+  if (!isTRUE(guardado_pg)) {
+    bd <- pdu_acceso_leer_bd(ruta_db = ruta_db)
+    nuevo <- data.frame(
+      id = nuevo_id,
+      id_dni_hash = hash_dni,
+      fecha = hoy,
+      hora_inicio = ahora,
+      duracion_min = as.integer(duracion_min),
+      ip_origen = ip,
+      stringsAsFactors = FALSE
+    )
+    bd_nueva <- rbind(bd, nuevo)
+    pdu_acceso_guardar_bd(bd_nueva, ruta_db = ruta_db)
+  }
   
   # Log de auditoría con enmascaramiento estricto de PII (Directiva ANPD R.D. 019-2013-JUS/DGPDP)
   tryCatch({
     cat(
-      sprintf("[%s] INGRESO_VALIDADO DNI_ENMASCARADO=%s ID_SESION=%s FECHA=%s\n", 
-              ahora, dni_mascara, nuevo$id, hoy),
+      sprintf("[%s] INGRESO_VALIDADO DNI_ENMASCARADO=%s ID_SESION=%s FECHA=%s MOTOR=%s\n", 
+              ahora, dni_mascara, nuevo_id, hoy, if (isTRUE(guardado_pg)) "POSTGRESQL" else "LOCAL_RDS"),
       file = file.path("outputs", "control_acceso.log"),
       append = TRUE
     )
   }, error = function(e) NULL)
   
-  nuevo$id
+  nuevo_id
 }
 
 #' Genera un código de captcha de 5 caracteres

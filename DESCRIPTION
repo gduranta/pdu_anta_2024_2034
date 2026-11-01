@@ -22,6 +22,7 @@ Imports:
     DBI,
     RPostgres
 Suggests:
+    pool,
     digest,
     pagedown,
     testthat,

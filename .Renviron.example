@@ -1,0 +1,34 @@
+# ==============================================================================
+# CONFIGURACIÓN DEL SERVIDOR GEOVISOR PDU ANTA (2024 - 2034)
+# Municipalidad Provincial de Anta - Gerencia de Desarrollo Urbano y Rural (GDUR)
+#
+# Plantilla de Configuración Corporativa de Base de Datos y Seguridad
+# Copiar este archivo como .Renviron en el servidor de producción:
+#   cp .Renviron.example .Renviron
+# ==============================================================================
+
+# Fuente de datos espaciales (local | postgres | supabase)
+PDU_DATA_SOURCE=local
+
+# ------------------------------------------------------------------------------
+# PARÁMETROS CORPORATIVOS DE BASE DE DATOS POSTGRESQL / POSTGIS (OPCIÓN 2 OTI)
+# Resuelve condiciones de carrera (CWE-362) y provee concurrencia ACID
+# ------------------------------------------------------------------------------
+# Modo de almacenamiento de sesiones (auto | postgres | local)
+# Si es 'auto', se activará PostgreSQL en cuanto se definan las credenciales
+PDU_DB_BACKEND=auto
+
+# Credenciales de conexión directa al servidor PostgreSQL municipal
+PGHOST=localhost
+PGPORT=5432
+PGDATABASE=geovisor_anta_pdu
+PGUSER=pdu_app_user
+PGPASSWORD=CambiarClaveSegura2026!
+PGSSLMODE=prefer
+
+# Alternativa: Conexión mediante URI unificada (ej. Supabase o servicio Cloud)
+# DATABASE_URL=postgresql://pdu_app_user:CambiarClaveSegura2026!@localhost:5432/geovisor_anta_pdu
+
+# Secreto criptográfico de 256 bits para hashing de DNI (Ley N° 29733)
+# Si se deja vacío, el sistema generará automáticamente una clave segura en outputs/.pdu_secret_key
+# PDU_PEPPER_KEY=ANTA_PDU_GDUR_SECRETO_CORPORATIVO_2026

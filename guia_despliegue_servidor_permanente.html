@@ -888,12 +888,14 @@ add_header Permissions-Policy "geolocation=(self 'https://antapat.github.io'), m
 
         <h3 class="subsection-title">8.3 Archivos de Configuración de Seguridad Provistos para la OTI</h3>
         <p>
-          En la carpeta <code>deploy/</code> del repositorio se han integrado los archivos de configuración listos para producción:
+          En la carpeta <code>deploy/</code> y la raíz del repositorio se han integrado los archivos de configuración listos para producción:
         </p>
         <ul>
-          <li><code>deploy/nginx/geovisor_anta.conf</code>: Configuración completa de Nginx con SSL/TLS, WebSockets y encabezados CSP.</li>
+          <li><code>deploy/nginx/geovisor_anta.conf</code>: Configuración completa de Nginx con SSL/TLS, WebSockets y encabezados CSP (SEC-05).</li>
           <li><code>deploy/cloudflare/config.yml</code>: Configuración del agente <code>cloudflared</code> para túnel seguro.</li>
           <li><code>deploy/systemd/geovisor-pdu-anta.service</code>: Archivo de servicio Linux Systemd con sandboxing y reinicio automático ante fallos.</li>
+          <li><code>deploy/postgres/init_pdu_sesiones.sql</code>: Script SQL oficial para inicializar la base de datos PostgreSQL/PostGIS transaccional ACID (CWE-362).</li>
+          <li><code>.Renviron.example</code>: Plantilla de variables de entorno con las credenciales de conexión de base de datos municipal.</li>
         </ul>
       </section>
 
