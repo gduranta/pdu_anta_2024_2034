@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Guía Técnica de Despliegue Permanente — GeoVisor PDU Anta (2024-2034)</title>
-  <link rel="icon" type="image/png" href="docs/escudo_muni_anta.png">
+  <link rel="icon" type="image/png" href="escudo_muni_anta.png">
   
   <!-- Tipografía Inter & FontAwesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -427,7 +427,7 @@
   <!-- Encabezado Oficial -->
   <header class="doc-header">
     <div class="doc-header-content">
-      <img src="docs/escudo_muni_anta.png" alt="Escudo de la Municipalidad de Anta" class="doc-escudo">
+      <img src="escudo_muni_anta.png" alt="Escudo de la Municipalidad de Anta" class="doc-escudo">
       <div class="doc-header-titles">
         <h2>MUNICIPALIDAD PROVINCIAL DE ANTA — GERENCIA DE DESARROLLO URBANO Y RURAL</h2>
         <h1>Protocolo Técnico de Despliegue Permanente del GeoVisor PDU Anta</h1>
@@ -450,7 +450,7 @@
       </div>
       <ul class="doc-nav-list">
         <li class="doc-nav-item"><a href="#sec1" class="doc-nav-link">1. Fundamentos Arquitectónicos</a></li>
-        <li class="doc-nav-item"><a href="#sec2" class="doc-nav-link">2. Requisitos de Hardware y Red</a></li>
+        <li class="doc-nav-item"><a href="#sec2" class="doc-nav-link">2. Requisitos Servidor Municipal</a></li>
         <li class="doc-nav-item"><a href="#sec3" class="doc-nav-link">3. Opción A: Servidor On-Premise</a></li>
         <li class="doc-nav-item"><a href="#sec4" class="doc-nav-link">4. Opción B: Servidor Cloud Linux</a></li>
         <li class="doc-nav-item"><a href="#sec5" class="doc-nav-link">5. Opción C: Contenedores Docker</a></li>
@@ -492,48 +492,146 @@
 
       <!-- Sección 2 -->
       <section id="sec2" class="section-block">
-        <h2 class="section-title"><i class="fa-solid fa-microchip"></i> 2. Requisitos de Hardware y Red</h2>
+        <h2 class="section-title"><i class="fa-solid fa-server"></i> 2. Requisitos Técnicos para Depositar la Aplicación en el Servidor Municipal (Dossier OTI)</h2>
         <p>
-          Para mantener el GeoVisor en línea de manera ininterrumpida (24 horas al día, 7 días a la semana), el servidor debe cumplir con los siguientes requerimientos recomendados:
+          Para que el equipo de la <strong>Oficina de Tecnologías de la Información (OTI)</strong> o el área de Sistemas de la Municipalidad Provincial de Anta aloje e implemente formalmente el GeoVisor en la infraestructura institucional (física, virtualizada o en la nube), el entorno de hospedaje debe cumplir con el siguiente pliego de condiciones técnicas:
+        </p>
+
+        <h3 class="subsection-title"><i class="fa-solid fa-microchip"></i> 2.1 Requisitos de Hardware y Capacidad de Cómputo</h3>
+        <p>
+          Las capas cartográficas (3,664 polígonos zonificados y 1,673 ejes viales) se cargan e indexan en la memoria RAM del servidor para ofrecer respuestas inmediatas a las consultas ciudadanas sin depender de llamadas lentas a bases de datos externas.
         </p>
         <div class="table-responsive">
           <table>
             <thead>
               <tr>
-                <th>Componente</th>
-                <th>Mínimo (Operación Básica)</th>
-                <th>Recomendado (Concurrencia Municipal)</th>
+                <th>Recurso</th>
+                <th>Requisito Mínimo</th>
+                <th>Requisito Óptimo Recomendado</th>
+                <th>Finalidad Técnica</th>
               </tr>
             </thead>
             <tbody>
               <tr>
+                <td><strong>Entorno</strong></td>
+                <td>Servidor Físico dedicado o VM</td>
+                <td>Máquina Virtual dedicada (VMware / Proxmox / Hyper-V)</td>
+                <td>Aislamiento operativo y facilidad de snapshots/backups.</td>
+              </tr>
+              <tr>
                 <td><strong>Procesador (CPU)</strong></td>
-                <td>2 núcleos (x86_64 a 2.0 GHz)</td>
-                <td>4 o más núcleos (ej. Intel Core i5/i7 o AMD Ryzen 5)</td>
+                <td>2 vCPU (x86_64 @ 2.2 GHz)</td>
+                <td>4 vCPU o superior</td>
+                <td>Cálculo de intersecciones geométricas y generación de PDFs.</td>
               </tr>
               <tr>
                 <td><strong>Memoria RAM</strong></td>
-                <td>4 GB de RAM</td>
-                <td>8 GB o 16 GB de RAM</td>
+                <td>4 GB libres garantizados</td>
+                <td>8 GB a 16 GB de RAM</td>
+                <td>Retención de capas Shapefile en memoria y concurrencia.</td>
               </tr>
               <tr>
-                <td><strong>Almacenamiento</strong></td>
-                <td>20 GB libres (SSD recomendado)</td>
-                <td>50 GB SSD NVMe (acceso ultrarrápido a capas GIS)</td>
+                <td><strong>Disco Duro</strong></td>
+                <td>30 GB libres (SSD SATA)</td>
+                <td>60 GB libres en SSD NVMe</td>
+                <td>Lectura ultrarrápida de capas y almacenamiento de logs de auditoría.</td>
               </tr>
               <tr>
-                <td><strong>Conexión a Internet</strong></td>
-                <td>15 Mbps de subida (Upload)</td>
-                <td>50 Mbps simétricos (Fibra Óptica estable)</td>
-              </tr>
-              <tr>
-                <td><strong>Suministro Eléctrico</strong></td>
-                <td>Conexión directa a red eléctrica</td>
-                <td>UPS (Sistema de Alimentación Ininterrumpida) para cortes</td>
+                <td><strong>Energía / Contingencia</strong></td>
+                <td>Red municipal con estabilizador</td>
+                <td>Conexión a banco de baterías UPS institucional</td>
+                <td>Garantizar continuidad ante cortes eléctricos intempestivos.</td>
               </tr>
             </tbody>
           </table>
         </div>
+
+        <h3 class="subsection-title"><i class="fa-solid fa-code"></i> 2.2 Requisitos de Software y Dependencias de Sistema</h3>
+        <p>
+          El servidor municipal debe contar con el siguiente stack de tecnologías instalado y configurado:
+        </p>
+        <ul>
+          <li><strong>Sistema Operativo Homologado:</strong>
+            <ul>
+              <li><strong>Linux (Estándar OTI):</strong> Ubuntu Server 22.04 LTS o 24.04 LTS (64 bits) / Debian 12.</li>
+              <li><strong>Windows:</strong> Windows Server 2019 / 2022 o Windows 10/11 Pro (64 bits).</li>
+            </ul>
+          </li>
+          <li><strong>Motor Analítico Base:</strong> R versión <strong>4.3.0 o superior</strong> (actualmente probado en R 4.4 / 4.6.1 x64).</li>
+          <li><strong>Librerías C/C++ Geoespaciales Mandatorias (Nivel Sistema Operativo):</strong>
+            <ul>
+              <li><code>GDAL &gt;= 3.4.0</code>: Motor de lectura, reproyección y parsing de formatos GIS (Shapefile, GeoJSON, KML).</li>
+              <li><code>GEOS &gt;= 3.10.0</code>: Motor de topología y cálculo de intersección espacial vectorial (detección de lotes dentro de zonas urbanas).</li>
+              <li><code>PROJ &gt;= 8.2.0</code>: Transformación de sistemas de coordenadas geodésicas (Datum WGS84 EPSG:4326 a UTM Zona 18 Sur EPSG:32718).</li>
+            </ul>
+          </li>
+          <li><strong>Paquetes R Requeridos (Instalados en la biblioteca global del servidor):</strong>
+            <pre><code># Comando de verificación e instalación en R:
+install.packages(c("shiny", "bslib", "leaflet", "sf", "DT", 
+                   "htmltools", "scales", "RColorBrewer", "digest"))</code></pre>
+          </li>
+        </ul>
+
+        <h3 class="subsection-title"><i class="fa-solid fa-network-wired"></i> 2.3 Requisitos de Red, Puertos y Soporte Mandatorio de WebSockets</h3>
+        <div class="callout callout-warning">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <div>
+            <strong>Requisito Crítico de Conectividad (WebSockets):</strong>
+            El cortafuegos (Firewall / UTM Fortinet / pfSense) o Proxy Inverso municipal <strong>DEBE tener expresamente habilitado el tráfico WebSocket (protocolos <code>ws://</code> y <code>wss://</code>)</strong>. La reactividad de Shiny, el movimiento del mapa Leaflet y la validación de DNI dependen de este canal bidireccional continuo.
+          </div>
+        </div>
+        <ul>
+          <li><strong>Dirección IP del Servidor:</strong> Asignación de una IP local fija/estática dentro de la red o DMZ municipal (ej. <code>192.168.10.50</code> o VLAN de servidores).</li>
+          <li><strong>Puertos de Red:</strong>
+            <ul>
+              <li><strong>Puerto Interno 3838 (TCP):</strong> Utilizado por el motor R Shiny para escuchar peticiones de la red local o proxy inverso.</li>
+              <li><strong>Puerto Externo 443 (HTTPS / TCP):</strong> Acceso público seguro cifrado hacia los ciudadanos.</li>
+              <li><strong>Puerto Externo 80 (HTTP / TCP):</strong> Redirección forzada automática a HTTPS.</li>
+            </ul>
+          </li>
+          <li><strong>Salida a Internet Saliente (Puerto 443):</strong> Permite la descarga en tiempo real de los mosaicos de mapas base satelitales (OpenStreetMap y Esri World Imagery) y la sincronización con el túnel seguro.</li>
+        </ul>
+
+        <h3 class="subsection-title"><i class="fa-solid fa-folder-tree"></i> 2.4 Estructura de Archivos, Permisos y Almacenamiento</h3>
+        <p>
+          Para mantener la seguridad del servidor según las buenas prácticas de la Contraloría y Gobierno Digital:
+        </p>
+        <ul>
+          <li><strong>Usuario de Ejecución sin Privilegios:</strong> La aplicación debe ejecutarse bajo un usuario de servicio sin permisos de superusuario/administrador (ej. usuario <code>shiny</code> en Linux o cuenta de servicio dedicada en Windows).</li>
+          <li><strong>Permisos de Solo Lectura (Read-Only):</strong>
+            <ul>
+              <li><code>app.R</code>, carpeta <code>R/</code> (lógica del sistema).</li>
+              <li>Carpeta <code>data/</code> (Shapefiles oficiales inmutables aprobados por Ordenanza).</li>
+              <li>Carpeta <code>www/</code> (estilos CSS, imágenes institucionales).</li>
+            </ul>
+          </li>
+          <li><strong>Permisos de Lectura y Escritura (Read-Write):</strong>
+            <ul>
+              <li>Exclusivamente sobre la carpeta <code>outputs/</code>: necesaria para registrar la bitácora de auditoría seudonimizada (<code>control_acceso.log</code>) y el estado temporal de sesiones ciudadanas (<code>usuarios_sesion.rds</code>).</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="subsection-title"><i class="fa-solid fa-globe"></i> 2.5 Requisitos de Identidad Digital y Dominio Institucional</h3>
+        <ul>
+          <li><strong>Subdominio Gubernamental Oficial:</strong> Creación de un registro DNS tipo <code>pdu.munianta.gob.pe</code> o <code>geovisor.munianta.gob.pe</code> administrado por la municipalidad (Punto.pe / PCM).</li>
+          <li><strong>Certificado Digital SSL/TLS:</strong> Certificado de seguridad vigente emitido para el dominio (Let's Encrypt o certificado comercial TLS 1.2 / 1.3) para asegurar el candado de navegación segura.</li>
+          <li><strong>Alternativa sin IP pública:</strong> Si la municipalidad no dispone de IP pública estática o puertos abiertos, se puede emplear el conector oficial <strong>Cloudflare Zero Trust</strong> (gratuito) para enlazar el dominio municipal directamente con el servidor sin exponer la red interna a ataques.</li>
+        </ul>
+
+        <h3 class="subsection-title"><i class="fa-solid fa-box-archive"></i> 2.6 Procedimiento de Entrega del Paquete de la Aplicación</h3>
+        <p>
+          Para transferir el GeoVisor al servidor municipal, la OTI puede emplear cualquiera de estos dos canales oficiales:
+        </p>
+        <ol>
+          <li><strong>Opción Git (Recomendada para Actualizaciones Frecuentes):</strong>
+            <pre><code>git clone https://github.com/antapat/pdu_anta_2024_2034.git /srv/shiny-server/pdu_anta</code></pre>
+            Permite actualizar capas o normativas en el futuro con un simple <code>git pull</code>.
+          </li>
+          <li><strong>Opción Paquete Cerrado (Despliegue Aislado / Offline):</strong>
+            Copiar la carpeta raíz completa <code>pdu_anta_2024_2034</code> en la unidad del servidor, preservando íntegras las subcarpetas <code>data/</code>, <code>R/</code>, <code>www/</code> y <code>docs/</code>.
+          </li>
+        </ol>
       </section>
 
       <!-- Sección 3 -->
@@ -680,3 +778,4 @@ docker run -d --name geovisor-live --restart always -p 3838:3838 geovisor-anta</
 
 </body>
 </html>
+
