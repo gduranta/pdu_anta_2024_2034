@@ -159,7 +159,6 @@ mod_privacidad_ui <- function() {
           class = "d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4",
           div(
             class = "d-flex align-items-center gap-3",
-            img(src = "escudo_muni_anta.png", style = "height: 65px; width: auto; background: white; padding: 4px; border-radius: 8px;", alt = "Escudo Anta"),
             div(
               tags$h3(class = "fw-bold mb-1 text-white", "POLÍTICA DE PRIVACIDAD, AVISO LEGAL Y TÉRMINOS DE USO"),
               tags$h6(class = "mb-2", style = "color: #E2E8F0;", "Municipalidad Provincial de Anta — Gerencia de Desarrollo Urbano y Rural (GDUR)"),
@@ -171,7 +170,6 @@ mod_privacidad_ui <- function() {
               )
             )
           ),
-          img(src = "pdu_actualizado_sf.png", style = "height: 60px; width: auto; background: white; padding: 4px; border-radius: 8px;", alt = "Logo PDU")
         )
       ),
 
