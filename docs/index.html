@@ -32,7 +32,7 @@
       --texto-claro: #F8FAF9;
       --texto-muted: #94A3B8;
       --border-color: rgba(255, 255, 255, 0.12);
-      --header-h: 52px;
+      --header-h: 36px;
     }
 
     * {
@@ -50,17 +50,17 @@
       color: #1E293B;
     }
 
-    /* Barra Superior Institucional */
+    /* Barra Superior Institucional Oficial */
     .pdu-topbar {
       height: var(--header-h);
-      background: linear-gradient(90deg, #0F2D24 0%, #174A3A 60%, #1A5442 100%);
+      background: linear-gradient(90deg, #09221B 0%, #113B2E 60%, #154637 100%);
       color: #FFFFFF;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 1rem;
-      border-bottom: 2px solid var(--dorado-inst);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+      padding: 0 0.85rem;
+      border-bottom: 1.5px solid var(--dorado-inst);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
       position: relative;
       z-index: 100;
     }
@@ -68,79 +68,76 @@
     .pdu-brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       text-decoration: none;
       color: inherit;
       min-width: 0;
     }
 
     .pdu-logo-muni {
-      height: 36px;
+      height: 24px;
       width: auto;
       background: #FFFFFF;
-      padding: 2px;
-      border-radius: 6px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      padding: 1px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     }
 
     .pdu-title-group {
       display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    .pdu-main-title {
-      font-size: 0.95rem;
-      font-weight: 800;
-      letter-spacing: -0.2px;
-      display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      min-width: 0;
       white-space: nowrap;
     }
 
-    .pdu-badge-vigencia {
-      background: rgba(182, 138, 44, 0.35);
-      border: 1px solid var(--dorado-inst);
-      color: #FEE8A2;
-      font-size: 0.70rem;
+    .pdu-main-title {
+      font-size: 0.80rem;
       font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 4px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      color: #FFFFFF;
+    }
+
+    .pdu-separator {
+      color: var(--dorado-inst);
+      font-weight: 300;
+      opacity: 0.75;
+      font-size: 0.75rem;
+      user-select: none;
     }
 
     .pdu-sub-title {
       font-size: 0.72rem;
-      color: rgba(255, 255, 255, 0.85);
-      white-space: nowrap;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.80);
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 480px;
     }
 
     .pdu-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-shrink: 0;
     }
 
     .status-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.76rem;
+      gap: 5px;
+      font-size: 0.70rem;
       font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: rgba(0, 0, 0, 0.25);
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.30);
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: #E2E8F0;
     }
 
     .status-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background-color: #94A3B8;
     }
@@ -163,27 +160,6 @@
     @keyframes pulse-dot {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.4; transform: scale(0.85); }
-    }
-
-    .btn-topbar {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      color: #FFFFFF;
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 5px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-
-    .btn-topbar:hover {
-      background: rgba(255, 255, 255, 0.22);
-      border-color: rgba(255, 255, 255, 0.4);
     }
 
     /* Contenedor del Iframe y Pantallas de Estado */
@@ -307,14 +283,12 @@
 
     /* Adaptación Móvil */
     @media (max-width: 768px) {
-      .pdu-sub-title {
+      .pdu-sub-title,
+      .pdu-separator {
         display: none;
       }
       .pdu-main-title {
-        font-size: 0.85rem;
-      }
-      .btn-topbar span {
-        display: none;
+        font-size: 0.74rem;
       }
       .state-card {
         padding: 1.5rem 1.2rem;
@@ -329,37 +303,21 @@
 
   <!-- Barra Superior Institucional Oficial -->
   <header class="pdu-topbar">
-    <a href="#" class="pdu-brand" title="Municipalidad Provincial de Anta - PDU 2024-2034">
+    <div class="pdu-brand" title="Municipalidad Provincial de Anta - Gerencia de Desarrollo Urbano y Rural">
       <img src="escudo_muni_anta.png" alt="Escudo Anta" class="pdu-logo-muni">
       <div class="pdu-title-group">
-        <div class="pdu-main-title">
-          <span>GEOVISOR PDU ANTA</span>
-          <span class="pdu-badge-vigencia">2024 - 2034</span>
-        </div>
-        <div class="pdu-sub-title">
-          Municipalidad Provincial de Anta • Gerencia de Desarrollo Urbano y Rural (GDUR)
-        </div>
+        <span class="pdu-main-title">Municipalidad Provincial de Anta</span>
+        <span class="pdu-separator">•</span>
+        <span class="pdu-sub-title">Gerencia de Desarrollo Urbano y Rural</span>
       </div>
-    </a>
+    </div>
 
     <div class="pdu-actions">
       <!-- Indicador de Estado del Servidor -->
-      <div id="status_pill" class="status-pill" title="Estado de la conexión">
+      <div id="status_pill" class="status-pill" title="Servicio Territorial Oficial">
         <span id="status_dot" class="status-dot connecting"></span>
         <span id="status_text">Conectando...</span>
       </div>
-
-      <!-- Botón de Reconexión -->
-      <button type="button" class="btn-topbar" onclick="verificarYConectarServidor(true)" title="Verificar señal del servidor">
-        <i class="fa-solid fa-arrows-rotate"></i>
-        <span>Actualizar</span>
-      </button>
-
-      <!-- Abrir directo -->
-      <a id="btn_abrir_directo" href="#" target="_blank" class="btn-topbar" style="display:none;" title="Abrir en pestaña nueva directa">
-        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-        <span>Abrir directo</span>
-      </a>
     </div>
   </header>
 
@@ -433,7 +391,6 @@
     async function verificarYConectarServidor(esManual = false) {
       const statusDot = document.getElementById('status_dot');
       const statusText = document.getElementById('status_text');
-      const btnAbrirDirecto = document.getElementById('btn_abrir_directo');
       const pantallaEstado = document.getElementById('pantalla_estado');
       const estadoTitulo = document.getElementById('estado_titulo');
       const estadoSubtitulo = document.getElementById('estado_subtitulo');
@@ -481,14 +438,10 @@
       if (iframeIniciado && urlNorm === urlActualNorm && !esManual) {
         statusDot.className = 'status-dot online';
         statusText.textContent = 'Servidor en Línea';
-        btnAbrirDirecto.href = urlNorm;
-        btnAbrirDirecto.style.display = 'inline-flex';
         return;
       }
 
       serverUrlActual = urlNorm;
-      btnAbrirDirecto.href = urlNorm;
-      btnAbrirDirecto.style.display = 'inline-flex';
       iframeIniciado = true;
 
       // Cargar iframe
