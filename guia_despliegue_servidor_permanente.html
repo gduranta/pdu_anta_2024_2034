@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía Técnica de Despliegue Permanente — GeoVisor PDU Anta (2024-2034)</title>
+  <link rel="icon" type="image/png" href="docs/escudo_muni_anta.png">
+  
+  <!-- Tipografía Inter & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <style>
+    :root {
+      --verde-primario: #174A3A;
+      --verde-oscuro: #0D2B22;
+      --verde-claro: #E8F5E9;
+      --verde-acento: #10B981;
+      --dorado-oficial: #B68A2C;
+      --dorado-claro: #FEF3C7;
+      --gris-fondo: #F8FAFC;
+      --gris-borde: #E2E8F0;
+      --texto-oscuro: #0F172A;
+      --texto-secundario: #475569;
+      --texto-muted: #64748B;
+      --azul-destacado: #0284C7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--gris-fondo);
+      color: var(--texto-oscuro);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    /* Cabecera Principal */
+    .doc-header {
+      background: linear-gradient(135deg, #092019 0%, #123C2F 60%, #174A3A 100%);
+      color: #FFFFFF;
+      padding: 2.5rem 1.5rem;
+      border-bottom: 3px solid var(--dorado-oficial);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .doc-header-content {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .doc-escudo {
+      height: 78px;
+      width: auto;
+      background: #FFFFFF;
+      padding: 4px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .doc-header-titles h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      margin-bottom: 0.3rem;
+    }
+
+    .doc-header-titles h2 {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #CBD5E1;
+      margin-bottom: 0.4rem;
+    }
+
+    .doc-header-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 0.6rem;
+    }
+
+    .badge-doc {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #F1F5F9;
+    }
+
+    .badge-dorada {
+      background: rgba(182, 138, 44, 0.3);
+      border-color: var(--dorado-oficial);
+      color: #FDE68A;
+    }
+
+    /* Estructura Layout (Sidebar + Contenido) */
+    .doc-container {
+      max-width: 1180px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2rem;
+    }
+
+    /* Sidebar de Navegación */
+    .doc-sidebar {
+      position: sticky;
+      top: 1.5rem;
+      height: fit-content;
+      background: #FFFFFF;
+      border: 1px solid var(--gris-borde);
+      border-radius: 12px;
+      padding: 1.2rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .doc-sidebar-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--verde-primario);
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--verde-claro);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .doc-nav-list {
+      list-style: none;
+    }
+
+    .doc-nav-item {
+      margin-bottom: 0.35rem;
+    }
+
+    .doc-nav-link {
+      display: block;
+      padding: 0.45rem 0.7rem;
+      border-radius: 6px;
+      color: var(--texto-secundario);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .doc-nav-link:hover {
+      background: var(--verde-claro);
+      color: var(--verde-primario);
+      transform: translateX(3px);
+    }
+
+    .btn-imprimir {
+      width: 100%;
+      margin-top: 1.2rem;
+      padding: 0.6rem;
+      border: 1px solid var(--verde-primario);
+      background: #FFFFFF;
+      color: var(--verde-primario);
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-imprimir:hover {
+      background: var(--verde-primario);
+      color: #FFFFFF;
+    }
+
+    /* Contenido Principal */
+    .doc-content {
+      background: #FFFFFF;
+      border: 1px solid var(--gris-borde);
+      border-radius: 12px;
+      padding: 2.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      min-width: 0;
+    }
+
+    .section-block {
+      margin-bottom: 3rem;
+      scroll-margin-top: 2rem;
+    }
+
+    h2.section-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--verde-primario);
+      border-bottom: 2px solid var(--dorado-oficial);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h3.subsection-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1E293B;
+      margin-top: 1.6rem;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--texto-secundario);
+    }
+
+    /* Cajas Informativas (Callouts) */
+    .callout {
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+      font-size: 0.90rem;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      border-left: 4px solid;
+    }
+
+    .callout-info {
+      background-color: #F0F9FF;
+      border-color: #0284C7;
+      color: #0369A1;
+    }
+
+    .callout-success {
+      background-color: #ECFDF5;
+      border-color: #10B981;
+      color: #065F46;
+    }
+
+    .callout-warning {
+      background-color: #FFFBEB;
+      border-color: #F59E0B;
+      color: #92400E;
+    }
+
+    .callout i {
+      font-size: 1.2rem;
+      margin-top: 2px;
+    }
+
+    /* Bloques de Código */
+    pre {
+      background: #0F172A;
+      color: #F8FAFC;
+      padding: 1rem 1.2rem;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      border: 1px solid #1E293B;
+      line-height: 1.5;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88em;
+      background: #F1F5F9;
+      color: #0F172A;
+      padding: 2px 5px;
+      border-radius: 4px;
+      border: 1px solid #E2E8F0;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      border: none;
+    }
+
+    /* Tablas Comparativas */
+    .table-responsive {
+      overflow-x: auto;
+      margin: 1.2rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--verde-primario);
+      color: #FFFFFF;
+      padding: 10px 14px;
+      font-weight: 600;
+      border: 1px solid #0D2B22;
+    }
+
+    td {
+      padding: 10px 14px;
+      border: 1px solid var(--gris-borde);
+      color: var(--texto-secundario);
+    }
+
+    tr:nth-child(even) {
+      background-color: #F8FAFC;
+    }
+
+    /* Listas Estilizadas */
+    ul, ol {
+      margin-left: 1.4rem;
+      margin-bottom: 1.2rem;
+      color: var(--texto-secundario);
+    }
+
+    li {
+      margin-bottom: 0.45rem;
+    }
+
+    /* Diagrama de Arquitectura */
+    .arch-diagram {
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+
+    .arch-step-box {
+      background: #FFFFFF;
+      border: 2px solid var(--verde-primario);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      display: inline-block;
+      margin: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .arch-arrow {
+      color: var(--dorado-oficial);
+      font-size: 1.2rem;
+      margin: 0 0.5rem;
+    }
+
+    /* Pie de Página */
+    .doc-footer {
+      max-width: 1180px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--texto-muted);
+      font-size: 0.80rem;
+      border-top: 1px solid var(--gris-borde);
+    }
+
+    @media (max-width: 900px) {
+      .doc-container {
+        grid-template-columns: 1fr;
+      }
+      .doc-sidebar {
+        display: none;
+      }
+      .doc-content {
+        padding: 1.5rem;
+      }
+      .doc-header-content {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    @media print {
+      body {
+        background: #FFFFFF;
+      }
+      .doc-header {
+        background: #174A3A !important;
+        color: #FFFFFF !important;
+        -webkit-print-color-adjust: exact;
+      }
+      .doc-sidebar, .btn-imprimir {
+        display: none !important;
+      }
+      .doc-container {
+        display: block;
+        padding: 0;
+        margin: 0;
+      }
+      .doc-content {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado Oficial -->
+  <header class="doc-header">
+    <div class="doc-header-content">
+      <img src="docs/escudo_muni_anta.png" alt="Escudo de la Municipalidad de Anta" class="doc-escudo">
+      <div class="doc-header-titles">
+        <h2>MUNICIPALIDAD PROVINCIAL DE ANTA — GERENCIA DE DESARROLLO URBANO Y RURAL</h2>
+        <h1>Protocolo Técnico de Despliegue Permanente del GeoVisor PDU Anta</h1>
+        <div class="doc-header-badges">
+          <span class="badge-doc badge-dorada"><i class="fa-solid fa-scroll"></i> Ordenanza Municipal N° 04-2025-A-MPA/C</span>
+          <span class="badge-doc"><i class="fa-solid fa-map-location-dot"></i> PDU Anta (2024 - 2034)</span>
+          <span class="badge-doc"><i class="fa-solid fa-server"></i> Infraestructura 24/7 y Alta Disponibilidad</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Cuerpo Principal -->
+  <div class="doc-container">
+    
+    <!-- Índice Lateral Fijo -->
+    <aside class="doc-sidebar">
+      <div class="doc-sidebar-title">
+        <i class="fa-solid fa-list-check"></i> Contenido de la Guía
+      </div>
+      <ul class="doc-nav-list">
+        <li class="doc-nav-item"><a href="#sec1" class="doc-nav-link">1. Fundamentos Arquitectónicos</a></li>
+        <li class="doc-nav-item"><a href="#sec2" class="doc-nav-link">2. Requisitos de Hardware y Red</a></li>
+        <li class="doc-nav-item"><a href="#sec3" class="doc-nav-link">3. Opción A: Servidor On-Premise</a></li>
+        <li class="doc-nav-item"><a href="#sec4" class="doc-nav-link">4. Opción B: Servidor Cloud Linux</a></li>
+        <li class="doc-nav-item"><a href="#sec5" class="doc-nav-link">5. Opción C: Contenedores Docker</a></li>
+        <li class="doc-nav-item"><a href="#sec6" class="doc-nav-link">6. Enlace de Dominio Fijo Municipal</a></li>
+        <li class="doc-nav-item"><a href="#sec7" class="doc-nav-link">7. Respaldo y Cumplimiento Legal</a></li>
+      </ul>
+      <button class="btn-imprimir" onclick="window.print()">
+        <i class="fa-solid fa-print"></i> Imprimir / Guardar en PDF
+      </button>
+    </aside>
+
+    <!-- Contenido del Documento -->
+    <main class="doc-content">
+
+      <!-- Sección 1 -->
+      <section id="sec1" class="section-block">
+        <h2 class="section-title"><i class="fa-solid fa-cubes"></i> 1. Fundamentos Arquitectónicos del GeoVisor</h2>
+        <p>
+          El <strong>GeoVisor del Plan de Desarrollo Urbano de Anta (2024 - 2034)</strong> está desarrollado sobre el motor analítico <strong>R Shiny</strong> con soporte espacial de alto rendimiento (bibliotecas compiladas en C/C++: <code>GDAL</code>, <code>GEOS</code> y <code>PROJ</code> vinculadas al paquete <code>sf</code>).
+        </p>
+        <p>
+          A diferencia de un sitio web estático tradicional (HTML/CSS), un GeoVisor reactivo opera mediante un <strong>proceso servidor activo</strong> que mantiene un socket de comunicación bidireccional (WebSocket) con cada ciudadano conectado para realizar en tiempo real:
+        </p>
+        <ul>
+          <li><strong>Intersección geométrica puntual:</strong> Localización del lote mediante coordenadas UTM 18S (WGS84) o GPS móvil frente a los 3,664 polígonos zonificados del PDU.</li>
+          <li><strong>Análisis de afectaciones viales:</strong> Búsqueda espacial de proximidad con los 1,673 tramos viales, secciones normativas y áreas de afectación.</li>
+          <li><strong>Generación dinámica de certificados:</strong> Compilación en memoria y descarga de la Ficha Informativa de Zonificación Oficial con código QR de verificación.</li>
+          <li><strong>Validación de acceso ciudadano (Estilo SUNARP):</strong> Control temporal de 10 minutos por sesión y tope de 2 periodos diarios por DNI según la Directiva de Seguridad de la Información (Ley N° 29733).</li>
+        </ul>
+
+        <div class="arch-diagram">
+          <div class="arch-step-box"><i class="fa-solid fa-users"></i> Ciudadano<br><small>antapat.github.io</small></div>
+          <span class="arch-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+          <div class="arch-step-box"><i class="fa-solid fa-shield-halved"></i> Cloudflare Tunnel<br><small>Túnel HTTPS Seguro</small></div>
+          <span class="arch-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+          <div class="arch-step-box" style="border-color: #B68A2C;"><i class="fa-solid fa-server"></i> Servidor Municipal<br><small>R Shiny (Puerto 3838)</small></div>
+        </div>
+      </section>
+
+      <!-- Sección 2 -->
+      <section id="sec2" class="section-block">
+        <h2 class="section-title"><i class="fa-solid fa-microchip"></i> 2. Requisitos de Hardware y Red</h2>
+        <p>
+          Para mantener el GeoVisor en línea de manera ininterrumpida (24 horas al día, 7 días a la semana), el servidor debe cumplir con los siguientes requerimientos recomendados:
+        </p>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Componente</th>
+                <th>Mínimo (Operación Básica)</th>
+                <th>Recomendado (Concurrencia Municipal)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Procesador (CPU)</strong></td>
+                <td>2 núcleos (x86_64 a 2.0 GHz)</td>
+                <td>4 o más núcleos (ej. Intel Core i5/i7 o AMD Ryzen 5)</td>
+              </tr>
+              <tr>
+                <td><strong>Memoria RAM</strong></td>
+                <td>4 GB de RAM</td>
+                <td>8 GB o 16 GB de RAM</td>
+              </tr>
+              <tr>
+                <td><strong>Almacenamiento</strong></td>
+                <td>20 GB libres (SSD recomendado)</td>
+                <td>50 GB SSD NVMe (acceso ultrarrápido a capas GIS)</td>
+              </tr>
+              <tr>
+                <td><strong>Conexión a Internet</strong></td>
+                <td>15 Mbps de subida (Upload)</td>
+                <td>50 Mbps simétricos (Fibra Óptica estable)</td>
+              </tr>
+              <tr>
+                <td><strong>Suministro Eléctrico</strong></td>
+                <td>Conexión directa a red eléctrica</td>
+                <td>UPS (Sistema de Alimentación Ininterrumpida) para cortes</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Sección 3 -->
+      <section id="sec3" class="section-block">
+        <h2 class="section-title"><i class="fa-solid fa-desktop"></i> 3. Opción A: Servidor en la Municipalidad (Windows 10 / 11 / Server)</h2>
+        <p>
+          Esta opción aprovecha una computadora dedicada dentro de la oficina de la Gerencia de Desarrollo Urbano y Rural (GDUR), sin pagar mensualidades por servicios en la nube.
+        </p>
+
+        <h3 class="subsection-title">Paso 3.1: Configuración de Energía y BIOS</h3>
+        <ol>
+          <li><strong>Suspender la suspensión del equipo:</strong> En Windows, ir a <em>Configuración &gt; Sistema &gt; Energía y batería</em> y configurar <em>"Al estar enchufado, suspender el equipo tras:"</em> en <strong>NUNCA</strong>.</li>
+          <li><strong>Auto-encendido tras corte eléctrico (BIOS):</strong> Reiniciar el equipo, entrar al BIOS (tecla <code>F2</code> o <code>Supr</code>) y en la pestaña <em>Power Management</em> activar <strong>"Restore on AC Power Loss" &gt; Power On</strong>. Con esto, si se corta la luz en la municipalidad, la máquina se prenderá sola apenas regrese el suministro.</li>
+        </ol>
+
+        <h3 class="subsection-title">Paso 3.2: Ejecución Continua como Servicio de Windows (NSSM)</h3>
+        <p>
+          Para que el visor arranque automáticamente incluso si ningún usuario inicia sesión en Windows, se utiliza el gestor libre <strong>NSSM (Non-Sucking Service Manager)</strong>:
+        </p>
+        <pre><code># 1. Descargar nssm.exe en la carpeta del proyecto
+# 2. Abrir PowerShell como Administrador e instalar el servicio:
+nssm.exe install GeoVisorAnta "C:\Program Files\R\R-4.6.1\bin\x64\Rscript.exe" "run_server.R"
+nssm.exe set GeoVisorAnta AppDirectory "D:\pdu_anta_2024_2034"
+nssm.exe set GeoVisorAnta Start SERVICE_AUTO_START
+nssm.exe start GeoVisorAnta</code></pre>
+
+        <div class="callout callout-success">
+          <i class="fa-solid fa-circle-check"></i>
+          <div>
+            <strong>Autonomía 100%:</strong> Con este servicio configurado, el motor de Shiny permanecerá corriendo en el puerto local <code>3838</code> en segundo plano de forma silenciosa y permanente.
+          </div>
+        </div>
+      </section>
+
+      <!-- Sección 4 -->
+      <section id="sec4" class="section-block">
+        <h2 class="section-title"><i class="fa-brands fa-linux"></i> 4. Opción B: Servidor Cloud Linux (Ubuntu Server 22.04 / 24.04 LTS)</h2>
+        <p>
+          Es el estándar de excelencia para portales institucionales de alto tráfico. Puede contratarse en cualquier proveedor de hosting en la nube (DigitalOcean, AWS, Hetzner, o servidores del Estado Peruano / GORE Cusco).
+        </p>
+
+        <h3 class="subsection-title">Paso 4.1: Instalación de Dependencias Espaciales</h3>
+        <pre><code># Actualizar repositorios e instalar librerías geoespaciales C++
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y software-properties-common dirmngr gnupg apt-transport-https
+sudo apt install -y gdal-bin libgdal-dev libgeos-dev libproj-dev libudunits2-dev libssl-dev
+
+# Instalar R base y desarrollo
+sudo apt install -y r-base r-base-dev</code></pre>
+
+        <h3 class="subsection-title">Paso 4.2: Instalación de Shiny Server</h3>
+        <pre><code># Descargar y desplegar Shiny Server Open Source
+wget https://download3.rstudio.org/ubuntu-18.04/x86_64/shiny-server-1.5.22.1017-amd64.deb
+sudo gdebi shiny-server-1.5.22.1017-amd64.deb
+
+# Clonar el proyecto en el directorio del servidor
+cd /srv/shiny-server
+sudo git clone https://github.com/antapat/pdu_anta_2024_2034.git pdu_anta
+sudo systemctl enable shiny-server
+sudo systemctl start shiny-server</code></pre>
+      </section>
+
+      <!-- Sección 5 -->
+      <section id="sec5" class="section-block">
+        <h2 class="section-title"><i class="fa-brands fa-docker"></i> 5. Opción C: Contenedores Docker (Portabilidad Total)</h2>
+        <p>
+          Permite empacar todo el GeoVisor (código, capas shapefile, entorno R y dependencias del sistema operativo) en una imagen inmutable.
+        </p>
+        <pre><code># Archivo: Dockerfile
+FROM rocker/geospatial:4.4.0
+
+RUN install2.r --error --skipinstalled \
+    shiny bslib leaflet sf DT RColorBrewer htmltools scales
+
+WORKDIR /app
+COPY . /app
+
+EXPOSE 3838
+CMD ["Rscript", "run_server.R"]</code></pre>
+        <p>
+          Para ponerlo en marcha en cualquier computadora o servidor del mundo basta un solo comando:
+        </p>
+        <pre><code>docker build -t geovisor-anta .
+docker run -d --name geovisor-live --restart always -p 3838:3838 geovisor-anta</code></pre>
+      </section>
+
+      <!-- Sección 6 -->
+      <section id="sec6" class="section-block">
+        <h2 class="section-title"><i class="fa-solid fa-link"></i> 6. Enlace de Dominio Fijo y Transmisión Segura</h2>
+        
+        <h3 class="subsection-title">6.1 Enlace Gratuito Mediante GitHub Pages (Implementado Actualmente)</h3>
+        <p>
+          Es el método que acabamos de configurar con éxito:
+        </p>
+        <ul>
+          <li><strong>Dirección Oficial Permanente:</strong> <code>https://antapat.github.io/pdu_anta_2024_2034/</code></li>
+          <li><strong>Mecanismo:</strong> Al encender el servidor con <code>iniciar_servidor_github_pages.bat</code>, el túnel seguro de Cloudflare transmite los datos espaciales y actualiza automáticamente el estado en GitHub Pages en 1 clic.</li>
+        </ul>
+
+        <h3 class="subsection-title">6.2 Enlace con Dominio Propio Institucional (Ej. <code>pdu.munianta.gob.pe</code>)</h3>
+        <p>
+          Si la municipalidad desea un subdominio oficial <code>.gob.pe</code>:
+        </p>
+        <ol>
+          <li>Crear una cuenta gratuita en <strong>Cloudflare Zero Trust</strong>.</li>
+          <li>En la sección <em>Access &gt; Tunnels</em>, crear un <strong>Named Tunnel</strong> llamado <code>pdu-anta-server</code>.</li>
+          <li>Apuntar el registro DNS: <code>pdu.munianta.gob.pe</code> al ID del túnel.</li>
+          <li>Instalar el servicio permanente en Windows con el token asignado:
+            <pre><code>tools\cloudflared.exe service install [TOKEN_PROVISTO_POR_CLOUDFLARE]</code></pre>
+          </li>
+        </ol>
+      </section>
+
+      <!-- Sección 7 -->
+      <section id="sec7" class="section-block">
+        <h2 class="section-title"><i class="fa-solid fa-shield-halved"></i> 7. Respaldo y Cumplimiento Legal</h2>
+        <p>
+          En estricto cumplimiento de la <strong>Ley N° 29733 (Ley de Protección de Datos Personales del Perú)</strong> y la <strong>Directiva de Seguridad R.D. N° 019-2013-JUS/DGPDP</strong>:
+        </p>
+        <div class="callout callout-info">
+          <i class="fa-solid fa-user-shield"></i>
+          <div>
+            <strong>Privacidad por Diseño (Privacy by Design):</strong> El GeoVisor <strong>NO almacena números de DNI en texto claro</strong>. Todo registro en <code>outputs/usuarios_sesion.rds</code> y <code>outputs/control_acceso.log</code> se realiza mediante un código seudonimizado (Hash SHA-256 criptográfico con Salt de sistema).
+          </div>
+        </div>
+
+        <h3 class="subsection-title">Procedimiento Periódico de Mantenimiento</h3>
+        <ul>
+          <li><strong>Respaldo de Cartografía:</strong> Copiar la carpeta <code>data/</code> a un disco externo o almacenamiento seguro cada vez que se emita una actualización de la zonificación por Ordenanza Municipal.</li>
+          <li><strong>Respaldo de Auditoría:</strong> El archivo <code>outputs/control_acceso.log</code> registra el historial de visitas para estadísticas municipales. Debe archivarse anualmente por la GDUR.</li>
+          <li><strong>Actualización de Capas:</strong> Si se aprueba una modificación urbana, solo se reemplazan los archivos Shapefile en <code>data/</code> y se reinicia el servidor R. El visor actualizará instantáneamente las capas sin alterar la configuración del servidor.</li>
+        </ul>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Pie de Página Institucional -->
+  <footer class="doc-footer">
+    <p><strong>MUNICIPALIDAD PROVINCIAL DE ANTA — GERENCIA DE DESARROLLO URBANO Y RURAL</strong></p>
+    <p>Casa de la cultura: Avenida los Andes SN - Anta - Cusco - Perú · Mesa de Partes Virtual: mesadepartesvirtual@munianta.gob.pe</p>
+    <p>Plan de Desarrollo Urbano de Anta (2024 - 2034) · Documento Técnico de Implementación Tecnológica y Despliegue Permanente</p>
+  </footer>
+
+</body>
+</html>
