@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GeoVisor PDU Anta (2024 - 2034) — Municipalidad Provincial de Anta</title>
+  
+  <!-- Metadatos institucionales y OpenGraph para compartir en WhatsApp, Facebook, etc. -->
+  <meta name="description" content="Plataforma de consulta cartográfica y normativa del Plan de Desarrollo Urbano de Anta (2024 - 2034). Municipalidad Provincial de Anta - GDUR.">
+  <meta property="og:title" content="GeoVisor Oficial PDU Anta (2024 - 2034)">
+  <meta property="og:description" content="Consulta de zonificación, sistema vial, parámetros urbanísticos y generación de fichas informativas del distrito de Anta.">
+  <meta property="og:image" content="escudo_muni_anta.png">
+  <meta property="og:type" content="website">
+  
+  <link rel="icon" type="image/png" href="escudo_muni_anta.png">
+  
+  <!-- Tipografía Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <style>
+    :root {
+      --verde-inst: #174A3A;
+      --verde-oscuro: #0F2D24;
+      --verde-hover: #10392D;
+      --dorado-inst: #B68A2C;
+      --bg-dark: #0B241D;
+      --texto-claro: #F8FAF9;
+      --texto-muted: #94A3B8;
+      --border-color: rgba(255, 255, 255, 0.12);
+      --header-h: 52px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--verde-oscuro);
+      color: #1E293B;
+    }
+
+    /* Barra Superior Institucional */
+    .pdu-topbar {
+      height: var(--header-h);
+      background: linear-gradient(90deg, #0F2D24 0%, #174A3A 60%, #1A5442 100%);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      border-bottom: 2px solid var(--dorado-inst);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+      position: relative;
+      z-index: 100;
+    }
+
+    .pdu-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      min-width: 0;
+    }
+
+    .pdu-logo-muni {
+      height: 36px;
+      width: auto;
+      background: #FFFFFF;
+      padding: 2px;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .pdu-title-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .pdu-main-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .pdu-badge-vigencia {
+      background: rgba(182, 138, 44, 0.35);
+      border: 1px solid var(--dorado-inst);
+      color: #FEE8A2;
+      font-size: 0.70rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .pdu-sub-title {
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 480px;
+    }
+
+    .pdu-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #E2E8F0;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #94A3B8;
+    }
+
+    .status-dot.online {
+      background-color: #10B981;
+      box-shadow: 0 0 8px #10B981;
+      animation: pulse-dot 2s infinite;
+    }
+
+    .status-dot.connecting {
+      background-color: #F59E0B;
+      animation: pulse-dot 1s infinite;
+    }
+
+    .status-dot.offline {
+      background-color: #EF4444;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .btn-topbar {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #FFFFFF;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-topbar:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Contenedor del Iframe y Pantallas de Estado */
+    .pdu-viewport-wrap {
+      width: 100%;
+      height: calc(100vh - var(--header-h));
+      position: relative;
+      background: #FFFFFF;
+    }
+
+    #geovisor_frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+    }
+
+    /* Pantalla de Carga y Conexión */
+    .pdu-screen-state {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+      background: radial-gradient(circle at center, #174A3A 0%, #0B241D 100%);
+      color: #FFFFFF;
+      z-index: 50;
+      transition: opacity 0.4s ease;
+    }
+
+    .state-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 2.2rem 2rem;
+      max-width: 580px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .state-card-img {
+      height: 64px;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .state-title {
+      font-size: 1.28rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+      color: #FFFFFF;
+    }
+
+    .state-subtitle {
+      font-size: 0.84rem;
+      color: #CBD5E1;
+      margin-bottom: 1.4rem;
+      line-height: 1.45;
+    }
+
+    /* Spinner Animado */
+    .pdu-spinner {
+      width: 44px;
+      height: 44px;
+      border: 3.5px solid rgba(255, 255, 255, 0.18);
+      border-top-color: #10B981;
+      border-radius: 50%;
+      animation: spin 0.85s linear infinite;
+      margin: 1.2rem auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .state-notice {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      font-size: 0.78rem;
+      color: #CBD5E1;
+      margin-top: 1.2rem;
+      line-height: 1.5;
+      text-align: left;
+    }
+
+    .state-notice strong {
+      color: #F8FAFC;
+    }
+
+    .btn-reconnect {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 0.86rem;
+      border: none;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 1.2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .btn-reconnect:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      transform: translateY(-1px);
+    }
+
+    /* Adaptación Móvil */
+    @media (max-width: 768px) {
+      .pdu-sub-title {
+        display: none;
+      }
+      .pdu-main-title {
+        font-size: 0.85rem;
+      }
+      .btn-topbar span {
+        display: none;
+      }
+      .state-card {
+        padding: 1.5rem 1.2rem;
+      }
+      .state-title {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra Superior Institucional Oficial -->
+  <header class="pdu-topbar">
+    <a href="#" class="pdu-brand" title="Municipalidad Provincial de Anta - PDU 2024-2034">
+      <img src="escudo_muni_anta.png" alt="Escudo Anta" class="pdu-logo-muni">
+      <div class="pdu-title-group">
+        <div class="pdu-main-title">
+          <span>GEOVISOR PDU ANTA</span>
+          <span class="pdu-badge-vigencia">2024 - 2034</span>
+        </div>
+        <div class="pdu-sub-title">
+          Municipalidad Provincial de Anta • Gerencia de Desarrollo Urbano y Rural (GDUR)
+        </div>
+      </div>
+    </a>
+
+    <div class="pdu-actions">
+      <!-- Indicador de Estado del Servidor -->
+      <div id="status_pill" class="status-pill" title="Estado de la conexión">
+        <span id="status_dot" class="status-dot connecting"></span>
+        <span id="status_text">Conectando...</span>
+      </div>
+
+      <!-- Botón de Reconexión -->
+      <button type="button" class="btn-topbar" onclick="verificarYConectarServidor(true)" title="Verificar señal del servidor">
+        <i class="fa-solid fa-arrows-rotate"></i>
+        <span>Actualizar</span>
+      </button>
+
+      <!-- Abrir directo -->
+      <a id="btn_abrir_directo" href="#" target="_blank" class="btn-topbar" style="display:none;" title="Abrir en pestaña nueva directa">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        <span>Abrir directo</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Área Principal de Visualización -->
+  <main class="pdu-viewport-wrap">
+    
+    <!-- Iframe Seguro donde corre el GeoVisor R Shiny -->
+    <iframe 
+      id="geovisor_frame" 
+      src="about:blank"
+      allow="geolocation *; clipboard-write *"
+      title="GeoVisor PDU Anta">
+    </iframe>
+
+    <!-- Pantalla de Estado (Conectando / Mantenimiento) -->
+    <div id="pantalla_estado" class="pdu-screen-state">
+      <div class="state-card">
+        <img src="escudo_muni_anta.png" alt="Escudo Anta" class="state-card-img">
+        <h2 id="estado_titulo" class="state-title">Conectando con el GeoVisor Municipal</h2>
+        <p id="estado_subtitulo" class="state-subtitle">
+          Estableciendo enlace seguro con el servidor cartográfico del Plan de Desarrollo Urbano de Anta (2024 - 2034)...
+        </p>
+
+        <div id="estado_spinner" class="pdu-spinner"></div>
+
+        <div id="estado_aviso" class="state-notice" style="display: none;">
+          <strong><i class="fa-solid fa-circle-info"></i> Información para el Ciudadano:</strong><br>
+          Si el visor no carga, es posible que el servidor municipal se encuentre en mantenimiento programado o fuera del horario de transmisión.<br><br>
+          • <strong>Mesa de Partes Virtual:</strong> <a href="mailto:mesadepartesvirtual@munianta.gob.pe" style="color: #6EE7B7;">mesadepartesvirtual@munianta.gob.pe</a><br>
+          • <strong>Sede Institucional:</strong> Casa de la cultura: Av. los Andes SN - Anta - Cusco (Referencia: Av. los Andes SN)<br>
+          • <strong>Horario de Atención:</strong> Lunes a Viernes de 8:00 a 17:00 horas.
+        </div>
+
+        <button id="btn_reintentar" type="button" class="btn-reconnect" style="display: none;" onclick="verificarYConectarServidor(true)">
+          <i class="fa-solid fa-rotate-right"></i> Reintentar Conexión Ahora
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Configuración del Portal GitHub Pages
+    const CONFIG = {
+      endpointFile: 'server_endpoint.json',
+      checkIntervalMs: 15000,
+      timeoutMs: 8000
+    };
+
+    let serverUrlActual = '';
+    let intervalTimer = null;
+
+    // 1. Obtener parámetro ?server= de la URL si se desea forzar una dirección
+    function obtenerParametroUrl(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    // 2. Verificar y conectar con el endpoint activo
+    async function verificarYConectarServidor(esManual = false) {
+      const statusDot = document.getElementById('status_dot');
+      const statusText = document.getElementById('status_text');
+      const btnAbrirDirecto = document.getElementById('btn_abrir_directo');
+      const pantallaEstado = document.getElementById('pantalla_estado');
+      const estadoTitulo = document.getElementById('estado_titulo');
+      const estadoSubtitulo = document.getElementById('estado_subtitulo');
+      const estadoSpinner = document.getElementById('estado_spinner');
+      const estadoAviso = document.getElementById('estado_aviso');
+      const btnReintentar = document.getElementById('btn_reintentar');
+      const geovisorFrame = document.getElementById('geovisor_frame');
+
+      if (esManual) {
+        statusDot.className = 'status-dot connecting';
+        statusText.textContent = 'Verificando...';
+        estadoSpinner.style.display = 'block';
+      }
+
+      let urlServidor = obtenerParametroUrl('server');
+
+      // Si no viene en la URL, leer el archivo server_endpoint.json
+      if (!urlServidor) {
+        try {
+          const resp = await fetch(CONFIG.endpointFile + '?t=' + Date.now(), { cache: 'no-store' });
+          if (resp.ok) {
+            const data = await resp.json();
+            if (data && data.url && data.url.trim() !== '') {
+              urlServidor = data.url.trim();
+            }
+          }
+        } catch (e) {
+          console.warn('No se pudo leer server_endpoint.json:', e);
+        }
+      }
+
+      // Validar si tenemos URL
+      if (!urlServidor || urlServidor === '') {
+        marcarServidorFueraDeLinea(
+          'Servidor en Espera de Conexión',
+          'El servidor territorial en la Municipalidad de Anta aún no ha transmitido su señal activa para hoy.'
+        );
+        return;
+      }
+
+      // Asegurar protocolo HTTPS/HTTP
+      if (!urlServidor.startsWith('http://') && !urlServidor.startsWith('https://')) {
+        urlServidor = 'https://' + urlServidor;
+      }
+
+      // Si la URL es la misma y ya está cargado el iframe, mantener
+      if (serverUrlActual === urlServidor && geovisorFrame.src === urlServidor) {
+        statusDot.className = 'status-dot online';
+        statusText.textContent = 'En Línea';
+        return;
+      }
+
+      serverUrlActual = urlServidor;
+      btnAbrirDirecto.href = urlServidor;
+      btnAbrirDirecto.style.display = 'inline-flex';
+
+      // Cargar iframe
+      statusDot.className = 'status-dot connecting';
+      statusText.textContent = 'Cargando Visor...';
+      estadoTitulo.textContent = 'Iniciando GeoVisor PDU Anta';
+      estadoSubtitulo.textContent = 'Cargando capas cartográficas y zonificación oficial...';
+      estadoSpinner.style.display = 'block';
+      estadoAviso.style.display = 'none';
+      btnReintentar.style.display = 'none';
+
+      geovisorFrame.src = urlServidor;
+      geovisorFrame.onload = function() {
+        // Iframe cargado con éxito
+        setTimeout(() => {
+          pantallaEstado.style.opacity = '0';
+          setTimeout(() => {
+            pantallaEstado.style.display = 'none';
+            geovisorFrame.style.display = 'block';
+          }, 400);
+
+          statusDot.className = 'status-dot online';
+          statusText.textContent = 'Servidor en Línea';
+        }, 1200);
+      };
+
+      // Control de tiempo límite si el iframe no responde en 15 segundos
+      setTimeout(() => {
+        if (pantallaEstado.style.display !== 'none' && statusText.textContent !== 'Servidor en Línea') {
+          statusDot.className = 'status-dot online';
+          statusText.textContent = 'En Línea';
+          pantallaEstado.style.opacity = '0';
+          setTimeout(() => {
+            pantallaEstado.style.display = 'none';
+            geovisorFrame.style.display = 'block';
+          }, 400);
+        }
+      }, 15000);
+    }
+
+    function marcarServidorFueraDeLinea(titulo, subtitulo) {
+      const statusDot = document.getElementById('status_dot');
+      const statusText = document.getElementById('status_text');
+      const pantallaEstado = document.getElementById('pantalla_estado');
+      const estadoTitulo = document.getElementById('estado_titulo');
+      const estadoSubtitulo = document.getElementById('estado_subtitulo');
+      const estadoSpinner = document.getElementById('estado_spinner');
+      const estadoAviso = document.getElementById('estado_aviso');
+      const btnReintentar = document.getElementById('btn_reintentar');
+      const geovisorFrame = document.getElementById('geovisor_frame');
+
+      statusDot.className = 'status-dot offline';
+      statusText.textContent = 'Fuera de Línea';
+      
+      geovisorFrame.style.display = 'none';
+      pantallaEstado.style.display = 'flex';
+      pantallaEstado.style.opacity = '1';
+      
+      estadoTitulo.textContent = titulo;
+      estadoSubtitulo.textContent = subtitulo;
+      estadoSpinner.style.display = 'none';
+      estadoAviso.style.display = 'block';
+      btnReintentar.style.display = 'inline-flex';
+    }
+
+    // Inicializar al cargar el DOM
+    document.addEventListener('DOMContentLoaded', () => {
+      verificarYConectarServidor();
+      // Verificación periódica cada 30 segundos
+      intervalTimer = setInterval(() => {
+        verificarYConectarServidor(false);
+      }, CONFIG.checkIntervalMs);
+    });
+  </script>
+</body>
+</html>
