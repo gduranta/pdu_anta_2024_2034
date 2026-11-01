@@ -368,7 +368,7 @@ mostrar_modal_validacion_dni <- function(captcha_val, error_msg = NULL, cuota_bl
         class = "mt-4 pt-3 border-top text-center text-muted",
         style = "font-size: 11.5px;",
         div("Gerencia de Desarrollo Urbano y Rural — Municipalidad Provincial de Anta"),
-        div("Consultas técnicas: ", tags$b("gdur@munidistritoanta.gob.pe"), " · Plaza de Armas s/n, Anta, Cusco")
+        div("Mesa de Partes Virtual: ", tags$b("mesadepartesvirtual@munianta.gob.pe"), " · Casa de la cultura: Avenida los Andes SN - Anta - Anta - Cusco - Perú - 0800 (Referencia: Avenida los Andes SN)")
       )
     )
   ))

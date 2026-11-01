@@ -85,6 +85,7 @@ nav.navbar-static-top {
   align-items: center !important;
   justify-content: space-between !important;
   gap: 12px !important;
+  flex-wrap: nowrap !important;
 }
 
 .navbar-header {
@@ -101,6 +102,8 @@ nav.navbar-static-top {
   display: flex !important;
   align-items: center !important;
   color: var(--verde-inst) !important;
+  min-width: 330px !important;
+  flex: 0 1 auto !important;
 }
 
 .brand-logo-left {
@@ -160,6 +163,17 @@ nav.navbar-static-top {
   white-space: nowrap;
 }
 
+/* Periodo integrado a la marca, sin badge independiente. */
+.header-brand-title .pdu-periodo {
+  color: inherit !important;
+  font: inherit !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-left: 0.18em !important;
+}
+
 .header-badge-aprobado {
   background-color: #FDF9EE !important;
   color: #78350F !important;
@@ -182,12 +196,22 @@ nav.navbar-static-top {
 
 .header-subtitle {
   color: #3F564C !important;
-  font-size: 0.71rem;
+  display: block !important;
+  max-width: 440px !important;
+  font-size: 0.64rem !important;
   font-weight: 500;
-  letter-spacing: -0.1px;
-  line-height: 1.2;
+  letter-spacing: 0;
+  line-height: 1.02 !important;
   margin: 0;
-  white-space: nowrap;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.header-subtitle span {
+  display: block !important;
+  line-height: 1.02 !important;
+  white-space: normal !important;
 }
 
 /* Micro-contadores Públicos en Encabezado (Telemetría Discreta de Alta Claridad) */
@@ -571,7 +595,7 @@ nav.navbar-static-top {
   background-color: #FFFFFF !important;
   border-right: 1px solid var(--border-card) !important;
   box-shadow: 4px 0 24px rgba(15, 45, 36, 0.05);
-  padding: 1.1rem !important;
+  padding: 0 !important;
 }
 
 /* Botón GPS Móvil de Alta Visibilidad */
@@ -1149,6 +1173,7 @@ html, body {
     max-width: 100vw !important;
     --_sidebar-width: 100vw !important;
     grid-template-columns: 100% !important;
+    height: auto !important;
   }
 
   .bslib-sidebar-layout > .sidebar {
@@ -1156,32 +1181,37 @@ html, body {
     max-width: 100vw !important;
     padding: 0.85rem !important;
     box-sizing: border-box !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
 
   .bslib-sidebar-layout > .main {
     width: 100% !important;
     max-width: 100vw !important;
     padding: 0 !important;
-    min-height: calc(100dvh - 66px) !important;
+    height: auto !important;
+    min-height: 480px !important;
   }
 
   #mapa_pdu,
   .leaflet-container {
-    height: calc(100dvh - 66px) !important;
-    height: calc(100vh - 66px) !important;
+    height: 520px !important;
     min-height: 480px !important;
     width: 100% !important;
     max-width: 100vw !important;
   }
 }
 
-/* 4. Reporte Informativo y Certificado en Móviles */
+/* 4. Reporte Informativo, Ficha y Catálogo en Móviles */
 @media (max-width: 767.98px) {
   .cert-card {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 
   .reporte-disclaimer {
@@ -1191,26 +1221,65 @@ html, body {
 
   .table-cert {
     font-size: 0.76rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    word-break: break-word !important;
   }
 
   .table-cert th, .table-cert td {
-    padding: 4px 6px !important;
+    padding: 3px 5px !important;
   }
 
   .mapa-img-fullpage {
     max-height: 380px !important;
     width: 100% !important;
   }
-}
 
-/* 5. Catálogo Normativo y PDU en Móviles */
-@media (max-width: 767.98px) {
   .catalogo-card {
-    padding: 1rem !important;
+    padding: 0.85rem !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .catalogo-title {
+    font-size: 1.15rem !important;
+    line-height: 1.3 !important;
   }
 
   .hero-pdu {
-    padding: 1.2rem !important;
+    padding: 1rem 0.85rem !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .hero-pdu h3 {
+    font-size: 1.15rem !important;
+    line-height: 1.25 !important;
+    word-break: break-word !important;
+  }
+
+  .hero-pdu h6 {
+    font-size: 0.80rem !important;
+    line-height: 1.3 !important;
+    word-break: break-word !important;
+  }
+
+  .hero-pdu img {
+    height: 44px !important;
+    width: auto !important;
+  }
+
+  .table-responsive {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .pdu-sector-table {
+    min-width: 580px;
   }
 }
 
@@ -1691,49 +1760,106 @@ html, body {
   color: #FFFFFF !important;
 }
 
-/* ==========================================================================
-   SCROLL VERTICAL RESPONSIVO PARA TODAS LAS PÁGINAS Y CONTENIDOS
-   ========================================================================== */
+/* ==========================================================================\n   LAYOUT RESPONSIVO DEL VISOR Y LAS PÁGINAS INFORMATIVAS\n   ========================================================================== */
+html, body { min-height: 100%; overflow-x: hidden !important; }
+body { overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
 
-/* Contenedor de pestañas bslib */
-.tab-content {
-  flex: 1 1 auto !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch;
+/* Catálogo, información, privacidad y ficha usan el scroll natural de página. */
+.tab-content:not([data-tabsetid]) {
+  height: auto !important; min-height: 0 !important; max-height: none !important;
+  overflow: visible !important; position: static !important;
+}
+.tab-content:not([data-tabsetid]) > .tab-pane:not(#tab_visor):not([data-value="tab_visor"]) {
+  height: auto !important; min-height: 0 !important; max-height: none !important;
+  overflow: visible !important; padding-bottom: 2rem !important;
 }
 
-/* Todas las páginas secundarias permiten scroll natural */
-.tab-pane {
-  height: auto !important;
-  min-height: 100% !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch;
+/* Escritorio: visor a pantalla completa con panel de consulta desplazable. */
+@media (min-width: 768px) {
+  body:has(#tab_visor.active) { height: 100dvh !important; overflow: hidden !important; }
+  body:has(#tab_visor.active) .tab-content:not([data-tabsetid]) {
+    height: calc(100dvh - 76px) !important; max-height: calc(100dvh - 76px) !important; overflow: hidden !important;
+  }
+  .tab-content:not([data-tabsetid]) > .tab-pane#tab_visor,
+  .tab-content:not([data-tabsetid]) > .tab-pane[data-value="tab_visor"] {
+    height: 100% !important; min-height: 0 !important; overflow: hidden !important;
+  }
+  #tab_visor .bslib-sidebar-layout { height: 100% !important; min-height: 0 !important; max-height: 100% !important; }
+  #tab_visor .bslib-sidebar-layout > .sidebar { height: 100% !important; min-height: 0 !important; overflow: hidden !important; padding: 0 !important; }
+  #tab_visor .bslib-sidebar-layout .sidebar-content {
+    height: 100% !important; max-height: 100% !important; overflow-y: auto !important; overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important; box-sizing: border-box !important;
+  }
+  #tab_visor .bslib-sidebar-layout > .main, #tab_visor #mapa_pdu, #tab_visor .leaflet-container {
+    height: 100% !important; min-height: 0 !important; max-height: 100% !important;
+  }
 }
 
-/* Excepción: El visor de mapas ocupa la pantalla completa */
-.tab-pane#tab_visor,
-.tab-pane[data-value="tab_visor"] {
-  height: 100% !important;
-  overflow: hidden !important;
+/* Tableta: mapa y panel lado a lado, con sidebar proporcional. */
+@media (min-width: 768px) and (max-width: 1199.98px) {
+  #tab_visor .bslib-sidebar-layout { --bslib-sidebar-width: min(36vw, 360px) !important; }
 }
 
-/* El panel lateral del visor tiene scroll independiente */
-.bslib-sidebar-layout > .sidebar,
-.bslib-sidebar-layout .sidebar-content {
-  overflow-y: auto !important;
-  max-height: 100% !important;
-  -webkit-overflow-scrolling: touch;
+/* El encabezado acomoda la marca y las pestañas según el ancho real disponible. */
+@media (min-width: 768px) and (max-width: 1399.98px) {
+  .navbar > .container-fluid { gap: 7px !important; }
+  .navbar-brand { min-width: 300px !important; }
+  .header-subtitle { max-width: 350px !important; font-size: 0.60rem !important; }
+  .header-counters-wrap { gap: 4px !important; }
+  .counter-chip-mini { font-size: 0.66rem !important; padding: 2px 6px !important; }
+  .navbar .navbar-nav > li > a,
+  .navbar .navbar-nav .nav-link,
+  .navbar .navbar-nav .dropdown-toggle { padding-left: 0.48rem !important; padding-right: 0.48rem !important; }
 }
 
-/* Asegurar que las tarjetas y contenedores interiores se desplieguen por completo */
-.tab-pane .container-fluid,
-.tab-pane .container {
-  height: auto !important;
-  min-height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
+@media (min-width: 1400px) {
+  .header-counters-wrap { gap: 5px !important; }
+  .counter-chip-mini { padding-left: 7px !important; padding-right: 7px !important; }
 }
 
+/* Teléfono: navbar en varias filas, panel sobre el mapa y scroll táctil natural. */
+@media (max-width: 767.98px) {
+  .navbar, .navbar > .container-fluid { height: auto !important; min-height: 56px !important; flex-wrap: wrap !important; }
+  .navbar > .container-fluid { align-items: flex-start !important; }
+  .navbar-brand { min-width: 0 !important; max-width: calc(100vw - 24px) !important; width: 100% !important; white-space: normal !important; }
+  .navbar-brand > div:first-child { gap: 0.5rem !important; }
+  .brand-logo-left { padding: 3px 6px !important; }
+  .logo-muni-header { height: 36px !important; }
+  .header-brand-title { font-size: 0.98rem !important; }
+  .header-subtitle { max-width: calc(100vw - 78px) !important; font-size: 0.58rem !important; }
+  .header-brand-title { font-size: 0.92rem !important; }
+  .navbar .navbar-nav { flex-wrap: wrap !important; }
+  .navbar .dropdown-menu {
+    position: static !important; float: none !important; width: 100% !important; max-height: min(55dvh, 360px) !important;
+    overflow-y: auto !important; -webkit-overflow-scrolling: touch !important;
+  }
+  .tab-content:not([data-tabsetid]) { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+  .navbar-nav { width: 100% !important; }
+  #tab_visor, #tab_visor .bslib-sidebar-layout, #tab_visor .bslib-sidebar-layout > .sidebar, #tab_visor .bslib-sidebar-layout > .main {
+    height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important;
+  }
+  #tab_visor .bslib-sidebar-layout .sidebar-content {
+    height: auto !important; min-height: 0 !important; max-height: 60dvh !important; overflow-y: auto !important; overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  #tab_visor #mapa_pdu, #tab_visor .leaflet-container {
+    height: clamp(340px, 55dvh, 560px) !important; min-height: 340px !important; max-height: none !important; width: 100% !important;
+  }
+  .catalogo-card { margin: 0.5rem !important; padding: 0.85rem !important; width: auto !important; max-width: none !important; }
+  .catalogo-title { font-size: clamp(1.2rem, 5vw, 1.65rem) !important; line-height: 1.25 !important; }
+  .catalogo-card .row > [class*="col-"] { width: 100% !important; }
+}
+
+/* Tabla ancha: desplazamiento horizontal localizado, conservando el scroll vertical. */
+.catalogo-table-wrap {
+  width: 100% !important; max-width: 100% !important; overflow-x: auto !important; overflow-y: visible !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+.catalogo-table { min-width: 1120px; }
+.sidebar-content::-webkit-scrollbar, body::-webkit-scrollbar { width: 7px; }
+.sidebar-content::-webkit-scrollbar-track, body::-webkit-scrollbar-track { background: #F1F5F3; }
+.sidebar-content::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb { background: #A0B6AC; border-radius: 4px; }
+.sidebar-content::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover { background: #174A3A; }
 /* ==========================================================================
    PORTAL INSTITUCIONAL DE ACCESO CIUDADANO Y ONBOARDING ESTRUCTURADO
    ========================================================================== */

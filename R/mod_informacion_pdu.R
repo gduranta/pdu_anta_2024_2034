@@ -624,7 +624,7 @@ mod_informacion_pdu_ui <- function(proyecto_nombre = NULL) {
               tags$button(
                 type = "button",
                 class = "btn btn-outline-success fw-bold text-nowrap px-3 py-2",
-                onclick = "reabrirModalPrivacidad();",
+                onclick = "Shiny.setInputValue('abrir_modal_privacidad', Math.random());",
                 icon("file-shield"), " Ver Términos y Privacidad"
               )
             )

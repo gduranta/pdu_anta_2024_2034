@@ -312,20 +312,17 @@ ui <- page_navbar(
     ),
     div(
       class = "d-flex flex-column justify-content-center",
-      # Fila 1: Marca institucional + Vigencia normativa + Fecha oficial
+      # Fila 1: Marca institucional y periodo del PDU
       div(
-        class = "d-flex align-items-center gap-2",
-        span(class = "header-brand-title", "GEOVISOR PDU ANTA"),
-        span(class = "pdu-badge-title", "2024 - 2034"),
-        span(
-          class = "header-badge-aprobado d-none d-sm-inline-flex",
-          icon("calendar-check"), " Aprobado: 11 de abril del 2025 (Act. 04/09/2026)"
-        )
+        class = "d-flex align-items-center gap-2 flex-wrap",
+        span(class = "header-brand-title", "GEOVISOR PDU ANTA 2024 - 2034")
       ),
-      # Fila 2: Subtítulo territorial institucional
+      # Dependencia institucional completa en dos líneas legibles
       tags$small(
-        class = "header-subtitle d-none d-md-inline-block",
-        "Municipalidad Provincial de Anta • Gerencia de Desarrollo Urbano y Rural — Sub Gerencia de Planeamiento Urbano y Acondicionamiento Territorial"
+        class = "header-subtitle",
+        span("Municipalidad Provincial de Anta • Gerencia de Desarrollo Urbano y Rural"),
+        tags$br(),
+        span("Sub Gerencia de Planeamiento Urbano y Acondicionamiento Territorial")
       )
     )
   ),
@@ -576,41 +573,7 @@ ui <- page_navbar(
       });
     ")),
     tags$style(HTML("
-      .leaflet-container { height: calc(100vh - 78px) !important; width: 100% !important; }
-      @media (max-width: 767.98px) {
-        .leaflet-container {
-          height: calc(100dvh - 66px) !important;
-          height: calc(100vh - 66px) !important;
-          width: 100% !important;
-        }
-      }
-      .nav-link { font-weight: 600; }
-      
-      /* Habilitar scroll vertical en el contenedor de pestañas y páginas de contenido */
-      .tab-content {
-        flex: 1 1 auto !important;
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch;
-      }
-      .tab-pane {
-        height: auto !important;
-        min-height: 100% !important;
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch;
-      }
-      /* El visor del mapa ocupa la pantalla y gestiona su propio canvas */
-      .tab-pane#tab_visor,
-      .tab-pane[data-value='tab_visor'] {
-        height: 100% !important;
-        overflow: hidden !important;
-      }
-      /* El sidebar de consultas debe poder hacer scroll si los controles superan la altura de pantalla */
-      .bslib-sidebar-layout > .sidebar,
-      .bslib-sidebar-layout .sidebar-content {
-        overflow-y: auto !important;
-        max-height: 100% !important;
-        -webkit-overflow-scrolling: touch;
-      }
+      /* El layout responsivo y el scroll se definen en www/custom.css. */
     "))
     )
   ),
