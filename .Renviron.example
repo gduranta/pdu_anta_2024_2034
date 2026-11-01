@@ -32,3 +32,4 @@ PGSSLMODE=prefer
 # Secreto criptográfico de 256 bits para hashing de DNI (Ley N° 29733)
 # Si se deja vacío, el sistema generará automáticamente una clave segura en outputs/.pdu_secret_key
 # PDU_PEPPER_KEY=ANTA_PDU_GDUR_SECRETO_CORPORATIVO_2026
+

@@ -77,3 +77,4 @@ $$ LANGUAGE plpgsql;
 
 COMMENT ON TABLE control_acceso_sesiones IS 'Registro transaccional ACID de cuotas ciudadanas de consulta territorial PDU Anta.';
 COMMENT ON COLUMN control_acceso_sesiones.id_dni_hash IS 'Identificador criptografico seudonimizado (SHA-256 + Salt secreta de 256 bits).';
+

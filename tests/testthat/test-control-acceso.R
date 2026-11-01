@@ -35,3 +35,4 @@ test_that("control de acceso DNI funciona correctamente", {
   expect_equal(cuota3$total_hoy, 2L)
   expect_true(grepl("ha alcanzado el límite diario", cuota3$mensaje))
 })
+
