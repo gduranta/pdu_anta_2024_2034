@@ -32,6 +32,18 @@ if (requireNamespace("pagedown", quietly = TRUE)) {
 }
 
 options(shiny.maxRequestSize = 25 * 1024^2)
+
+# ------------------------------------------------------------------------------
+# BLINDAJE DE CIBERSEGURIDAD SEC-05: POLÍTICAS DE ENMARCADO Y ENCABEZADOS HTTP
+# (Mitigación de Clickjacking CWE-1021 y Restricción de Orígenes CSP)
+# ------------------------------------------------------------------------------
+shinyOptions(
+  httpResponseHeaders = list(
+    "Content-Security-Policy" = "frame-ancestors 'self' https://antapat.github.io https://*.munianta.gob.pe http://localhost:* http://127.0.0.1:*;",
+    "X-Content-Type-Options" = "nosniff",
+    "Referrer-Policy" = "strict-origin-when-cross-origin"
+  )
+)
 source("R/spatial_utils.R", local = TRUE)
 source("R/estilos_territoriales.R", local = TRUE)
 source("R/supabase_utils.R", local = TRUE)
@@ -353,7 +365,80 @@ ui <- page_navbar(
     ),
     tags$head(
       tags$meta(name = "viewport", content = "width=device-width, initial-scale=1, shrink-to-fit=no"),
+      tags$meta(`http-equiv` = "X-Content-Type-Options", content = "nosniff"),
+      tags$meta(name = "referrer", content = "strict-origin-when-cross-origin"),
       tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
+      tags$script(HTML("
+        // ======================================================================
+        // BLINDAJE SEC-05: MITIGACIÓN DE CLICKJACKING Y VALIDACIÓN DE MARCO (CWE-1021)
+        // Garantiza que el GeoVisor solo pueda ser incrustado en el portal oficial de
+        // GitHub Pages (https://antapat.github.io) o en dominios institucionales (*.munianta.gob.pe)
+        // ======================================================================
+        (function() {
+          if (window.self !== window.top) {
+            try {
+              var parentOrigin = '';
+              if (document.referrer) {
+                parentOrigin = (new URL(document.referrer)).origin.toLowerCase();
+              }
+
+              var esAutorizado = false;
+
+              // 1. Origen oficial en GitHub Pages
+              if (parentOrigin === 'https://antapat.github.io') {
+                esAutorizado = true;
+              }
+
+              // 2. Dominios y subdominios institucionales de la Municipalidad Provincial de Anta
+              if (!esAutorizado && (parentOrigin === 'https://munianta.gob.pe' || parentOrigin.endsWith('.munianta.gob.pe'))) {
+                esAutorizado = true;
+              }
+
+              // 3. Entornos locales de desarrollo y pruebas internas autorizadas
+              if (!esAutorizado && (
+                parentOrigin.indexOf('localhost') !== -1 || 
+                parentOrigin.indexOf('127.0.0.1') !== -1
+              )) {
+                esAutorizado = true;
+              }
+
+              // Si el origen NO es autorizado (sitio fraudulento, phishing o tercero no reconocido)
+              if (!esAutorizado) {
+                // Destruir el DOM inmediatamente para evitar captura de datos o clics encubiertos
+                document.documentElement.innerHTML = [
+                  '<div style=\"display:flex;align-items:center;justify-content:center;height:100vh;background:#0F2D24;color:#FFFFFF;font-family:Inter,-apple-system,sans-serif;padding:2rem;text-align:center;\">',
+                    '<div style=\"max-width:580px;background:#174A3A;padding:2.5rem;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.5);border:2px solid #B68A2C;\">',
+                      '<h2 style=\"color:#FDE68A;margin-bottom:1rem;font-size:1.4rem;\">⚠️ Acceso Bloqueado por Seguridad Institucional</h2>',
+                      '<p style=\"color:#E2E8F0;font-size:0.95rem;line-height:1.6;margin-bottom:1.5rem;\">',
+                        'Se ha detectado un intento de incrustación de este GeoVisor en un sitio web no autorizado (<b>' + (parentOrigin ? parentOrigin : 'Origen desconocido / no identificado') + '</b>). ',
+                        'Por protección de sus datos personales (Ley N° 29733) y para prevenir suplantaciones de identidad o ataques de captura de DNI (phishing/clickjacking), el acceso ha sido restringido.',
+                      '</p>',
+                      '<p style=\"color:#94A3B8;font-size:0.85rem;margin-bottom:2rem;\">',
+                        'El GeoVisor Oficial del PDU de Anta únicamente puede ser consultado a través de los canales institucionales de la Municipalidad Provincial de Anta.',
+                      '</p>',
+                      '<a href=\"https://antapat.github.io/pdu_anta_2024_2034/\" target=\"_top\" style=\"display:inline-block;background:#B68A2C;color:#0F2D24;padding:0.75rem 1.5rem;font-weight:700;text-decoration:none;border-radius:6px;font-size:0.9rem;\">',
+                        'Ir al Portal Oficial de la Municipalidad de Anta',
+                      '</a>',
+                    '</div>',
+                  '</div>'
+                ].join('');
+
+                // Forzar escape del marco no autorizado si el navegador lo permite
+                if (window.top) {
+                  window.top.location.href = 'https://antapat.github.io/pdu_anta_2024_2034/';
+                }
+                throw new Error('SEC-05: Acceso enmarcado no autorizado detenido.');
+              }
+            } catch (err) {
+              if (window.top && window.top.location) {
+                try {
+                  window.top.location.href = 'https://antapat.github.io/pdu_anta_2024_2034/';
+                } catch(e) {}
+              }
+            }
+          }
+        })();
+      ")),
     tags$script(HTML("
       function obtenerUbicacionGPS() {
         if (!navigator.geolocation) {
@@ -978,6 +1063,10 @@ server <- function(input, output, session) {
   
   # GPS Móvil desde botón HTML / JS
   observeEvent(input$gps_location_device, {
+    if (!sesion_vigente()) {
+      cerrar_sesion_pdu("tiempo_agotado")
+      return()
+    }
     loc <- input$gps_location_device
     req(loc$lat, loc$lng)
     acc <- round(loc$accuracy, 1)
@@ -1047,6 +1136,10 @@ server <- function(input, output, session) {
   
   # Botón consultar punto manual
   observeEvent(input$btn_consultar_punto, {
+    if (!sesion_vigente()) {
+      cerrar_sesion_pdu("tiempo_agotado")
+      return()
+    }
     tryCatch({
       if (input$tipo_coordenada == "utm") {
         req(input$in_este, input$in_norte)
@@ -1065,6 +1158,10 @@ server <- function(input, output, session) {
   # 2.3 CONSULTA POR POLÍGONO DE PREDIO (INTERSECCIÓN Y ZONIFICACIÓN MÚLTIPLE)
   # ----------------------------------------------------------------------------
   observeEvent(input$btn_consultar_poligono, {
+    if (!sesion_vigente()) {
+      cerrar_sesion_pdu("tiempo_agotado")
+      return()
+    }
     tryCatch({
       modo_activo("poligono")
       punto_actual(NULL)
@@ -1080,6 +1177,7 @@ server <- function(input, output, session) {
       idx_zip <- which(tolower(tools::file_ext(f_df$name)) == "zip")
       if (length(idx_zip) > 0) {
         temp_dir <- tempfile("shp_zip_")
+        on.exit(unlink(temp_dir, recursive = TRUE, force = TRUE), add = TRUE)
         extraer_zip_seguro(f_df$datapath[idx_zip[1]], temp_dir)
         shp_list <- list.files(temp_dir, pattern = "\\.shp$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE)
         if (length(shp_list) > 0) {
@@ -1091,6 +1189,7 @@ server <- function(input, output, session) {
       idx_shp <- which(tolower(tools::file_ext(f_df$name)) == "shp")
       if (is.null(poly_subido) && length(idx_shp) > 0) {
         temp_dir <- tempfile("shp_upload_")
+        on.exit(unlink(temp_dir, recursive = TRUE, force = TRUE), add = TRUE)
         dir.create(temp_dir, showWarnings = FALSE, recursive = TRUE)
         for (k in 1:nrow(f_df)) {
           dest_k <- file.path(temp_dir, basename(f_df$name[k]))
@@ -1140,6 +1239,10 @@ server <- function(input, output, session) {
       
       if (length(lineas) < 3) {
         showNotification("Debe ingresar al menos 3 vértices o subir un archivo Shapefile / GeoJSON válido.", type = "error")
+        return()
+      }
+      if (length(lineas) > 1000) {
+        showNotification("Por seguridad del servidor municipal, el polígono no puede exceder 1,000 vértices.", type = "error")
         return()
       }
       

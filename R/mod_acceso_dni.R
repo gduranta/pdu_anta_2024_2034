@@ -19,11 +19,30 @@ suppressPackageStartupMessages({
   file.path("outputs", "control_acceso_sesiones.rds")
 }
 
-#' Sal criptográfica institucional fija por entorno para evitar ataques de tablas rainbow
+#' Sal criptográfica institucional segura por entorno para evitar ataques de tablas rainbow
 .pdu_salt_secreto <- function() {
   salt_env <- Sys.getenv("PDU_PEPPER_KEY", "")
   if (nzchar(salt_env)) return(salt_env)
-  "ANTA_PDU_GDUR_2024_2034_SECURE_SALT_v1"
+  
+  # Si no hay variable de entorno, usar o generar un secreto criptográfico local persistente (ignorado por Git)
+  ruta_clave_local <- file.path("outputs", ".pdu_secret_key")
+  if (file.exists(ruta_clave_local)) {
+    clave <- tryCatch(readLines(ruta_clave_local, n = 1, warn = FALSE), error = function(e) "")
+    if (nzchar(clave)) return(clave)
+  }
+  
+  # Generar clave secreta criptográfica única de 256 bits para esta instancia municipal
+  dir.create("outputs", showWarnings = FALSE, recursive = TRUE)
+  nueva_clave <- paste0(
+    "ANTA_PDU_",
+    if (requireNamespace("openssl", quietly = TRUE)) {
+      openssl::hex_encode(openssl::rand_bytes(24))
+    } else {
+      paste0(sample(c(letters, LETTERS, 0:9), 32, replace = TRUE), collapse = "")
+    }
+  )
+  tryCatch(writeLines(nueva_clave, ruta_clave_local), error = function(e) NULL)
+  nueva_clave
 }
 
 #' Enmascara el DNI para logs y auditoría según directiva ANPD (R.D. 019-2013-JUS/DGPDP)

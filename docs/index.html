@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>GeoVisor PDU Anta (2024 - 2034) — Municipalidad Provincial de Anta</title>
   
   <!-- Metadatos institucionales y OpenGraph para compartir en WhatsApp, Facebook, etc. -->
@@ -360,6 +362,27 @@
   </main>
 
   <script>
+    // ======================================================================
+    // BLINDAJE SEC-05: PROTECCIÓN ANTI-CLICKJACKING DEL PORTAL GITHUB PAGES (CWE-1021)
+    // Evita que portales externos fraudulentos enmarquen esta página para phishing
+    // ======================================================================
+    if (window.top !== window.self) {
+      try {
+        var parentOrigin = '';
+        if (document.referrer) {
+          parentOrigin = (new URL(document.referrer)).origin.toLowerCase();
+        }
+        var autorizado = parentOrigin.endsWith('.munianta.gob.pe') || parentOrigin === 'https://munianta.gob.pe';
+        if (!autorizado) {
+          window.top.location.href = window.self.location.href;
+        }
+      } catch(e) {
+        if (window.top) {
+          window.top.location.href = window.self.location.href;
+        }
+      }
+    }
+
     // Configuración del Portal GitHub Pages
     const CONFIG = {
       endpointFile: 'server_endpoint.json',

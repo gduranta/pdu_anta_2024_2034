@@ -1,0 +1,45 @@
+# ==============================================================================
+# GEOVISOR DEL PLAN DE DESARROLLO URBANO (PDU) DE ANTA (2024 - 2034)
+# MUNICIPALIDAD PROVINCIAL DE ANTA - GERENCIA DE DESARROLLO URBANO Y RURAL
+#
+# Servicio Systemd para Servidor Municipal Linux (Ubuntu 22.04 / 24.04 LTS)
+# Ubicación: /etc/systemd/system/geovisor-pdu-anta.service
+# Comandos de activación:
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable geovisor-pdu-anta
+#   sudo systemctl start geovisor-pdu-anta
+#   sudo systemctl status geovisor-pdu-anta
+# ==============================================================================
+
+[Unit]
+Description=Servidor Backend GeoVisor PDU Anta (2024 - 2034) - R Shiny
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=shiny
+Group=shiny
+WorkingDirectory=/opt/pdu_anta_2024_2034
+ExecStart=/usr/bin/Rscript /opt/pdu_anta_2024_2034/run_server.R
+Restart=always
+RestartSec=5s
+
+# Límites de seguridad y recursos
+LimitNOFILE=65536
+LimitNPROC=4096
+TimeoutStopSec=30s
+
+# Variables de entorno de producción
+Environment=LANG=es_PE.UTF-8
+Environment=LC_ALL=es_PE.UTF-8
+Environment=R_LIBS_USER=/home/shiny/R/x86_64-pc-linux-gnu-library/4.3
+
+# Sandboxing y endurecimiento de procesos del kernel
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

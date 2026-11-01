@@ -456,6 +456,7 @@
         <li class="doc-nav-item"><a href="#sec5" class="doc-nav-link">5. Opción C: Contenedores Docker</a></li>
         <li class="doc-nav-item"><a href="#sec6" class="doc-nav-link">6. Enlace de Dominio Fijo Municipal</a></li>
         <li class="doc-nav-item"><a href="#sec7" class="doc-nav-link">7. Respaldo y Cumplimiento Legal</a></li>
+        <li class="doc-nav-item"><a href="#sec8" class="doc-nav-link">8. Blindaje de Ciberseguridad (SEC-05)</a></li>
       </ul>
       <button class="btn-imprimir" onclick="window.print()">
         <i class="fa-solid fa-print"></i> Imprimir / Guardar en PDF
@@ -763,6 +764,136 @@ docker run -d --name geovisor-live --restart always -p 3838:3838 geovisor-anta</
           <li><strong>Respaldo de Cartografía:</strong> Copiar la carpeta <code>data/</code> a un disco externo o almacenamiento seguro cada vez que se emita una actualización de la zonificación por Ordenanza Municipal.</li>
           <li><strong>Respaldo de Auditoría:</strong> El archivo <code>outputs/control_acceso.log</code> registra el historial de visitas para estadísticas municipales. Debe archivarse anualmente por la GDUR.</li>
           <li><strong>Actualización de Capas:</strong> Si se aprueba una modificación urbana, solo se reemplazan los archivos Shapefile en <code>data/</code> y se reinicia el servidor R. El visor actualizará instantáneamente las capas sin alterar la configuración del servidor.</li>
+        </ul>
+      </section>
+
+      <!-- Sección 8 -->
+      <section id="sec8" class="section-block">
+        <h2 class="section-title"><i class="fa-solid fa-shield-halved"></i> 8. Blindaje Integral de Ciberseguridad y Mitigación de Vulnerabilidades (SEC-01 a SEC-05)</h2>
+        
+        <p>
+          En el marco del proceso de auditoría y hardening del GeoVisor del PDU de Anta, se implementaron controles técnicos avanzados para neutralizar cinco (5) vectores de riesgo de seguridad, en cumplimiento del marco normativo nacional establecido por el <strong>Centro Nacional de Seguridad Digital (CNSD / PCM)</strong> y la <strong>Ley N° 29733 (Ley de Protección de Datos Personales del Perú)</strong>.
+        </p>
+
+        <!-- Subsección SEC-05 Destacada -->
+        <div style="border: 2px solid #B68A2C; border-radius: 8px; padding: 1.5rem; background: #FFFBEB; margin: 1.5rem 0;">
+          <h3 class="subsection-title" style="color: #92400E; margin-top: 0;">
+            <i class="fa-solid fa-shield-virus"></i> 8.1 Vulnerabilidad SEC-05: Políticas de Enmarcado y Mitigación de Clickjacking (CWE-1021)
+          </h3>
+          
+          <p><strong>El Vector de Ataque y Amenaza:</strong></p>
+          <p>
+            Si el servidor no define de forma estricta las políticas de procedencia de marcos (<code>frame-ancestors</code> en Content Security Policy), portales fraudulentos o actores maliciosos podrían incrustar el GeoVisor en páginas falsas (phishing) mediante etiquetas <code>&lt;iframe&gt;</code>. De esta forma, simularían la imagen institucional de la <strong>Municipalidad Provincial de Anta</strong> para capturar números de DNI de los ciudadanos o realizar ataques de Clickjacking (superposición de elementos transparentes para engañar al usuario).
+          </p>
+
+          <p><strong>Blindaje Implementado en Cuatro (4) Capas Complementarias (Defensa en Profundidad):</strong></p>
+
+          <div style="background: white; border-radius: 6px; padding: 1rem; border-left: 4px solid #10B981; margin-bottom: 1rem;">
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: #174A3A; margin-bottom: 0.4rem;">
+              <i class="fa-solid fa-network-wired"></i> Capa 1: Reverse Proxy Nginx (Archivo Oficial <code>deploy/nginx/geovisor_anta.conf</code>)
+            </h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+              Se inyectan encabezados HTTP estrictos a nivel de protocolo web antes de que cualquier contenido sea transmitido al navegador:
+            </p>
+            <pre style="background: #0F172A; color: #38BDF8; padding: 0.75rem; border-radius: 4px; font-size: 0.82rem; overflow-x: auto;"><code># Restringe la incrustación únicamente al portal de GitHub Pages y subdominios municipales
+add_header Content-Security-Policy "frame-ancestors 'self' https://antapat.github.io https://*.munianta.gob.pe;" always;
+
+# Impide ataques de adivinación de tipo MIME (MIME Sniffing)
+add_header X-Content-Type-Options "nosniff" always;
+
+# Protección de privacidad en el encabezado Referrer
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+# Política de permisos de periféricos (Solo autoriza geolocalización GPS oficial)
+add_header Permissions-Policy "geolocation=(self 'https://antapat.github.io'), microphone=(), camera=()" always;</code></pre>
+          </div>
+
+          <div style="background: white; border-radius: 6px; padding: 1rem; border-left: 4px solid #0284C7; margin-bottom: 1rem;">
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: #0284C7; margin-bottom: 0.4rem;">
+              <i class="fa-solid fa-cloud"></i> Capa 2: Borde Cloudflare Zero Trust (Archivo <code>deploy/cloudflare/config.yml</code>)
+            </h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+              Para la transmisión mediante túnel cifrado (Cloudflare Tunnel), las peticiones provenientes de sitios de terceros no autorizados son filtradas en la red perimetral (Edge) de Cloudflare antes de tocar el servidor municipal.
+            </p>
+          </div>
+
+          <div style="background: white; border-radius: 6px; padding: 1rem; border-left: 4px solid #B68A2C; margin-bottom: 1rem;">
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: #B68A2C; margin-bottom: 0.4rem;">
+              <i class="fa-solid fa-code"></i> Capa 3: Motor R Shiny y Validación Activa de Origen en Cliente (<code>app.R</code> / <code>run_server.R</code>)
+            </h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+              En el propio código de la aplicación se ejecuta una doble salvaguarda:
+            </p>
+            <ul style="font-size: 0.88rem; margin-left: 1.2rem; margin-bottom: 0.5rem;">
+              <li><strong>Encabezados Nativos HTTP en R:</strong> Mediante <code>shinyOptions(httpResponseHeaders = list(...))</code>, el servidor <code>httpuv</code> emite directamente la política de procedencia de marco.</li>
+              <li><strong>Frame Busting Activo en JavaScript:</strong> Si la aplicación se carga dentro de un <code>iframe</code>, un script en <code>tags$head</code> comprueba el origen del documento padre (<code>document.referrer</code>). Si no proviene de <code>antapat.github.io</code> ni <code>*.munianta.gob.pe</code>, destruye de inmediato el DOM (impidiendo mostrar el formulario de DNI o el mapa) y redirige al portal oficial.</li>
+            </ul>
+          </div>
+
+          <div style="background: white; border-radius: 6px; padding: 1rem; border-left: 4px solid #64748B; margin-bottom: 0.5rem;">
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem;">
+              <i class="fa-solid fa-window-maximize"></i> Capa 4: Portal Contenedor en GitHub Pages (<code>docs/index.html</code>)
+            </h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+              El portal institucional en GitHub Pages incorpora defensas anti-enmarcado para asegurar que la propia portada no pueda ser incrustada en portales fraudulentos externos. Si se detecta un intento de enmarcado no autorizado, la página rompe el marco y se abre a pantalla completa oficial (<code>window.top.location.href = window.self.location.href</code>).
+            </p>
+          </div>
+        </div>
+
+        <h3 class="subsection-title">8.2 Matriz Consolidada de Seguridad y Mitigaciones Implementadas</h3>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 100px;">Código</th>
+                <th>Vulnerabilidad Identificada</th>
+                <th style="width: 110px;">Severidad</th>
+                <th>Mitigación Técnica Aplicada en el Código</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>SEC-01</strong></td>
+                <td>Bypass de Control de Acceso en Servidor (CWE-306)</td>
+                <td><span class="badge-doc" style="background:#DC2626; color:white;">Alta</span></td>
+                <td>En <code>app.R</code> se blindaron los eventos reactivos de consulta territorial (<code>gps_location_device</code>, <code>btn_consultar_punto</code>, <code>btn_consultar_poligono</code>) con validación estricta de <code>sesion_vigente()</code>. Si la sesión expiró o no se validó DNI, la consulta se rechaza y se cierra la sesión en el servidor.</td>
+              </tr>
+              <tr>
+                <td><strong>SEC-02</strong></td>
+                <td>Sal Criptográfica Pública y Fija en Código (CWE-327)</td>
+                <td><span class="badge-doc" style="background:#D97706; color:white;">Media</span></td>
+                <td>En <code>R/mod_acceso_dni.R</code> se eliminó la sal estática pública. Ahora se genera dinámicamente un secreto criptográfico único de 256 bits almacenado en <code>outputs/.pdu_secret_key</code> (ignorado por Git) o en variable de entorno <code>PDU_PEPPER_KEY</code>, cumpliendo con la Ley N° 29733.</td>
+              </tr>
+              <tr>
+                <td><strong>SEC-03</strong></td>
+                <td>Agotamiento de Memoria y Fuga de Temporales (CWE-400 / CWE-459)</td>
+                <td><span class="badge-doc" style="background:#D97706; color:white;">Media</span></td>
+                <td>En <code>app.R</code> se implementaron directivas <code>on.exit(unlink(temp_dir, recursive = TRUE, force = TRUE))</code> para borrar inmediatamente los archivos Shapefile subidos y se estableció un límite máximo de 1,000 vértices por polígono para prevenir bloqueos de GEOS.</td>
+              </tr>
+              <tr>
+                <td><strong>SEC-04</strong></td>
+                <td>Exposición de Información en Repositorio Público (CWE-200)</td>
+                <td><span class="badge-doc" style="background:#2563EB; color:white;">Informativa</span></td>
+                <td>Se estableció la arquitectura definitiva de desacoplamiento: en producción, los datos espaciales y el motor R Shiny se alojan exclusivamente en el servidor físico o cloud municipal de la OTI, manteniendo en GitHub Pages únicamente el archivo estático ligero <code>docs/index.html</code>.</td>
+              </tr>
+              <tr>
+                <td><strong>SEC-05</strong></td>
+                <td>Clickjacking y Suplantación en Iframes (CWE-1021)</td>
+                <td><span class="badge-doc" style="background:#DC2626; color:white;">Alta</span></td>
+                <td>Implementación en profundidad de la política <code>frame-ancestors 'self' https://antapat.github.io https://*.munianta.gob.pe;</code> en Nginx, Cloudflare Tunnel, Shiny Server y validación activa de origen en JavaScript con bloqueo instantáneo del DOM.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="subsection-title">8.3 Archivos de Configuración de Seguridad Provistos para la OTI</h3>
+        <p>
+          En la carpeta <code>deploy/</code> del repositorio se han integrado los archivos de configuración listos para producción:
+        </p>
+        <ul>
+          <li><code>deploy/nginx/geovisor_anta.conf</code>: Configuración completa de Nginx con SSL/TLS, WebSockets y encabezados CSP.</li>
+          <li><code>deploy/cloudflare/config.yml</code>: Configuración del agente <code>cloudflared</code> para túnel seguro.</li>
+          <li><code>deploy/systemd/geovisor-pdu-anta.service</code>: Archivo de servicio Linux Systemd con sandboxing y reinicio automático ante fallos.</li>
         </ul>
       </section>
 

@@ -1,0 +1,29 @@
+# ==============================================================================
+# GEOVISOR DEL PLAN DE DESARROLLO URBANO (PDU) DE ANTA (2024 - 2034)
+# MUNICIPALIDAD PROVINCIAL DE ANTA - GERENCIA DE DESARROLLO URBANO Y RURAL
+#
+# Configuración Oficial de Cloudflare Zero Trust Tunnel con Blindaje SEC-05
+# Ubicación en servidor: /etc/cloudflared/config.yml  (o C:\ProgramData\cloudflared\config.yml)
+# ==============================================================================
+
+tunnel: geovisor-pdu-anta-oficial
+credentials-file: /etc/cloudflared/geovisor-pdu-anta-oficial.json
+
+ingress:
+  # 1. Servicio principal hacia el backend Shiny del GeoVisor
+  - hostname: geovisor.munianta.gob.pe
+    service: http://127.0.0.1:3838
+    originRequest:
+      connectTimeout: 30s
+      noTLSVerify: false
+      keepAliveTimeout: 120s
+      # Headers inyectados o validados a través de la red Cloudflare Edge
+
+  # 2. Subdominio alternativo de consulta pública
+  - hostname: pdu.munianta.gob.pe
+    service: http://127.0.0.1:3838
+    originRequest:
+      connectTimeout: 30s
+
+  # 3. Regla por defecto para rechazar tráfico huérfano o no reconocido
+  - service: http_status:404
