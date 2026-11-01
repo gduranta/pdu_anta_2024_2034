@@ -405,12 +405,23 @@
     // Configuración del Portal GitHub Pages
     const CONFIG = {
       endpointFile: 'server_endpoint.json',
-      checkIntervalMs: 15000,
+      checkIntervalMs: 30000,
       timeoutMs: 8000
     };
 
     let serverUrlActual = '';
+    let iframeIniciado = false;
     let intervalTimer = null;
+
+    // Normalizar URLs asegurando protocolo https/http y barra final consistente
+    function normalizarUrl(u) {
+      if (!u) return '';
+      u = u.trim();
+      if (!u.startsWith('http://') && !u.startsWith('https://')) {
+        u = 'https://' + u;
+      }
+      return u.replace(/\/+$/, '') + '/';
+    }
 
     // 1. Obtener parámetro ?server= de la URL si se desea forzar una dirección
     function obtenerParametroUrl(param) {
@@ -434,7 +445,6 @@
       if (esManual) {
         statusDot.className = 'status-dot connecting';
         statusText.textContent = 'Verificando...';
-        estadoSpinner.style.display = 'block';
       }
 
       let urlServidor = obtenerParametroUrl('server');
@@ -463,21 +473,23 @@
         return;
       }
 
-      // Asegurar protocolo HTTPS/HTTP
-      if (!urlServidor.startsWith('http://') && !urlServidor.startsWith('https://')) {
-        urlServidor = 'https://' + urlServidor;
-      }
+      const urlNorm = normalizarUrl(urlServidor);
+      const urlActualNorm = normalizarUrl(serverUrlActual);
 
-      // Si la URL es la misma y ya está cargado el iframe, mantener
-      if (serverUrlActual === urlServidor && geovisorFrame.src === urlServidor) {
+      // CRÍTICO: Si el iframe ya está cargado con esta misma URL y no es actualización manual forzada,
+      // NUNCA recargar el iframe para no interrumpir el ingreso de DNI ni la sesión activa del ciudadano.
+      if (iframeIniciado && urlNorm === urlActualNorm && !esManual) {
         statusDot.className = 'status-dot online';
-        statusText.textContent = 'En Línea';
+        statusText.textContent = 'Servidor en Línea';
+        btnAbrirDirecto.href = urlNorm;
+        btnAbrirDirecto.style.display = 'inline-flex';
         return;
       }
 
-      serverUrlActual = urlServidor;
-      btnAbrirDirecto.href = urlServidor;
+      serverUrlActual = urlNorm;
+      btnAbrirDirecto.href = urlNorm;
       btnAbrirDirecto.style.display = 'inline-flex';
+      iframeIniciado = true;
 
       // Cargar iframe
       statusDot.className = 'status-dot connecting';
@@ -488,7 +500,7 @@
       estadoAviso.style.display = 'none';
       btnReintentar.style.display = 'none';
 
-      geovisorFrame.src = urlServidor;
+      geovisorFrame.src = urlNorm;
       geovisorFrame.onload = function() {
         // Iframe cargado con éxito
         setTimeout(() => {
@@ -500,21 +512,21 @@
 
           statusDot.className = 'status-dot online';
           statusText.textContent = 'Servidor en Línea';
-        }, 1200);
+        }, 800);
       };
 
-      // Control de tiempo límite si el iframe no responde en 15 segundos
+      // Control de tiempo límite si el iframe no responde en 12 segundos
       setTimeout(() => {
-        if (pantallaEstado.style.display !== 'none' && statusText.textContent !== 'Servidor en Línea') {
+        if (pantallaEstado.style.display !== 'none' && iframeIniciado) {
           statusDot.className = 'status-dot online';
-          statusText.textContent = 'En Línea';
+          statusText.textContent = 'Servidor en Línea';
           pantallaEstado.style.opacity = '0';
           setTimeout(() => {
             pantallaEstado.style.display = 'none';
             geovisorFrame.style.display = 'block';
-          }, 400);
+          }, 300);
         }
-      }, 15000);
+      }, 12000);
     }
 
     function marcarServidorFueraDeLinea(titulo, subtitulo) {
@@ -528,6 +540,8 @@
       const btnReintentar = document.getElementById('btn_reintentar');
       const geovisorFrame = document.getElementById('geovisor_frame');
 
+      iframeIniciado = false;
+      serverUrlActual = '';
       statusDot.className = 'status-dot offline';
       statusText.textContent = 'Fuera de Línea';
       
