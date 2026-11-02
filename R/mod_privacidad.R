@@ -76,26 +76,26 @@ mostrar_modal_privacidad <- function(es_inicio = FALSE) {
       tags$p(
         class = "small text-secondary mb-3",
         "El tratamiento de datos es efectuado por la ", tags$b("Municipalidad Provincial de Anta"), " (Casa de la cultura: Avenida los Andes SN - Anta - Anta - Cusco - Perú - 0800, Referencia: Avenida los Andes SN) a través de la ", tags$b("Gerencia de Desarrollo Urbano y Rural (GDUR)"), ". ",
-        "Los datos recabados forman parte del banco de datos institucional ", tags$i("«Usuarios del GeoVisor PDU Anta»"), ", gestionado bajo medidas de seguridad técnicas y organizativas para garantizar su confidencialidad e integridad."
+        "El DNI se utiliza para regular el uso del visor. La fecha de emisión no se contrasta con una fuente oficial y el sistema no verifica identidad. Las geometrías vectoriales del mapa se envían al navegador para su visualización y pueden inspeccionarse desde las herramientas del navegador."
       ),
 
       tags$h6(class = "fw-bold text-success mb-1", icon("database"), " 2. Finalidades Determinadas y Explícitas (Art. 6 Ley 29733)"),
       tags$ul(class = "small text-secondary mb-3",
-        tags$li(tags$b("Control de Acceso Equitativo: "), "Garantizar la disponibilidad del servicio y prevenir la saturación de los servidores mediante un límite de 2 periodos de 10 minutos por día por ciudadano."),
+        tags$li(tags$b("Control de Acceso Equitativo: "), "Garantizar la disponibilidad mediante un límite de uso. Las capas vectoriales se envían al navegador para visualizar el mapa y pueden inspeccionarse con herramientas del navegador."),
         tags$li(tags$b("Generación de Fichas Informativas: "), "Emitir reportes cartográficos preliminares referenciales de zonificación y vías a solicitud expresa del usuario.")
       ),
 
       tags$h6(class = "fw-bold text-success mb-1", icon("list-check"), " 3. Carácter Obligatorio o Facultativo de la Entrega de Datos"),
       tags$ul(class = "small text-secondary mb-3",
-        tags$li(tags$b("Datos Obligatorios para Acceso: "), "El número de DNI y su fecha de emisión son indispensables para verificar la identidad ciudadana y habilitar la sesión temporal. La negativa a suministrarlos impide el acceso al visor web interactivo, pudiendo el ciudadano consultar el PDU de manera presencial en la sede municipal."),
+        tags$li(tags$b("Datos de control de uso: "), "El número de DNI y la fecha de emisión se usan para limitar el tiempo y la frecuencia de uso. El sistema no verifica la identidad con una fuente oficial."),
         tags$li(tags$b("Datos Facultativos: "), "La geolocalización GPS en el mapa es estrictamente voluntaria (Opt-In) y solo se procesa bajo autorización expresa en el navegador para centrar el mapa en la posición actual del usuario.")
       ),
 
       tags$h6(class = "fw-bold text-success mb-1", icon("user-shield"), " 4. Medidas de Seguridad, Protección de Identidad y Plazos de Conservación"),
       tags$ul(class = "small text-secondary mb-3",
-        tags$li(tags$b("Cifrado y Código de Seguridad Irreversible: "), "Los números de DNI nunca se guardan en texto visible; se transforman de manera irreversible en un código de seguridad matemático protegido con una clave secreta del servidor municipal, lo que impide que cualquier persona pueda descifrar o conocer su número de documento."),
-        tags$li(tags$b("Protección de Datos en Registros (Enmascaramiento): "), "Los registros de control del sistema cuidan la privacidad ciudadana ocultando los números intermedios del documento (por ejemplo: 47****15), en estricto cumplimiento de las normas de la Autoridad Nacional de Protección de Datos Personales (Ministerio de Justicia del Perú - MINJUS)."),
-        tags$li(tags$b("Depuración Automática (Plazo de Conservación de 7 Días): "), "Los registros de control de turnos se eliminan automáticamente cada 7 días, cumpliendo con el principio legal de conservación limitada."),
+        tags$li(tags$b("Seudonimización del DNI: "), "El sistema guarda un identificador derivado del DNI mediante una clave secreta para aplicar el límite de uso. Este identificador reduce exposición, pero no equivale a anonimización."),
+        tags$li(tags$b("Protección de registros: "), "Los registros de control solo contienen un DNI seudonimizado y datos técnicos mínimos."),
+        tags$li(tags$b("Conservación limitada: "), "Los registros de uso se purgan después de siete días."),
         tags$li(tags$b("Sin Transferencias ni Fines Comerciales: "), "La plataforma no utiliza cookies publicitarias, no cede datos a terceros y procesa las coordenadas de consulta únicamente durante la sesión activa.")
       ),
 
@@ -230,9 +230,9 @@ mod_privacidad_ui <- function() {
           ),
           tags$p(class = "small text-secondary mb-2", "La plataforma tiene fines estrictamente públicos, informativos y de transparencia en el marco de la vigencia del Plan de Desarrollo Urbano de Anta (2024 - 2034) aprobado por O.M. Nº 04-2025-A-MPA/C y actualizado por O.M. N° 008-2026-A-MPA-C:"),
           tags$ul(class = "small text-secondary mb-0", style = "line-height: 1.7;",
-            tags$li(tags$b("Control de Acceso Equitativo: "), "Garantizar la disponibilidad del servicio y prevenir la saturación de los servidores mediante un límite de 2 periodos de 10 minutos por día por ciudadano."),
+            tags$li(tags$b("Control de Acceso Equitativo: "), "Garantizar la disponibilidad mediante un límite de uso. Las capas vectoriales se envían al navegador para visualizar el mapa y pueden inspeccionarse con herramientas del navegador."),
             tags$li(tags$b("Generación de Fichas Informativas: "), "Emitir reportes cartográficos preliminares referenciales de zonificación y parámetros urbanísticos y edificatorios a solicitud expresa del usuario."),
-            tags$li(tags$b("Transparencia Activa: "), "Poner a disposición ciudadana los planos de zonificación, parámetros urbanísticos y edificatorios según el D.S. N° 012-2022-VIVIENDA.")
+            tags$li(tags$b("Privacidad cartográfica: "), "Las geometrías de las capas vectoriales se envían al navegador para la visualización y pueden inspeccionarse desde las herramientas del navegador.")
           )
         ),
 
@@ -245,7 +245,7 @@ mod_privacidad_ui <- function() {
             tags$h5(class = "fw-bold mb-0 text-dark", "3. Carácter Obligatorio o Facultativo de la Entrega de Datos")
           ),
           tags$ul(class = "small text-secondary mb-0", style = "line-height: 1.7;",
-            tags$li(tags$b("Datos Obligatorios para Acceso: "), "El número de DNI y su fecha de emisión son indispensables para verificar la identidad ciudadana e impedir accesos automatizados (robots). La negativa a suministrarlos impide el acceso al visor web interactivo, pudiendo el ciudadano consultar el PDU de manera presencial en la sede municipal."),
+            tags$li(tags$b("Datos de control de uso: "), "El número de DNI y la fecha de emisión se usan para limitar el tiempo y la frecuencia de uso. El sistema no verifica la identidad con una fuente oficial."),
             tags$li(tags$b("Datos Facultativos (GPS Móvil): "), "La geolocalización GPS en el mapa es estrictamente voluntaria (Opt-In) y solo se procesa bajo autorización expresa en el navegador para centrar el mapa en la posición actual del usuario. Las coordenadas no son almacenadas.")
           )
         ),
@@ -259,9 +259,9 @@ mod_privacidad_ui <- function() {
             tags$h5(class = "fw-bold mb-0 text-dark", "4. Medidas de Seguridad, Protección de Identidad y Plazos de Conservación")
           ),
           tags$ul(class = "small text-secondary mb-0", style = "line-height: 1.7;",
-            tags$li(tags$b("Protección de Identidad y Cifrado Irreversible: "), "Los números de DNI nunca se almacenan en texto visible; se transforman de manera irreversible en un código de seguridad matemático protegido con una clave secreta interna del servidor municipal, impidiendo que cualquier persona o atacante pueda descubrir o descifrar su número de documento."),
-            tags$li(tags$b("Protección en Registros de Auditoría (Enmascaramiento): "), "Los registros de control del sistema cuidan la privacidad ciudadana ocultando los dígitos intermedios del documento (por ejemplo: 47****15), en estricto cumplimiento de las normas de la Autoridad Nacional de Protección de Datos Personales (Ministerio de Justicia del Perú - MINJUS)."),
-            tags$li(tags$b("Depuración Automática (Plazo de Conservación de 7 Días): "), "Los registros de control de turnos se eliminan automáticamente cada 7 días, cumpliendo con el principio de conservación limitada."),
+            tags$li(tags$b("Seudonimización del DNI: "), "El sistema guarda un identificador derivado del DNI mediante una clave secreta para aplicar el límite de uso. Este identificador reduce exposición, pero no equivale a anonimización."),
+            tags$li(tags$b("Protección de registros: "), "Los registros de control solo contienen un DNI seudonimizado y datos técnicos mínimos."),
+            tags$li(tags$b("Conservación limitada: "), "Los registros de uso se purgan después de siete días."),
             tags$li(tags$b("Sin Cookies Comerciales ni Rastreadores: "), "No se emplean cookies publicitarias ni de redes sociales (sin rastreadores externos ni cesión a terceros)."),
             tags$li(tags$b("Consultas de Predios Seguras: "), "Las coordenadas o polígonos consultados por los ciudadanos se procesan únicamente en memoria de sesión y no se asocian a datos comerciales.")
           )

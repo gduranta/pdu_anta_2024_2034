@@ -4,6 +4,10 @@
 .Rproj.user/
 .codex_spreadsheet/
 outputs/
+data_pdu/
+/aprobacion/
+/normativa/
+/docs/server_endpoint.json
 renv/library/
 renv/staging/
 rsconnect/

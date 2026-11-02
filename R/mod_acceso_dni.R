@@ -30,6 +30,20 @@ suppressPackageStartupMessages({
 .pdu_pg_env$intentado <- FALSE
 .pdu_pg_env$activo <- FALSE
 
+# Serializa las operaciones del modo local entre procesos del mismo equipo.
+.pdu_con_archivo_bloqueado <- function(ruta, accion) {
+  dir.create(dirname(ruta), showWarnings = FALSE, recursive = TRUE)
+  lock <- paste0(ruta, ".lock")
+  limite <- Sys.time() + 10
+  repeat {
+    if (dir.create(lock, showWarnings = FALSE)) break
+    if (Sys.time() >= limite) stop("No se pudo adquirir el bloqueo de almacenamiento local.")
+    Sys.sleep(runif(1, 0.025, 0.075))
+  }
+  on.exit(unlink(lock, recursive = TRUE, force = TRUE), add = TRUE)
+  accion()
+}
+
 #' Obtiene o inicializa el pool de conexiones PostgreSQL corporativo (CWE-362 / Transacciones ACID)
 #' @return Conexión pool, conexión DBI o NULL si no está disponible/configurado
 .pdu_postgres_get_pool <- function() {
@@ -72,7 +86,7 @@ suppressPackageStartupMessages({
       dbname_pg <- Sys.getenv("PGDATABASE", Sys.getenv("PDU_PGDATABASE", "geovisor_anta_pdu"))
       user_pg <- Sys.getenv("PGUSER", Sys.getenv("PDU_PGUSER", "postgres"))
       pass_pg <- Sys.getenv("PGPASSWORD", Sys.getenv("PDU_PGPASSWORD", ""))
-      ssl_pg <- Sys.getenv("PGSSLMODE", Sys.getenv("PDU_PGSSLMODE", "prefer"))
+      ssl_pg <- Sys.getenv("PGSSLMODE", Sys.getenv("PDU_PGSSLMODE", "require"))
       
       if (tiene_pool) {
         pool::dbPool(
@@ -100,27 +114,11 @@ suppressPackageStartupMessages({
       }
     }
     
-    # Auto-inicialización del esquema DDL en PostgreSQL si no existe
-    DBI::dbExecute(con_obj, "
-      CREATE TABLE IF NOT EXISTS control_acceso_sesiones (
-        id VARCHAR(64) PRIMARY KEY,
-        id_dni_hash VARCHAR(64) NOT NULL,
-        fecha DATE NOT NULL,
-        hora_inicio TIMESTAMP NOT NULL,
-        duracion_min INTEGER NOT NULL DEFAULT 10,
-        ip_origen VARCHAR(45) DEFAULT 'local',
-        creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    ")
-    DBI::dbExecute(con_obj, "
-      CREATE INDEX IF NOT EXISTS idx_pdu_sesiones_hash_fecha 
-        ON control_acceso_sesiones (id_dni_hash, fecha);
-    ")
-    DBI::dbExecute(con_obj, "
-      CREATE INDEX IF NOT EXISTS idx_pdu_sesiones_fecha 
-        ON control_acceso_sesiones (fecha);
-    ")
-    
+    # Requiere que OTI preaprovisione las tablas. La cuenta de aplicación no
+    # necesita permisos DDL en producción.
+    DBI::dbGetQuery(con_obj, "SELECT 1 FROM control_acceso_sesiones LIMIT 0")
+    DBI::dbGetQuery(con_obj, "SELECT 1 FROM control_acceso_intentos LIMIT 0")
+
     message("Módulo de Seguridad PDU: Conexión PostgreSQL/PostGIS inicializada con éxito (Modo Corporativo ACID).")
     .pdu_pg_env$activo <- TRUE
     con_obj
@@ -145,7 +143,7 @@ pdu_postgres_is_active <- function() {
   salt_env <- Sys.getenv("PDU_PEPPER_KEY", "")
   if (nzchar(salt_env)) return(salt_env)
   
-  # Si no hay variable de entorno, usar o generar un secreto criptográfico local persistente (ignorado por Git)
+  # Si no hay variable de entorno, usar o generar un secreto criptográfico local persistente (ignorado por Git).
   ruta_clave_local <- file.path("outputs", ".pdu_secret_key")
   if (file.exists(ruta_clave_local)) {
     clave <- tryCatch(readLines(ruta_clave_local, n = 1, warn = FALSE), error = function(e) "")
@@ -162,7 +160,10 @@ pdu_postgres_is_active <- function() {
       paste0(sample(c(letters, LETTERS, 0:9), 32, replace = TRUE), collapse = "")
     }
   )
-  tryCatch(writeLines(nueva_clave, ruta_clave_local), error = function(e) NULL)
+  tryCatch({
+    writeLines(nueva_clave, ruta_clave_local)
+    if (.Platform$OS.type == "unix") Sys.chmod(ruta_clave_local, mode = "0600")
+  }, error = function(e) NULL)
   nueva_clave
 }
 
@@ -318,6 +319,112 @@ pdu_acceso_consultar_cuota <- function(dni, ruta_db = .pdu_acceso_db_path()) {
   }
 }
 
+#' Consume una cuota diaria en una operación atómica. FALSE si el DNI agotó su cuota.
+pdu_acceso_intentar_registrar_sesion <- function(dni, duracion_min = 10L,
+                                                  ruta_db = .pdu_acceso_db_path()) {
+  dni_limpio <- trimws(as.character(dni))
+  if (!grepl("^[0-9]{8}$", dni_limpio)) return(FALSE)
+  hoy <- as.character(Sys.Date())
+  hash_dni <- .pdu_pseudonimizar_dni(dni_limpio)
+  nuevo_id <- paste0("SES-", format(Sys.time(), "%y%m%d%H%M%OS6"), "-", sample(1000:9999, 1))
+  pool <- .pdu_postgres_get_pool()
+
+  if (!is.null(pool)) {
+    resultado <- tryCatch(DBI::dbWithTransaction(pool, {
+      DBI::dbGetQuery(pool,
+      "SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))",
+        params = list(hash_dni, hoy))
+      DBI::dbExecute(pool,
+        "DELETE FROM control_acceso_sesiones WHERE fecha < (CURRENT_DATE - INTERVAL '7 days')")
+      n <- DBI::dbGetQuery(pool,
+        "SELECT COUNT(*) AS total FROM control_acceso_sesiones WHERE id_dni_hash = $1 AND fecha = $2",
+        params = list(hash_dni, as.Date(hoy)))$total[1]
+      if (as.integer(n) >= 2L) FALSE else {
+        DBI::dbExecute(pool,
+          "INSERT INTO control_acceso_sesiones (id, id_dni_hash, fecha, hora_inicio, duracion_min, ip_origen) VALUES ($1, $2, $3, $4, $5, $6)",
+          params = list(nuevo_id, hash_dni, as.Date(hoy), Sys.time(), as.integer(duracion_min), "local"))
+        TRUE
+      }
+    }), error = function(e) NULL)
+    if (!is.null(resultado)) return(isTRUE(resultado))
+    # Fallo de base de datos: el control local serializado queda como contingencia.
+  }
+
+  .pdu_con_archivo_bloqueado(ruta_db, function() {
+    bd <- pdu_acceso_leer_bd(ruta_db)
+    hoy_local <- if ("fecha" %in% names(bd)) as.character(bd$fecha) else character()
+    hash_local <- if ("id_dni_hash" %in% names(bd)) as.character(bd$id_dni_hash) else character()
+    if (sum(hoy_local == hoy & hash_local == hash_dni, na.rm = TRUE) >= 2L) return(FALSE)
+    nuevo <- data.frame(id = nuevo_id, id_dni_hash = hash_dni, fecha = hoy,
+      hora_inicio = format(Sys.time(), "%Y-%m-%d %H:%M:%S"), duracion_min = as.integer(duracion_min),
+      ip_origen = "local", stringsAsFactors = FALSE)
+    if (!pdu_acceso_guardar_bd(rbind(bd, nuevo), ruta_db)) stop("No se pudo guardar la sesión.")
+    TRUE
+  })
+}
+
+#' Rate limit persistente y compartido por DNI seudonimizado en el equipo local.
+pdu_acceso_registrar_intento <- function(dni, ruta_db) {
+  llave <- .pdu_pseudonimizar_dni(if (grepl("^[0-9]{8}$", dni)) dni else paste0("invalido:", dni))
+  pool <- .pdu_postgres_get_pool()
+  if (!is.null(pool)) {
+    resultado <- tryCatch(DBI::dbWithTransaction(pool, {
+      DBI::dbExecute(pool, "INSERT INTO control_acceso_intentos(id_dni_hash) VALUES($1) ON CONFLICT DO NOTHING", params = list(llave))
+      row <- DBI::dbGetQuery(pool, "SELECT intentos, ventana_desde, bloqueado_hasta, CURRENT_TIMESTAMP AS ahora FROM control_acceso_intentos WHERE id_dni_hash=$1 FOR UPDATE", params = list(llave))
+      ahora <- as.POSIXct(row$ahora[1], tz = "UTC")
+      inicio <- as.POSIXct(row$ventana_desde[1], tz = "UTC")
+      bloqueado_val <- row$bloqueado_hasta[1]
+      bloqueado <- if (length(bloqueado_val) == 0 || is.na(bloqueado_val)) NULL else as.POSIXct(bloqueado_val, tz = "UTC")
+      if (!is.null(bloqueado) && bloqueado > ahora) return(list(permitido = FALSE, esperar = ceiling(as.numeric(difftime(bloqueado, ahora, units = "secs")))))
+      n <- if (difftime(ahora, inicio, units = "secs") > 600 || (!is.null(bloqueado) && bloqueado <= ahora)) 1L else as.integer(row$intentos[1]) + 1L
+      bloqueado_nuevo <- if (n > 20L) ahora + 600 else NULL
+      DBI::dbExecute(pool, "UPDATE control_acceso_intentos SET intentos=$1, ventana_desde=$2, bloqueado_hasta=$3 WHERE id_dni_hash=$4", params = list(n, if(n == 1L) ahora else inicio, bloqueado_nuevo, llave))
+      list(permitido = n <= 20L, esperar = if(n > 20L) 600L else 0L)
+    }), error = function(e) NULL)
+    if (!is.null(resultado)) return(resultado)
+  }
+  archivo <- paste0(ruta_db, ".rate.rds")
+  .pdu_con_archivo_bloqueado(archivo, function() {
+    ahora <- as.numeric(Sys.time())
+    estado <- if (file.exists(archivo)) tryCatch(readRDS(archivo), error = function(e) list()) else list()
+    item <- estado[[llave]] %||% list(veces = numeric(), bloqueado_hasta = 0)
+    item$veces <- item$veces[item$veces > ahora - 600]
+    if (item$bloqueado_hasta > ahora) {
+      estado[[llave]] <- item
+      saveRDS(estado, archivo)
+      return(list(permitido = FALSE, esperar = ceiling(item$bloqueado_hasta - ahora)))
+    }
+    item$veces <- c(item$veces, ahora)
+    if (length(item$veces) > 20L) item$bloqueado_hasta <- ahora + 600
+    estado[[llave]] <- item
+    saveRDS(estado, archivo)
+    list(permitido = item$bloqueado_hasta <= ahora,
+         esperar = max(0L, ceiling(item$bloqueado_hasta - ahora)))
+  })
+}
+
+pdu_acceso_registrar_fallo <- function(dni, ruta_db) {
+  llave <- .pdu_pseudonimizar_dni(if (grepl("^[0-9]{8}$", dni)) dni else paste0("invalido:", dni))
+  pool <- .pdu_postgres_get_pool()
+  if (!is.null(pool)) {
+    ok <- tryCatch({
+      DBI::dbExecute(pool, "INSERT INTO control_acceso_intentos(id_dni_hash, intentos) VALUES($1,1) ON CONFLICT(id_dni_hash) DO UPDATE SET intentos=CASE WHEN control_acceso_intentos.ventana_desde < CURRENT_TIMESTAMP - INTERVAL '10 minutes' OR control_acceso_intentos.bloqueado_hasta < CURRENT_TIMESTAMP THEN 1 ELSE control_acceso_intentos.intentos+1 END, ventana_desde=CASE WHEN control_acceso_intentos.ventana_desde < CURRENT_TIMESTAMP - INTERVAL '10 minutes' OR control_acceso_intentos.bloqueado_hasta < CURRENT_TIMESTAMP THEN CURRENT_TIMESTAMP ELSE control_acceso_intentos.ventana_desde END, bloqueado_hasta=CASE WHEN control_acceso_intentos.intentos+1 > 20 THEN CURRENT_TIMESTAMP + INTERVAL '10 minutes' ELSE NULL END", params = list(llave))
+      TRUE
+    }, error = function(e) FALSE)
+    if (ok) return(invisible(TRUE))
+  }
+  archivo <- paste0(ruta_db, ".rate.rds")
+  .pdu_con_archivo_bloqueado(archivo, function() {
+    ahora <- as.numeric(Sys.time())
+    estado <- if (file.exists(archivo)) tryCatch(readRDS(archivo), error = function(e) list()) else list()
+    item <- estado[[llave]] %||% list(veces = numeric(), bloqueado_hasta = 0)
+    item$veces <- c(item$veces[item$veces > ahora - 600], ahora)
+    if (length(item$veces) > 20L) item$bloqueado_hasta <- ahora + 600
+    estado[[llave]] <- item
+    saveRDS(estado, archivo)
+  })
+}
+
 #' Registra el inicio de una nueva sesión de 10 minutos de forma seudonimizada
 pdu_acceso_registrar_sesion <- function(dni, fecha_emision_str = NULL, duracion_min = 10L, ip = "local", ruta_db = .pdu_acceso_db_path()) {
   hoy <- as.character(Sys.Date())
@@ -366,14 +473,7 @@ pdu_acceso_registrar_sesion <- function(dni, fecha_emision_str = NULL, duracion_
   }
   
   # Log de auditoría con enmascaramiento estricto de PII (Directiva ANPD R.D. 019-2013-JUS/DGPDP)
-  tryCatch({
-    cat(
-      sprintf("[%s] INGRESO_VALIDADO DNI_ENMASCARADO=%s ID_SESION=%s FECHA=%s MOTOR=%s\n", 
-              ahora, dni_mascara, nuevo_id, hoy, if (isTRUE(guardado_pg)) "POSTGRESQL" else "LOCAL_RDS"),
-      file = file.path("outputs", "control_acceso.log"),
-      append = TRUE
-    )
-  }, error = function(e) NULL)
+  # No se escribe log adicional con DNI, fecha, IP o identificadores de sesión.
   
   nuevo_id
 }
@@ -630,7 +730,7 @@ mod_acceso_dni_server <- function(id = "acceso", input, output, session, on_logi
   segundos_restantes <- reactiveVal(600L) # 10 minutos = 600 segundos
   captcha_actual <- reactiveVal(pdu_acceso_generar_captcha())
   
-  # Control de tasa de intentos y protección anti-fuerza bruta (OWASP / NIST SP 800-63B)
+  # Rate limiting persistente compartido entre conexiones e instancias.
   intentos_fallidos <- reactiveVal(0L)
   bloqueado_hasta <- reactiveVal(Sys.time() - 1)
   
@@ -675,18 +775,18 @@ mod_acceso_dni_server <- function(id = "acceso", input, output, session, on_logi
     dni_in <- trimws(as.character(input$in_valida_dni %||% ""))
     fecha_in <- trimws(as.character(input$in_valida_fecha_emision %||% ""))
     captcha_in <- toupper(trimws(as.character(input$in_valida_captcha %||% "")))
-    
-    # 0. Verificar si la sesión está en enfriamiento por intentos fallidos
-    ahora_t <- Sys.time()
-    if (ahora_t < bloqueado_hasta()) {
-      seg_restantes <- ceiling(as.numeric(difftime(bloqueado_hasta(), ahora_t, units = "secs")))
+
+    denegar <- function(msg, segundos = 60L) {
       nuevo_c <- pdu_acceso_generar_captcha()
       captcha_actual(nuevo_c)
-      mostrar_modal_validacion_dni(
-        captcha_val = nuevo_c,
-        error_msg = sprintf("Por motivos de seguridad ante múltiples intentos fallidos, el acceso está pausado temporalmente. Reintente en %d segundos.", seg_restantes),
-        dni_previo = dni_in
-      )
+      mostrar_modal_validacion_dni(captcha_val = nuevo_c,
+        error_msg = sprintf("%s. Reintente en %d segundos.", msg, segundos), dni_previo = dni_in)
+    }
+    # 0. Aplicar control de tasa compartido antes de procesar credenciales.`r`n    # Límite compartido entre sesiones del mismo proceso/equipo, por IP y DNI seudonimizado.
+    rate <- tryCatch(pdu_acceso_registrar_intento(dni_in, ruta_db = .pdu_acceso_db_path()), error = function(e) NULL)
+    if (is.null(rate) || !isTRUE(rate$permitido)) {
+      esperar <- if (is.null(rate)) 60L else rate$esperar
+      denegar("Demasiados intentos", esperar)
       return()
     }
     
@@ -716,12 +816,14 @@ mod_acceso_dni_server <- function(id = "acceso", input, output, session, on_logi
     
     # 1. Validar Captcha
     if (!nzchar(captcha_in) || captcha_in != captcha_actual()) {
+      pdu_acceso_registrar_fallo(dni_in, .pdu_acceso_db_path())
       manejar_error("Código de seguridad incorrecto. Ingrese los caracteres mostrados en el recuadro.")
       return()
     }
     
     # 2. Validar DNI (exactamente 8 dígitos)
     if (!grepl("^[0-9]{8}$", dni_in)) {
+      pdu_acceso_registrar_fallo(dni_in, .pdu_acceso_db_path())
       manejar_error("El número de DNI debe contener exactamente 8 dígitos numéricos.")
       return()
     }
@@ -736,27 +838,28 @@ mod_acceso_dni_server <- function(id = "acceso", input, output, session, on_logi
       m <- as.integer(partes[2])
       y <- as.integer(partes[3])
       if (!is.na(d) && !is.na(m) && !is.na(y)) {
-        if (d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1990 && y <= as.integer(format(Sys.Date(), "%Y"))) {
-          fecha_valida <- TRUE
-        }
+        fecha_parseada <- suppressWarnings(as.Date(sprintf("%04d-%02d-%02d", y, m, d)))
+        fecha_valida <- !is.na(fecha_parseada) && format(fecha_parseada, "%d/%m/%Y") == sprintf("%02d/%02d/%04d", d, m, y) && y >= 1990 && fecha_parseada <= Sys.Date()
       }
     }
     
     if (!fecha_valida) {
+      pdu_acceso_registrar_fallo(dni_in, .pdu_acceso_db_path())
       manejar_error("Fecha de emisión no válida. Ingrese una fecha en formato dd/mm/aaaa (ejemplo: 12/04/2021).")
       return()
     }
     
     # 4. Validar Cuota Diaria (Máximo 2 sesiones de 10 min por día)
     cuota <- pdu_acceso_consultar_cuota(dni_in)
-    if (!cuota$permitido) {
-      manejar_error(cuota$mensaje, cuota_bloqueada = TRUE)
-      return()
-    }
+    if (!cuota$permitido) { denegar(cuota$mensaje, 86400L); return() }
     
     # REGISTRO EXITOSO: Resetear intentos fallidos, guardar sesión y activar temporizador
     intentos_fallidos(0L)
-    pdu_acceso_registrar_sesion(dni = dni_in, fecha_emision_str = fecha_in, duracion_min = 10L)
+    registro_ok <- tryCatch(pdu_acceso_intentar_registrar_sesion(dni_in, duracion_min = 10L), error = function(e) FALSE)
+    if (!isTRUE(registro_ok)) {
+      denegar("No fue posible iniciar la sesión o ya alcanzó el límite diario", 5L)
+      return()
+    }
     dni_actual(dni_in)
     segundos_restantes(600L) # Reiniciar a 10 minutos (600s)
     sesion_activa(TRUE)

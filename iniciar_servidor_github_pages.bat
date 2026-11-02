@@ -8,6 +8,7 @@ echo  Municipalidad Provincial de Anta
 echo ==============================================================================
 echo.
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0iniciar_servidor_github_pages.ps1"
+echo ERROR: El tunel publico fue deshabilitado porque las capas del visor son privadas.
+echo Inicie el visor solo en la red local con iniciar_servidor_online.bat.
 
 pause

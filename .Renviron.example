@@ -16,20 +16,21 @@ PDU_DATA_SOURCE=local
 # ------------------------------------------------------------------------------
 # Modo de almacenamiento de sesiones (auto | postgres | local)
 # Si es 'auto', se activará PostgreSQL en cuanto se definan las credenciales
-PDU_DB_BACKEND=auto
+PDU_DB_BACKEND=local
 
 # Credenciales de conexión directa al servidor PostgreSQL municipal
-PGHOST=localhost
+# Complete estos campos solo si PDU_DB_BACKEND=postgres.
+PGHOST=127.0.0.1
 PGPORT=5432
 PGDATABASE=geovisor_anta_pdu
 PGUSER=pdu_app_user
-PGPASSWORD=CambiarClaveSegura2026!
-PGSSLMODE=prefer
+PGPASSWORD=
+PGSSLMODE=require
 
 # Alternativa: Conexión mediante URI unificada (ej. Supabase o servicio Cloud)
-# DATABASE_URL=postgresql://pdu_app_user:CambiarClaveSegura2026!@localhost:5432/geovisor_anta_pdu
+# DATABASE_URL=postgresql://pdu_app_user:SECRETO@localhost:5432/geovisor_anta_pdu?sslmode=require
 
-# Secreto criptográfico de 256 bits para hashing de DNI (Ley N° 29733)
-# Si se deja vacío, el sistema generará automáticamente una clave segura en outputs/.pdu_secret_key
-# PDU_PEPPER_KEY=ANTA_PDU_GDUR_SECRETO_CORPORATIVO_2026
+# Secreto criptográfico para hashing de DNI (configurar solo fuera de Git)
+# Si se deja vacío, se genera una clave local persistente en outputs/.pdu_secret_key.
+# PDU_PEPPER_KEY=GENERAR_SECRETO_ALEATORIO_DE_32_BYTES_O_MAS
 

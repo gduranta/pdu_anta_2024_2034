@@ -40,3 +40,22 @@ test_that("el control de cuotas limita a exactamente 2 periodos por dia por DNI"
   expect_false(pdu_acceso_consultar_cuota("123", ruta_db = tmp_db)$permitido)
   expect_false(pdu_acceso_consultar_cuota("1234567A", ruta_db = tmp_db)$permitido)
 })
+
+test_that("el registro atomico no permite consumir mas de dos cuotas", {
+  dni_prueba <- "88776655"
+  tmp_db <- tempfile(fileext = ".rds")
+  on.exit(unlink(c(tmp_db, paste0(tmp_db, ".lock")), force = TRUE), add = TRUE)
+  expect_true(pdu_acceso_intentar_registrar_sesion(dni_prueba, ruta_db = tmp_db))
+  expect_true(pdu_acceso_intentar_registrar_sesion(dni_prueba, ruta_db = tmp_db))
+  expect_false(pdu_acceso_intentar_registrar_sesion(dni_prueba, ruta_db = tmp_db))
+})
+
+test_that("los intentos de validacion comparten el bloqueo local", {
+  dni_prueba <- "77665544"
+  tmp_db <- tempfile(fileext = ".rds")
+  on.exit(unlink(c(paste0(tmp_db, ".rate.rds"), paste0(tmp_db, ".rate.rds.lock")), force = TRUE), add = TRUE)
+  for (i in seq_len(20)) expect_true(pdu_acceso_registrar_intento(dni_prueba, tmp_db)$permitido)
+  resultado <- pdu_acceso_registrar_intento(dni_prueba, tmp_db)
+  expect_false(resultado$permitido)
+  expect_gt(resultado$esperar, 0)
+})

@@ -6,6 +6,8 @@
 -- Módulo Corporativo de Control de Acceso y Gestión de Cuotas (CWE-362)
 -- Ubicación: deploy/postgres/init_pdu_sesiones.sql
 -- Ejecución: psql -U postgres -d geovisor_anta_pdu -f init_pdu_sesiones.sql
+-- Cree previamente el rol en psql: CREATE ROLE pdu_app_user LOGIN; luego
+-- ejecute \password pdu_app_user para establecer un secreto aleatorio.
 -- ==============================================================================
 
 -- 1. Crear Base de Datos Institucional (opcional si ya existe)
@@ -16,13 +18,8 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
 
 -- 3. Crear Usuario Institucional con Principio de Menor Privilegio
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'pdu_app_user') THEN
-    CREATE ROLE pdu_app_user WITH LOGIN PASSWORD 'CambiarClaveSegura2026!';
-  END IF;
-END
-$$;
+-- No se crea una credencial de aplicación en este archivo; el secreto se configura
+-- fuera del repositorio en el entorno del servicio.
 
 -- 4. Tabla Transaccional de Sesiones de Acceso Ciudadano
 -- Cumplimiento: Ley N° 29733 (Sin almacenamiento de DNI en texto claro)
@@ -43,10 +40,25 @@ CREATE INDEX IF NOT EXISTS idx_pdu_sesiones_hash_fecha
 CREATE INDEX IF NOT EXISTS idx_pdu_sesiones_fecha 
     ON control_acceso_sesiones (fecha);
 
+-- Cuenta por DNI y fecha para serializar el consumo concurrente de la cuota.
+CREATE TABLE IF NOT EXISTS control_acceso_cuotas (
+    id_dni_hash VARCHAR(64) NOT NULL,
+    fecha DATE NOT NULL,
+    sesiones INTEGER NOT NULL DEFAULT 0 CHECK (sesiones BETWEEN 0 AND 2),
+    PRIMARY KEY (id_dni_hash, fecha)
+);
+CREATE TABLE IF NOT EXISTS control_acceso_intentos (
+    id_dni_hash VARCHAR(64) PRIMARY KEY,
+    intentos INTEGER NOT NULL DEFAULT 0,
+    ventana_desde TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    bloqueado_hasta TIMESTAMP
+);
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE control_acceso_intentos TO pdu_app_user;
+
 -- 6. Asignar Permisos Restringidos a la Aplicación Shiny
 GRANT CONNECT ON DATABASE geovisor_anta_pdu TO pdu_app_user;
 GRANT USAGE ON SCHEMA public TO pdu_app_user;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE control_acceso_sesiones TO pdu_app_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE control_acceso_sesiones, control_acceso_intentos TO pdu_app_user;
 
 -- 7. Vista Institucional para Auditoría Anónima de la GDUR
 CREATE OR REPLACE VIEW vista_estadisticas_acceso_pdu AS

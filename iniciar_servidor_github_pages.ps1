@@ -3,6 +3,8 @@ param(
     [switch]$SinGitPush
 )
 
+throw "Este script de túnel público está deshabilitado: el visor contiene capas privadas. Inicie el servicio en la LAN con Rscript run_server.R y proxy municipal."
+
 $raiz = Split-Path -Parent $MyInvocation.MyCommand.Definition
 Set-Location $raiz
 
@@ -37,9 +39,10 @@ if ($rscriptCmd -eq "Rscript.exe") {
     if ($rFound) { $rscriptCmd = $rFound }
 }
 
-# 3. Iniciar R Shiny en segundo plano (host 0.0.0.0 para red local y tunel)
+# 3. Iniciar R Shiny en loopback; el túnel es el único acceso remoto previsto.
 Write-Host "[1/3] Iniciando motor del GeoVisor en puerto $Puerto..." -ForegroundColor Cyan
 $runServerScript = Join-Path $raiz "run_server.R"
+$env:PDU_SHINY_HOST = "127.0.0.1"
 $rProcess = Start-Process -FilePath $rscriptCmd -ArgumentList $runServerScript -PassThru -NoNewWindow
 
 Start-Sleep -Seconds 3
@@ -97,7 +100,9 @@ if ([string]::IsNullOrEmpty($urlPublica)) {
     [System.IO.File]::WriteAllText($endpointFile, $jsonContent, [System.Text.Encoding]::UTF8)
     Write-Host "[3/3] Archivo docs\server_endpoint.json actualizado." -ForegroundColor Green
 
-    # 6. Sincronizar con GitHub si no se indico -SinGitPush
+# 6. No publicar URL dinámica: GitHub Pages es una máscara sin acceso al servidor.
+throw "No se publican URLs de túnel en GitHub Pages. El servidor está configurado para la red local únicamente."
+# 6. Sincronizar con GitHub si no se indico -SinGitPush (deshabilitado)
     if (-not $SinGitPush) {
         $cambios = git status --porcelain docs/server_endpoint.json
         if ($cambios) {

@@ -40,9 +40,11 @@ options(shiny.sanitize.errors = TRUE) # Blindaje CWE-209: Oculta stack traces y 
 # ------------------------------------------------------------------------------
 shinyOptions(
   httpResponseHeaders = list(
-    "Content-Security-Policy" = "frame-ancestors 'self' https://antapat.github.io https://*.munianta.gob.pe http://localhost:* http://127.0.0.1:*;",
+    "Content-Security-Policy" = "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://server.arcgisonline.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' ws: wss: https://*.tile.openstreetmap.org https://server.arcgisonline.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://antapat.github.io https://*.munianta.gob.pe http://localhost:* http://127.0.0.1:*;",
     "X-Content-Type-Options" = "nosniff",
-    "Referrer-Policy" = "strict-origin-when-cross-origin"
+    "Referrer-Policy" = "strict-origin-when-cross-origin",
+    "Permissions-Policy" = "geolocation=(self), camera=(), microphone=(), payment=()",
+    "Cache-Control" = "no-store"
   )
 )
 source("R/spatial_utils.R", local = TRUE)
@@ -62,10 +64,6 @@ source("R/mod_catalogo_zonas.R", local = TRUE)
 # ------------------------------------------------------------------------------
 # 0. CARGA DE DATOS LOCALES O SUPABASE/POSTGIS Y CONSTANTES
 # ------------------------------------------------------------------------------
-if (dir.exists("aprobacion")) {
-  shiny::addResourcePath("aprobacion", normalizePath("aprobacion"))
-}
-
 datos_pdu <- datos_supabase <- pdu_cargar_datos()
 ambito_disponible <- nrow(datos_supabase$capas$ambito) > 0
 if (!is.null(datos_supabase$aviso)) message(datos_supabase$aviso)
@@ -121,120 +119,71 @@ mapa_pdu_compartido <- local({
       
 
       
-      # 2. Ámbito PDU (color rojo resaltante para máxima visibilidad)
+      # Capas vectoriales del visor.
       addPolygons(
-        data = capas_mapa$ambito,
-        group = "Ámbito PDU Anta",
-        fillColor = "#FFCDD2",
-        fillOpacity = 0.08,
-        color = "#D32F2F",
-        weight = 3.5,
-        opacity = 1.0,
-        dashArray = "8, 5",
+        data = capas_mapa$ambito, group = "Ámbito PDU Anta",
+        fillColor = "#FFCDD2", fillOpacity = 0.08, color = "#D32F2F",
+        weight = 3.5, opacity = 1, dashArray = "8, 5",
         label = ~paste("Ámbito PDU Anta -", NOM_AI)
       ) %>%
-      
-      # 3. Servidumbre Alta Tensión
       addPolygons(
-        data = capas_mapa$alta_tension_buffer,
-        group = "Servidumbre Alta Tensión",
-        fillColor = "#D6A43A",
-        fillOpacity = 0.24,
-        color = "#A23E3A",
-        weight = 0.9,
+        data = capas_mapa$alta_tension_buffer, group = "Servidumbre Alta Tensión",
+        fillColor = "#D6A43A", fillOpacity = 0.24, color = "#A23E3A", weight = 0.9,
         label = ~paste("Faja de Servidumbre Eléctrica:", TENS_NOMIN, "kV"),
         popup = ~paste0(
           "<div style='font-size:12px; font-family:Inter, sans-serif; min-width:210px;'>",
           "<div style='background:#A23E3A; color:white; padding:5px 8px; font-weight:bold; border-radius:4px 4px 0 0;'>FAJA DE SERVIDUMBRE ELÉCTRICA</div>",
-          "<div style='padding:6px;'>",
-          "<b>Nivel de Tensión:</b> ", htmltools::htmlEscape(TENS_NOMIN), " kV<br>",
+          "<div style='padding:6px;'><b>Nivel de Tensión:</b> ", htmltools::htmlEscape(TENS_NOMIN), " kV<br>",
           "<b>Empresa:</b> ", htmltools::htmlEscape(NOM_EMPRES), "<br>",
           "<div style='margin-top:4px; font-size:11px; color:#A23E3A; font-weight:600;'>Área con restricción de edificación (CNE)</div>",
           "</div></div>"
         )
       ) %>%
-      
-      # 4. Líneas Alta Tensión
       addPolylines(
-        data = capas_mapa$alta_tension,
-        group = "Líneas de Alta Tensión",
-        color = "#A23E3A",
-        weight = 1.8,
-        opacity = 0.85,
-        dashArray = "8, 5",
+        data = capas_mapa$alta_tension, group = "Líneas de Alta Tensión",
+        color = "#A23E3A", weight = 1.8, opacity = 0.85, dashArray = "8, 5",
         label = ~paste("Línea AT:", NOM_EMPRES, "-", TENS_NOMIN),
         popup = ~paste0(
           "<div style='font-size:12px; font-family:Inter, sans-serif; min-width:210px;'>",
           "<div style='background:#A23E3A; color:white; padding:5px 8px; font-weight:bold; border-radius:4px 4px 0 0;'>LÍNEA DE ALTA TENSIÓN</div>",
-          "<div style='padding:6px;'>",
-          "<b>Línea:</b> ", htmltools::htmlEscape(NOM_LINEA), "<br>",
+          "<div style='padding:6px;'><b>Línea:</b> ", htmltools::htmlEscape(NOM_LINEA), "<br>",
           "<b>Empresa:</b> ", htmltools::htmlEscape(NOM_EMPRES), "<br>",
-          "<b>Tensión:</b> ", htmltools::htmlEscape(TENS_NOMIN), " kV",
-          "</div></div>"
+          "<b>Tensión:</b> ", htmltools::htmlEscape(TENS_NOMIN), " kV</div></div>"
         )
       ) %>%
-      
-      # 5. Servidumbre Ferrocarril
       addPolygons(
-        data = capas_mapa$ferrocarril_buffer,
-        group = "Zona de influencia del ferrocarril",
-        fillColor = "#8B7AA8",
-        fillOpacity = 0.20,
-        color = "#6B5A88",
-        weight = 0.9,
+        data = capas_mapa$ferrocarril_buffer, group = "Zona de influencia del ferrocarril",
+        fillColor = "#8B7AA8", fillOpacity = 0.20, color = "#6B5A88", weight = 0.9,
         label = ~"Zona de influencia del ferrocarril (15 m por lado; requiere verificación sectorial)",
         popup = ~paste0(
           "<div style='font-size:12px; font-family:Inter, sans-serif; min-width:220px;'>",
           "<div style='background:#6B5A88; color:white; padding:5px 8px; font-weight:bold; border-radius:4px 4px 0 0;'>ZONA DE INFLUENCIA DEL FERROCARRIL</div>",
-          "<div style='padding:6px;'>",
-          "<b>Faja de Seguridad:</b> 15 m por lado respecto al eje.<br>",
+          "<div style='padding:6px;'><b>Faja de Seguridad:</b> 15 m por lado respecto al eje.<br>",
           "<b>Normativa:</b> D.S. 032-2005-MTC.<br>",
-          "<div style='margin-top:4px; font-size:11px; color:#6B5A88;'>Verificar derecho de vía con el MTC y concesionario.</div>",
-          "</div></div>"
+          "<div style='margin-top:4px; font-size:11px; color:#6B5A88;'>Verificar derecho de vía con el MTC y concesionario.</div></div></div>"
         )
       ) %>%
-      
-      # 6. Vía Férrea
       addPolylines(
-        data = capas_mapa$ferrocarril,
-        group = "Vía Férrea (Tren)",
-        color = "#3F4844",
-        weight = 2.1,
-        opacity = 0.88,
-        dashArray = "7, 5",
+        data = capas_mapa$ferrocarril, group = "Vía Férrea (Tren)",
+        color = "#3F4844", weight = 2.1, opacity = 0.88, dashArray = "7, 5",
         label = ~paste("Ferrocarril:", NOM_FERR, "-", TRAMO_FERR),
         popup = ~paste0(
           "<div style='font-size:12px; font-family:Inter, sans-serif; min-width:200px;'>",
           "<div style='background:#3F4844; color:white; padding:5px 8px; font-weight:bold; border-radius:4px 4px 0 0;'>RED FERROVIARIA</div>",
-          "<div style='padding:6px;'>",
-          "<b>Ferrocarril:</b> ", htmltools::htmlEscape(NOM_FERR), "<br>",
+          "<div style='padding:6px;'><b>Ferrocarril:</b> ", htmltools::htmlEscape(NOM_FERR), "<br>",
           "<b>Tramo:</b> ", htmltools::htmlEscape(TRAMO_FERR), "<br>",
-          "<b>Administrador:</b> ", htmltools::htmlEscape(ADM_FERR),
-          "</div></div>"
+          "<b>Administrador:</b> ", htmltools::htmlEscape(ADM_FERR), "</div></div>"
         )
       ) %>%
-      
-      # 7. Zonificación PDU
       addPolygons(
-        data = capas_mapa$zonificacion,
-        group = "Zonificación PDU",
-        fillColor = ~COLOR_MAPA,
-        fillOpacity = 0.60,
-        color = ~COLOR_MAPA,
-        opacity = 0.88,
-        weight = 0.8,
-        label = ~paste0(COD_S_ZONA, ": ", NOMBRE_COMPLETO),
-        popup = ~POPUP_MAPA,
+        data = capas_mapa$zonificacion, group = "Zonificación PDU",
+        fillColor = ~COLOR_MAPA, fillOpacity = 0.60, color = ~COLOR_MAPA,
+        opacity = 0.88, weight = 0.8,
+        label = ~paste0(COD_S_ZONA, ": ", NOMBRE_COMPLETO), popup = ~POPUP_MAPA,
         highlightOptions = highlightOptions(
-          weight = 2.2,
-          color = "#F1C75B",
-          fillOpacity = 0.82,
-          bringToFront = FALSE
+          weight = 2.2, color = "#F1C75B", fillOpacity = 0.82, bringToFront = FALSE
         )
       ) %>%
-      
-
-      
       addEasyButton(easyButton(
         icon = "fa-crosshairs", title = "Mi Ubicación Actual (GPS)",
         position = "topleft",
@@ -252,11 +201,7 @@ mapa_pdu_compartido <- local({
       
       addLayersControl(
         baseGroups = c("OpenStreetMap", "Satélite", "Topográfico"),
-        overlayGroups = c(
-          "Zonificación PDU", "Ámbito PDU Anta",
-          "Servidumbre Alta Tensión", "Líneas de Alta Tensión",
-          "Zona de influencia del ferrocarril", "Vía Férrea (Tren)"
-        ),
+        overlayGroups = c("Zonificación PDU", "Ámbito PDU Anta", "Servidumbre Alta Tensión", "Líneas de Alta Tensión", "Zona de influencia del ferrocarril", "Vía Férrea (Tren)"),
         options = layersControlOptions(collapsed = TRUE)
       ) %>%
       
@@ -310,6 +255,8 @@ mapa_pdu_compartido <- local({
       unname(zonif_bbox["ymax"]), unname(zonif_bbox["xmax"])
       ))
 })
+
+# Renderizado raster del visor retirado durante la restauración del flujo estable.
 
 # ------------------------------------------------------------------------------
 # 1. INTERFAZ DE USUARIO (UI)
@@ -977,6 +924,7 @@ server <- function(input, output, session) {
         lat2 = unname(zonif_bb["ymax"])
       )
   }, once = TRUE)
+
   
   # ----------------------------------------------------------------------------
   # 2.2 CONSULTAS PUNTUALES Y EVENTO GPS
@@ -1030,8 +978,8 @@ server <- function(input, output, session) {
         label = paste0("Punto consultado", if (!is.null(precision)) paste0(" (Precisión: ±", precision, " m)") else "")
       ) %>%
       setView(lng = lng, lat = lat, zoom = if (!is.null(precision) && precision > 150) 15 else 17)
-      
-    # Registro de auditoría territorial en Supabase
+
+    # La consulta se limita al cálculo en memoria; no guardar coordenadas ni resultados.
     tryCatch({
       pt_sf <- st_sf(geometry = pt_4326)
       en_amb <- any(st_intersects(pt_sf, capas$ambito, sparse = FALSE)[1, ])
@@ -1128,6 +1076,7 @@ server <- function(input, output, session) {
   
   # GPS Leaflet nativo
   observeEvent(input$mapa_pdu_location, {
+    if (!sesion_vigente()) { cerrar_sesion_pdu("tiempo_agotado"); return() }
     loc <- input$mapa_pdu_location
     req(loc$longitude, loc$latitude)
     tryCatch(fijar_punto_consulta(loc$longitude, loc$latitude), error = function(e) {
@@ -1406,21 +1355,12 @@ server <- function(input, output, session) {
     bb <- st_bbox(poly_4326)
     leafletProxy("mapa_pdu", session = session) %>%
       clearGroup("consulta_activa") %>%
-      addPolygons(
-        data = poly_4326,
-        group = "consulta_activa",
-        fillColor = "#D80808",
-        fillOpacity = 0.35,
-        color = "#202020",
-        weight = 3,
-        dashArray = "3, 3"
-      ) %>%
       fitBounds(
         lng1 = as.numeric(bb["xmin"]), lat1 = as.numeric(bb["ymin"]),
         lng2 = as.numeric(bb["xmax"]), lat2 = as.numeric(bb["ymax"])
       )
       
-    # Registro de auditoría territorial de polígono en Supabase
+    # Consulta temporal en memoria; no persistir coordenadas ni geometría.
     tryCatch({
       z_prin <- if (nrow(tabla_zonif) > 0) tabla_zonif$COD_S_ZONA[1] else "SIN_ZONA"
       supabase_registrar_consulta(

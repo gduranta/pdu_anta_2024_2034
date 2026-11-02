@@ -20,7 +20,8 @@ Imports:
     httr2,
     jsonlite,
     DBI,
-    RPostgres
+    RPostgres,
+    later
 Suggests:
     pool,
     digest,

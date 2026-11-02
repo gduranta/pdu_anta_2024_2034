@@ -1,5 +1,5 @@
 # ==============================================================================
-# GENERADOR DE MANIFEST.JSON PARA POSIT CONNECT CLOUD / SHINYAPPS
+# GENERADOR DE MANIFEST.JSON PARA PUBLICAR SOLO LA MÁSCARA DE GITHUB PAGES
 # GDUR - MUNICIPALIDAD PROVINCIAL DE ANTA
 # ==============================================================================
 
@@ -24,47 +24,4 @@ if (file.exists(file.path(directorio_raiz, "app.R"))) {
   directorio_raiz <- getwd()
 }
 
-suppressPackageStartupMessages({
-  if (!requireNamespace("rsconnect", quietly = TRUE)) {
-    install.packages("rsconnect", repos = "https://cloud.r-project.org")
-  }
-  library(rsconnect)
-})
-
-cat("Generando manifest.json optimizado para Posit Connect Cloud en:", getwd(), "\n")
-
-app_files <- c(
-  "app.R",
-  "DESCRIPTION",
-  "constancia_pdu_template.qmd",
-  "R/spatial_utils.R",
-  "R/estilos_territoriales.R",
-  "R/local_data.R",
-  "R/optimizacion.R",
-  "R/reporte_cartografico_utils.R",
-  "R/reglamento_utils.R",
-  "R/supabase_utils.R",
-  "R/mod_privacidad.R",
-  "R/mod_acceso_dni.R",
-  "R/mod_informacion_pdu.R",
-  "R/mod_catalogo_zonas.R",
-  "data_pdu/pdu_preparado.rds",
-  "www/custom.css",
-  "www/escudo_muni_anta.png",
-  "www/pdu_actualizado_sf.png"
-)
-
-# El despliegue requiere una cache vigente; nunca publicar un RDS antiguo.
-source("scripts/preparar_cache_pdu.R", encoding = "UTF-8")
-app_files <- unique(c(app_files, list.files("normativa", recursive = TRUE, full.names = TRUE),
-                     list.files("aprobacion", recursive = TRUE, full.names = TRUE)))
-app_files_exist <- app_files[file.exists(app_files)]
-
-rsconnect::writeManifest(
-  appDir = ".",
-  appPrimaryDoc = "app.R",
-  appFiles = app_files_exist,
-  appMode = "shiny"
-)
-
-cat("Manifest generado exitosamente. Existe manifest.json:", file.exists("manifest.json"), "\n")
+message("GitHub Pages sirve únicamente docs/. El despliegue privado del backend requiere un repositorio privado y no se genera desde aquí.")

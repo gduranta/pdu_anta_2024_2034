@@ -6,7 +6,9 @@ $raiz = Split-Path -Parent $MyInvocation.MyCommand.Definition
 Set-Location $raiz
 
 Write-Host "==============================================================================" -ForegroundColor Cyan
-Write-Host " GEOVISOR PDU ANTA (2024 - 2034) - SERVIDOR PUBLICO CON CLOUDFLARE TUNNEL" -ForegroundColor Green
+Write-Host " GEOVISOR PDU ANTA (2024 - 2034) - ACCESO LOCAL PRIVADO" -ForegroundColor Green
+Write-Host "ADVERTENCIA: las capas son privadas; este script no debe crear túneles públicos." -ForegroundColor Red
+throw "Tunnel publico deshabilitado para proteger las capas territoriales. Inicie con Rscript run_server.R desde el servidor municipal."
 Write-Host "==============================================================================" -ForegroundColor Cyan
 Write-Host ""
 

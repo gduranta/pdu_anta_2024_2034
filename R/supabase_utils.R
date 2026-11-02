@@ -134,28 +134,8 @@ supabase_registrar_consulta <- function(tipo_consulta,
                                         resultado_resumen = list(),
                                         duracion_ms = NA_integer_,
                                         meta = list()) {
-  m <- .local_metricas_leer()
-  m$consultas_total <- m$consultas_total + 1
-  .local_metricas_guardar(m)
-  
-  registro <- list(
-    fecha = format(Sys.time(), "%Y-%m-%d %H:%M:%OS3"),
-    tipo = tipo_consulta,
-    coordenadas = coordenadas_texto,
-    distrito = distrito,
-    en_ambito = en_ambito,
-    zona = zona_principal,
-    area_m2 = area_consulta_m2,
-    duracion_ms = duracion_ms
-  )
-  
-  dir.create("outputs", showWarnings = FALSE, recursive = TRUE)
-  tryCatch({
-    cat(jsonlite::toJSON(registro, auto_unbox = TRUE), "\n",
-        file = file.path("outputs", "consultas_local.log"),
-        append = TRUE)
-  }, error = function(e) NULL)
-  
+  # Coordenadas, polígonos y resultados solo se procesan en memoria.
+  # Se omiten incluso métricas de consultas para evitar rastreo de actividad.
   TRUE
 }
 
