@@ -6,7 +6,9 @@ if (!identical(host_local, "127.0.0.1") && !identical(host_local, "::1")) {
   stop("Por seguridad, el servidor Shiny solo puede enlazarse a loopback. Configure TLS y un proxy local independiente para exponerlo.")
 }
 options(shiny.host = host_local)
-options(shiny.port = 3838)
+port_local <- suppressWarnings(as.integer(Sys.getenv("PDU_SHINY_PORT", "3838")))
+if (is.na(port_local) || port_local < 1L || port_local > 65535L) stop("PDU_SHINY_PORT debe estar entre 1 y 65535.")
+options(shiny.port = port_local)
 options(shiny.launch.browser = FALSE)
 options(shiny.sanitize.errors = TRUE) # Blindaje CWE-209: Oculta rutas internas y stack traces en consola del cliente
 
@@ -23,8 +25,8 @@ shiny::shinyOptions(
 
 cat("\n=======================================================\n")
 cat(" GeoVisor PDU Anta - Servidor Shiny Inicializado\n")
-cat(" Escuchando en: http://", host_local, ":3838\n", sep = "")
+cat(" Escuchando en: http://", host_local, ":", port_local, "\n", sep = "")
 cat("=======================================================\n\n")
 
-shiny::runApp(appDir = ".", host = host_local, port = 3838, launch.browser = FALSE)
+shiny::runApp(appDir = ".", host = host_local, port = port_local, launch.browser = FALSE)
 

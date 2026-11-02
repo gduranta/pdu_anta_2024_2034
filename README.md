@@ -2,14 +2,22 @@
 
 ## Seguridad y despliegue privado
 
-Las capas territoriales y documentos normativos son privados. No publicar `data/`,
-`data_pdu/`, `normativa/` ni `aprobacion/` en GitHub. GitHub Pages solo debe alojar
-la máscara estática ubicada en `docs/`; esta no incluye datos ni inicia túneles.
-El visor se ejecuta en un computador municipal dentro de la LAN mediante
-`Rscript run_server.R`, enlazado a `127.0.0.1`. Para acceso desde otros equipos
-de la red local, habilite una regla de firewall solo desde la subred autorizada;
-no use túneles públicos. Nginx es una alternativa si se configura con TLS y una
-subred autorizada explícita.
+No publicar `data/`, `data_pdu/`, `normativa/` ni `aprobacion/` en GitHub. GitHub
+Pages aloja la máscara estática ubicada en `docs/`; el visor Shiny se ejecuta en
+el computador servidor y la máscara se conecta mediante un túnel HTTPS de
+Cloudflare. El endpoint público temporal se escribe en `docs/server_endpoint.json`
+y debe publicarse en la rama de Pages para que la máscara encuentre el servidor.
+Ejecute `iniciar_servidor_github_pages.bat` en el computador anfitrión. Para usar
+un hostname estable en producción, configure un túnel Cloudflare administrado y
+reemplace el flujo temporal `trycloudflare.com`.
+
+El túnel protege el transporte y evita abrir directamente el puerto Shiny a
+Internet. No vuelve secretas las capas que el navegador necesita dibujar: las
+geometrías vectoriales visibles pueden recuperarse mediante herramientas del
+navegador. No se debe presentar este diseño como protección contra descarga de
+cartografía; para reducir la exposición hay que servir mapas rasterizados o tiles
+y definir el nivel de detalle permitido, entendiendo que las imágenes visibles
+también pueden capturarse.
 
 Las credenciales reales deben residir en un archivo de entorno fuera de Git,
 con permisos restringidos. Genere contraseñas aleatorias, configure `PGSSLMODE`
@@ -21,9 +29,6 @@ se procesan en memoria y no se conservan en logs.
 El visor actual usa capas Leaflet vectoriales para mostrar el mapa. El navegador
 recibe las geometrías de las capas cargadas; ocultar botones no impide que se
 inspeccionen desde las herramientas del navegador.
-
-La sustitución del mapa por raster requiere un cambio separado y pruebas visuales
-antes de afirmar que las geometrías ya no se transfieren al navegador.
 
 
 ## Optimizacion del visor

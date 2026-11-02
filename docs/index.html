@@ -385,7 +385,7 @@
 
     // Configuración del Portal GitHub Pages
     const CONFIG = {
-      endpointFile: '',
+      endpointFile: './server_endpoint.json',
       checkIntervalMs: 30000,
       timeoutMs: 8000
     };
@@ -429,12 +429,6 @@
 
       let urlServidor = obtenerParametroUrl('server');
 
-      // GitHub Pages es únicamente la máscara; nunca conecta al servidor privado.
-      if (window.location.hostname === 'antapat.github.io') {
-        marcarServidorFueraDeLinea('Visor de acceso local', 'El GeoVisor solo está disponible desde la red municipal autorizada.');
-        return;
-      }
-
       // Si no viene en la URL, leer el archivo server_endpoint.json
       if (!urlServidor) {
         try {
@@ -477,7 +471,7 @@
       statusDot.className = 'status-dot connecting';
       statusText.textContent = 'Cargando Visor...';
       estadoTitulo.textContent = 'Iniciando GeoVisor PDU Anta';
-      estadoSubtitulo.textContent = 'Conectando con el visor privado de la red municipal...';
+      estadoSubtitulo.textContent = 'Conectando con el GeoVisor de la Municipalidad de Anta...';
       estadoSpinner.style.display = 'block';
       estadoAviso.style.display = 'none';
       btnReintentar.style.display = 'none';

@@ -3,179 +3,114 @@ param(
     [switch]$SinGitPush
 )
 
-throw "Este script de túnel público está deshabilitado: el visor contiene capas privadas. Inicie el servicio en la LAN con Rscript run_server.R y proxy municipal."
-
+$ErrorActionPreference = "Stop"
 $raiz = Split-Path -Parent $MyInvocation.MyCommand.Definition
 Set-Location $raiz
 
 Write-Host "==============================================================================" -ForegroundColor DarkGreen
-Write-Host " GEOVISOR PDU ANTA (2024 - 2034) - SERVIDOR CONEXION GITHUB PAGES" -ForegroundColor Green
-Write-Host " Municipalidad Provincial de Anta - Gerencia de Desarrollo Urbano y Rural" -ForegroundColor Gray
+Write-Host " GEOVISOR PDU ANTA - GITHUB PAGES + TUNEL HTTPS" -ForegroundColor Green
+Write-Host " Municipalidad Provincial de Anta" -ForegroundColor Gray
 Write-Host "==============================================================================" -ForegroundColor DarkGreen
-Write-Host ""
 
-# 1. Verificar herramienta Cloudflare Tunnel
 $cloudflared = Join-Path $raiz "tools\cloudflared.exe"
+$rscriptCmd = (Get-Command "Rscript.exe" -ErrorAction SilentlyContinue).Source
+if (-not $rscriptCmd) {
+    $rscriptCmd = Get-ChildItem "C:\Program Files\R" -Filter "Rscript.exe" -Recurse -ErrorAction SilentlyContinue |
+        Select-Object -First 1 -ExpandProperty FullName
+}
+if (-not $rscriptCmd) { throw "No se encontró Rscript.exe. Instale R y agréguelo al PATH." }
+
 if (-not (Test-Path $cloudflared)) {
-    Write-Host "[*] Descargando herramienta Cloudflare Tunnel en tools\..." -ForegroundColor Yellow
-    New-Item -ItemType Directory -Path (Join-Path $raiz "tools") -Force | Out-Null
-    curl.exe -L -o $cloudflared "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe"
+    New-Item -ItemType Directory -Path (Split-Path $cloudflared) -Force | Out-Null
+    Write-Host "Descargando Cloudflare Tunnel..." -ForegroundColor Yellow
+    Invoke-WebRequest -Uri "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe" -OutFile $cloudflared
 }
 
-# 2. Localizar Rscript
-$rscriptCmd = "Rscript.exe"
-$candidatos = @(
-    "C:\Program Files\R\R-4.6.1\bin\x64\Rscript.exe",
-    "C:\Program Files\R\R-4.6.1\bin\Rscript.exe"
-)
-foreach ($c in $candidatos) {
-    if (Test-Path $c) {
-        $rscriptCmd = $c
-        break
+$outputs = Join-Path $raiz "outputs"
+if (-not (Test-Path $outputs)) { New-Item -ItemType Directory -Path $outputs -Force | Out-Null }
+$cfLog = Join-Path $outputs "cloudflared_live.log"
+$cfOut = Join-Path $outputs "cloudflared_stdout.log"
+$rLog = Join-Path $outputs "shiny_server.log"
+$rOut = Join-Path $outputs "shiny_stdout.log"
+$endpointFile = Join-Path $raiz "docs\server_endpoint.json"
+$rProcess = $null
+$cfProcess = $null
+
+try {
+    $env:PDU_SHINY_HOST = "127.0.0.1"
+    $env:PDU_SHINY_PORT = "$Puerto"
+    if (Test-Path $rLog) { Remove-Item -LiteralPath $rLog -Force }
+    if (Test-Path $rOut) { Remove-Item -LiteralPath $rOut -Force }
+    Write-Host "Iniciando Shiny solo en loopback, puerto $Puerto..." -ForegroundColor Cyan
+    $rProcess = Start-Process -FilePath $rscriptCmd -ArgumentList @("run_server.R") -WorkingDirectory $raiz -RedirectStandardError $rLog -RedirectStandardOutput $rOut -PassThru -WindowStyle Hidden
+
+    $listo = $false
+    for ($i = 0; $i -lt 45; $i++) {
+        if ($rProcess.HasExited) { throw "Shiny terminó antes de iniciar. Revise outputs\shiny_server.log y shiny_stdout.log." }
+        try {
+            $null = Invoke-WebRequest -Uri "http://127.0.0.1:$Puerto/" -TimeoutSec 2
+            $listo = $true
+            break
+        } catch { Start-Sleep -Seconds 1 }
     }
-}
-if ($rscriptCmd -eq "Rscript.exe") {
-    $rFound = Get-ChildItem "C:\Program Files\R" -Filter "Rscript.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
-    if ($rFound) { $rscriptCmd = $rFound }
-}
+    if (-not $listo) { throw "Shiny no respondió en http://127.0.0.1:$Puerto después de 45 segundos." }
 
-# 3. Iniciar R Shiny en loopback; el túnel es el único acceso remoto previsto.
-Write-Host "[1/3] Iniciando motor del GeoVisor en puerto $Puerto..." -ForegroundColor Cyan
-$runServerScript = Join-Path $raiz "run_server.R"
-$env:PDU_SHINY_HOST = "127.0.0.1"
-$rProcess = Start-Process -FilePath $rscriptCmd -ArgumentList $runServerScript -PassThru -NoNewWindow
+    if (Test-Path $cfLog) { Remove-Item -LiteralPath $cfLog -Force }
+    if (Test-Path $cfOut) { Remove-Item -LiteralPath $cfOut -Force }
+    Write-Host "Iniciando Cloudflare Quick Tunnel..." -ForegroundColor Cyan
+    $cfProcess = Start-Process -FilePath $cloudflared -ArgumentList @("tunnel", "--url", "http://127.0.0.1:$Puerto") -WorkingDirectory $raiz -RedirectStandardError $cfLog -RedirectStandardOutput $cfOut -PassThru -WindowStyle Hidden
 
-Start-Sleep -Seconds 3
-
-# 4. Iniciar Cloudflare Tunnel y capturar URL publica
-Write-Host "[2/3] Estableciendo tunel seguro HTTPS con Cloudflare..." -ForegroundColor Cyan
-$cfLog = Join-Path $raiz "outputs\cloudflared_live.log"
-if (-not (Test-Path (Join-Path $raiz "outputs"))) { New-Item -ItemType Directory -Path (Join-Path $raiz "outputs") -Force | Out-Null }
-if (Test-Path $cfLog) { Remove-Item $cfLog -Force }
-
-$cfArgs = @("tunnel", "--url", "http://127.0.0.1:$Puerto")
-$cfProcess = Start-Process -FilePath $cloudflared -ArgumentList $cfArgs -RedirectStandardError $cfLog -PassThru -NoNewWindow
-
-# Esperar a que cloudflared genere la URL publica
-$urlPublica = ""
-$intentos = 0
-while ($intentos -lt 25 -and [string]::IsNullOrEmpty($urlPublica)) {
-    Start-Sleep -Seconds 1
-    $intentos++
-    if (Test-Path $cfLog) {
-        $lineas = Get-Content $cfLog -ErrorAction SilentlyContinue
-        foreach ($linea in $lineas) {
-            if ($linea -match 'https://[a-zA-Z0-9-]+\.trycloudflare\.com') {
-                $candidata = $matches[0]
-                if ($candidata -notmatch 'api\.trycloudflare\.com') {
-                    $urlPublica = $candidata
-                    break
-                }
+    $urlPublica = ""
+    for ($i = 0; $i -lt 60 -and -not $urlPublica; $i++) {
+        if ($cfProcess.HasExited) { throw "Cloudflare Tunnel terminó. Revise outputs\cloudflared_live.log." }
+        foreach ($archivoLog in @($cfLog, $cfOut)) {
+            if (Test-Path $archivoLog) {
+                $contenidoLog = Get-Content -LiteralPath $archivoLog -Raw -ErrorAction SilentlyContinue
+                if ($contenidoLog -match "https://[a-zA-Z0-9-]+\.trycloudflare\.com") { $urlPublica = $Matches[0]; break }
             }
         }
+        if (-not $urlPublica) { Start-Sleep -Seconds 1 }
     }
-}
+    if (-not $urlPublica) { throw "No se detectó la URL pública. Revise outputs\cloudflared_live.log." }
 
-$endpointFile = Join-Path $raiz "docs\server_endpoint.json"
-$ahora = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-
-if ([string]::IsNullOrEmpty($urlPublica)) {
-    Write-Host "[!] Advertencia: No se pudo capturar automaticamente la URL de Cloudflare en 25 segundos." -ForegroundColor Red
-    Write-Host "    Verifique el archivo outputs\cloudflared_live.log para copiarla manualmente." -ForegroundColor Yellow
-} else {
-    Write-Host "    URL del tunel activo: $urlPublica" -ForegroundColor Green
-    
-    # 5. Actualizar docs\server_endpoint.json
     $endpointData = [ordered]@{
         url = $urlPublica
         status = "online"
-        updated_at = $ahora
+        updated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
         institucion = "Municipalidad Provincial de Anta"
         gerencia = "Gerencia de Desarrollo Urbano y Rural (GDUR)"
         proyecto = "Plan de Desarrollo Urbano de Anta (2024 - 2034)"
         ordenanza = "Ordenanza Municipal No 04-2025-A-MPA/C"
         mesa_de_partes = "mesadepartesvirtual@munianta.gob.pe"
     }
-    $jsonContent = $endpointData | ConvertTo-Json -Depth 4
-    [System.IO.File]::WriteAllText($endpointFile, $jsonContent, [System.Text.Encoding]::UTF8)
-    Write-Host "[3/3] Archivo docs\server_endpoint.json actualizado." -ForegroundColor Green
+    $json = $endpointData | ConvertTo-Json -Depth 4
+    [System.IO.File]::WriteAllText($endpointFile, $json, [System.Text.UTF8Encoding]::new($false))
 
-# 6. No publicar URL dinámica: GitHub Pages es una máscara sin acceso al servidor.
-throw "No se publican URLs de túnel en GitHub Pages. El servidor está configurado para la red local únicamente."
-# 6. Sincronizar con GitHub si no se indico -SinGitPush (deshabilitado)
+    Write-Host "`nTúnel activo: $urlPublica" -ForegroundColor Green
+    Write-Host "GitHub Pages: https://antapat.github.io/pdu_anta_2024_2034/" -ForegroundColor Green
     if (-not $SinGitPush) {
-        $cambios = git status --porcelain docs/server_endpoint.json
-        if ($cambios) {
-            Write-Host "    Sincronizando con GitHub Pages (antapat/pdu_anta_2024_2034)..." -ForegroundColor Cyan
-            git add docs/server_endpoint.json
-            git commit -m "chore(pages): activar servidor en vivo [skip ci]" --quiet
-            git push origin main
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "    Sincronizacion con GitHub completada exitosamente." -ForegroundColor Green
-            } else {
-                Write-Host "    Nota: No se pudo hacer push automatico a GitHub (verifique conexion o credenciales)." -ForegroundColor Yellow
-            }
-        }
+        $branch = (& git -C $raiz branch --show-current).Trim()
+        if (-not $branch) { throw "No se pudo determinar la rama Git para publicar el endpoint." }
+        & git -C $raiz add -f -- docs/server_endpoint.json
+        if ($LASTEXITCODE -ne 0) { throw "No se pudo preparar docs/server_endpoint.json." }
+        & git -C $raiz commit --only -m "chore(pages): actualizar endpoint del visor" -- docs/server_endpoint.json
+        if ($LASTEXITCODE -ne 0) { throw "No se pudo crear el commit del endpoint. Publique docs/server_endpoint.json manualmente." }
+        & git -C $raiz push origin $branch
+        if ($LASTEXITCODE -ne 0) { throw "No se pudo publicar el endpoint en GitHub Pages. Revise acceso Git y vuelva a ejecutar." }
+        Write-Host "Endpoint publicado. Pages puede tardar unos minutos en actualizarse." -ForegroundColor Green
+    } else {
+        Write-Host "SinGitPush activado: publique docs/server_endpoint.json en GitHub para actualizar Pages." -ForegroundColor Yellow
     }
-}
 
-Write-Host ""
-Write-Host "==============================================================================" -ForegroundColor Green
-Write-Host " EL GEOVISOR ESTA EN LINEA Y DISPONIBLE PUBLICAMENTE EN:" -ForegroundColor Yellow
-Write-Host ""
-Write-Host "   https://antapat.github.io/pdu_anta_2024_2034/" -ForegroundColor White -BackgroundColor DarkGreen
-Write-Host ""
-if (-not [string]::IsNullOrEmpty($urlPublica)) {
-    Write-Host " Enlace de tunel directo: $urlPublica" -ForegroundColor Cyan
-}
-Write-Host " Enlace de red local municipal: http://localhost:$Puerto" -ForegroundColor Gray
-Write-Host "==============================================================================" -ForegroundColor Green
-Write-Host ""
-Write-Host " [Presione Ctrl + C en cualquier momento para apagar el servidor]" -ForegroundColor Magenta
-Write-Host ""
-
-try {
-    # Mantener el script en espera activa
-    while ($true) {
-        Start-Sleep -Seconds 2
-        if ($rProcess.HasExited -or $cfProcess.HasExited) {
-            Write-Host "[!] Uno de los procesos se detuvo inesperadamente." -ForegroundColor Red
-            break
-        }
-    }
+    Write-Host "`nMantenga esta ventana abierta mientras el visor esté en línea. Ctrl+C para detener." -ForegroundColor Magenta
+    while (-not $rProcess.HasExited -and -not $cfProcess.HasExited) { Start-Sleep -Seconds 2 }
+    if ($rProcess.HasExited) { Write-Warning "El proceso Shiny se detuvo." }
+    if ($cfProcess.HasExited) { Write-Warning "Cloudflare Tunnel se detuvo." }
 } finally {
-    Write-Host "`nCerrando servidor y servicios en segundo plano..." -ForegroundColor Yellow
-    
-    if ($cfProcess -and -not $cfProcess.HasExited) {
-        Stop-Process -Id $cfProcess.Id -Force -ErrorAction SilentlyContinue
+    foreach ($proc in @($cfProcess, $rProcess)) {
+        if ($proc -and -not $proc.HasExited) { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }
     }
-    if ($rProcess -and -not $rProcess.HasExited) {
-        Stop-Process -Id $rProcess.Id -Force -ErrorAction SilentlyContinue
-    }
-
-    # Marcar fuera de linea en docs\server_endpoint.json
-    $offlineAhora = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-    $offlineData = [ordered]@{
-        url = ""
-        status = "offline"
-        updated_at = $offlineAhora
-        institucion = "Municipalidad Provincial de Anta"
-        gerencia = "Gerencia de Desarrollo Urbano y Rural (GDUR)"
-        proyecto = "Plan de Desarrollo Urbano de Anta (2024 - 2034)"
-        ordenanza = "Ordenanza Municipal No 04-2025-A-MPA/C"
-        mesa_de_partes = "mesadepartesvirtual@munianta.gob.pe"
-    }
-    $jsonOffline = $offlineData | ConvertTo-Json -Depth 4
-    [System.IO.File]::WriteAllText($endpointFile, $jsonOffline, [System.Text.Encoding]::UTF8)
-    
-    if (-not $SinGitPush) {
-        $cambios = git status --porcelain docs/server_endpoint.json
-        if ($cambios) {
-            git add docs/server_endpoint.json
-            git commit -m "chore(pages): servidor fuera de linea [skip ci]" --quiet
-            git push origin main
-        }
-    }
-
-    Write-Host "Servidor detenido correctamente. Estado fuera de linea registrado." -ForegroundColor Green
+    Remove-Item Env:PDU_SHINY_HOST -ErrorAction SilentlyContinue
+    Remove-Item Env:PDU_SHINY_PORT -ErrorAction SilentlyContinue
+    Write-Host "Servidor y túnel detenidos." -ForegroundColor Yellow
 }
