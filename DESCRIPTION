@@ -29,5 +29,5 @@ Suggests:
     testthat,
     rsconnect,
     renv
-URL: https://github.com/antapat/pdu_anta_2024_2034
-BugReports: https://github.com/antapat/pdu_anta_2024_2034/issues
+URL: https://github.com/gduranta/pdu_anta_2024_2034
+BugReports: https://github.com/gduranta/pdu_anta_2024_2034/issues

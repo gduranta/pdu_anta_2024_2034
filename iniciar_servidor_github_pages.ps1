@@ -87,7 +87,7 @@ try {
     [System.IO.File]::WriteAllText($endpointFile, $json, [System.Text.UTF8Encoding]::new($false))
 
     Write-Host "`nTúnel activo: $urlPublica" -ForegroundColor Green
-    Write-Host "GitHub Pages: https://antapat.github.io/pdu_anta_2024_2034/" -ForegroundColor Green
+    Write-Host "GitHub Pages: https://gduranta.github.io/pdu_anta_2024_2034/" -ForegroundColor Green
     if (-not $SinGitPush) {
         $branch = (& git -C $raiz branch --show-current).Trim()
         if (-not $branch) { throw "No se pudo determinar la rama Git para publicar el endpoint." }

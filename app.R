@@ -40,7 +40,7 @@ options(shiny.sanitize.errors = TRUE) # Blindaje CWE-209: Oculta stack traces y 
 # ------------------------------------------------------------------------------
 shinyOptions(
   httpResponseHeaders = list(
-    "Content-Security-Policy" = "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://server.arcgisonline.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' ws: wss: https://*.tile.openstreetmap.org https://server.arcgisonline.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://antapat.github.io https://*.munianta.gob.pe http://localhost:* http://127.0.0.1:*;",
+    "Content-Security-Policy" = "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://server.arcgisonline.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' ws: wss: https://*.tile.openstreetmap.org https://server.arcgisonline.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://gduranta.github.io https://antapat.github.io https://*.munianta.gob.pe http://localhost:* http://127.0.0.1:*;",
     "X-Content-Type-Options" = "nosniff",
     "Referrer-Policy" = "strict-origin-when-cross-origin",
     "Permissions-Policy" = "geolocation=(self), camera=(), microphone=(), payment=()",
@@ -320,7 +320,7 @@ ui <- page_navbar(
         // ======================================================================
         // BLINDAJE SEC-05: MITIGACIÓN DE CLICKJACKING Y VALIDACIÓN DE MARCO (CWE-1021)
         // Garantiza que el GeoVisor solo pueda ser incrustado en el portal oficial de
-        // GitHub Pages (https://antapat.github.io) o en dominios institucionales (*.munianta.gob.pe)
+        // GitHub Pages (https://gduranta.github.io) o en dominios institucionales (*.munianta.gob.pe)
         // ======================================================================
         (function() {
           if (window.self !== window.top) {
@@ -332,8 +332,8 @@ ui <- page_navbar(
 
               var esAutorizado = false;
 
-              // 1. Origen oficial en GitHub Pages
-              if (parentOrigin === 'https://antapat.github.io') {
+              // 1. Origen oficial en GitHub Pages (gduranta y antapat)
+              if (parentOrigin === 'https://gduranta.github.io' || parentOrigin === 'https://antapat.github.io') {
                 esAutorizado = true;
               }
 
@@ -364,7 +364,7 @@ ui <- page_navbar(
                       '<p style=\"color:#94A3B8;font-size:0.85rem;margin-bottom:2rem;\">',
                         'El GeoVisor Oficial del PDU de Anta únicamente puede ser consultado a través de los canales institucionales de la Municipalidad Provincial de Anta.',
                       '</p>',
-                      '<a href=\"https://antapat.github.io/pdu_anta_2024_2034/\" target=\"_top\" style=\"display:inline-block;background:#B68A2C;color:#0F2D24;padding:0.75rem 1.5rem;font-weight:700;text-decoration:none;border-radius:6px;font-size:0.9rem;\">',
+                      '<a href=\"https://gduranta.github.io/pdu_anta_2024_2034/\" target=\"_top\" style=\"display:inline-block;background:#B68A2C;color:#0F2D24;padding:0.75rem 1.5rem;font-weight:700;text-decoration:none;border-radius:6px;font-size:0.9rem;\">',
                         'Ir al Portal Oficial de la Municipalidad de Anta',
                       '</a>',
                     '</div>',
@@ -373,14 +373,14 @@ ui <- page_navbar(
 
                 // Forzar escape del marco no autorizado si el navegador lo permite
                 if (window.top) {
-                  window.top.location.href = 'https://antapat.github.io/pdu_anta_2024_2034/';
+                  window.top.location.href = 'https://gduranta.github.io/pdu_anta_2024_2034/';
                 }
                 throw new Error('SEC-05: Acceso enmarcado no autorizado detenido.');
               }
             } catch (err) {
               if (window.top && window.top.location) {
                 try {
-                  window.top.location.href = 'https://antapat.github.io/pdu_anta_2024_2034/';
+                  window.top.location.href = 'https://gduranta.github.io/pdu_anta_2024_2034/';
                 } catch(e) {}
               }
             }
