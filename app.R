@@ -451,18 +451,33 @@ ui <- page_navbar(
     tags$script(HTML("
       // ======================================================================
       // GESTIÓN DE CONSENTIMIENTO OPT-IN (Ley N° 29733 y Estándares Int.)
-      // Ningún identificador de analítica se almacena ni se transmite antes de Aceptar.
+      // Almacenamiento seguro compatible con iframes de terceros (Safe Storage)
       // ======================================================================
+      var memStore = {};
+      var safeStorage = {
+        getItem: function(k) {
+          try { return window.localStorage ? window.localStorage.getItem(k) : memStore[k]; } catch(e) { return memStore[k] || null; }
+        },
+        setItem: function(k, v) {
+          try { if (window.localStorage) window.localStorage.setItem(k, v); } catch(e) {}
+          memStore[k] = v;
+        },
+        removeItem: function(k) {
+          try { if (window.localStorage) window.localStorage.removeItem(k); } catch(e) {}
+          delete memStore[k];
+        }
+      };
+
       function inicializarConsentimientoPDU() {
-        var decision = localStorage.getItem('pdu_consent_decision');
+        var decision = safeStorage.getItem('pdu_consent_decision');
         if (decision === 'accepted') {
           var storageKey = 'pdu_anta_visitante_id';
-          var visitorId = localStorage.getItem(storageKey);
+          var visitorId = safeStorage.getItem(storageKey);
           if (!visitorId) {
             visitorId = (window.crypto && window.crypto.randomUUID)
               ? window.crypto.randomUUID()
               : 'pdu-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-            localStorage.setItem(storageKey, visitorId);
+            safeStorage.setItem(storageKey, visitorId);
           }
           if (window.Shiny && Shiny.setInputValue) {
             Shiny.setInputValue('visitante_geovisor_id', visitorId, {priority: 'event'});
@@ -471,14 +486,14 @@ ui <- page_navbar(
       }
 
       function aceptarTerminosYProceder() {
-        localStorage.setItem('pdu_consent_decision', 'accepted');
+        safeStorage.setItem('pdu_consent_decision', 'accepted');
         var storageKey = 'pdu_anta_visitante_id';
-        var visitorId = localStorage.getItem(storageKey);
+        var visitorId = safeStorage.getItem(storageKey);
         if (!visitorId) {
           visitorId = (window.crypto && window.crypto.randomUUID)
             ? window.crypto.randomUUID()
             : 'pdu-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-          localStorage.setItem(storageKey, visitorId);
+          safeStorage.setItem(storageKey, visitorId);
         }
         if (window.Shiny && Shiny.setInputValue) {
           Shiny.setInputValue('visitante_geovisor_id', visitorId, {priority: 'event'});
@@ -487,14 +502,14 @@ ui <- page_navbar(
       }
 
       function aceptarConsentimientoPDU() {
-        localStorage.setItem('pdu_consent_decision', 'accepted');
+        safeStorage.setItem('pdu_consent_decision', 'accepted');
         var storageKey = 'pdu_anta_visitante_id';
-        var visitorId = localStorage.getItem(storageKey);
+        var visitorId = safeStorage.getItem(storageKey);
         if (!visitorId) {
           visitorId = (window.crypto && window.crypto.randomUUID)
             ? window.crypto.randomUUID()
             : 'pdu-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-          localStorage.setItem(storageKey, visitorId);
+          safeStorage.setItem(storageKey, visitorId);
         }
         if (window.Shiny && Shiny.setInputValue) {
           Shiny.setInputValue('visitante_geovisor_id', visitorId, {priority: 'event'});
@@ -508,8 +523,8 @@ ui <- page_navbar(
       }
 
       function rechazarConsentimientoPDU() {
-        localStorage.setItem('pdu_consent_decision', 'rejected');
-        localStorage.removeItem('pdu_anta_visitante_id');
+        safeStorage.setItem('pdu_consent_decision', 'rejected');
+        safeStorage.removeItem('pdu_anta_visitante_id');
         if (window.Shiny && Shiny.setInputValue) {
           Shiny.setInputValue('cerrar_modal_privacidad', new Date().getTime(), {priority: 'event'});
         }
