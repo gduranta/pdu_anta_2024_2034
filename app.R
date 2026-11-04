@@ -40,7 +40,7 @@ options(shiny.sanitize.errors = TRUE) # Blindaje CWE-209: Oculta stack traces y 
 # ------------------------------------------------------------------------------
 shinyOptions(
   httpResponseHeaders = list(
-    "Content-Security-Policy" = "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://server.arcgisonline.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' ws: wss: https://*.tile.openstreetmap.org https://server.arcgisonline.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://gduranta.github.io https://antapat.github.io https://*.munianta.gob.pe http://localhost:* http://127.0.0.1:*;",
+    "Content-Security-Policy" = "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://server.arcgisonline.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' ws: wss: https://*.tile.openstreetmap.org https://server.arcgisonline.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://gduranta.github.io https://*.munianta.gob.pe http://localhost:* http://127.0.0.1:*;",
     "X-Content-Type-Options" = "nosniff",
     "Referrer-Policy" = "strict-origin-when-cross-origin",
     "Permissions-Policy" = "geolocation=(self), camera=(), microphone=(), payment=()",
@@ -332,8 +332,8 @@ ui <- page_navbar(
 
               var esAutorizado = false;
 
-              // 1. Origen oficial en GitHub Pages (gduranta y antapat)
-              if (parentOrigin === 'https://gduranta.github.io' || parentOrigin === 'https://antapat.github.io') {
+              // 1. Origen oficial en GitHub Pages (gduranta)
+              if (parentOrigin === 'https://gduranta.github.io') {
                 esAutorizado = true;
               }
 

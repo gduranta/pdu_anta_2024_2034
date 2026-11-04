@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guía Técnica de Despliegue Permanente — GeoVisor PDU Anta (2024-2034)</title>
+  <title>GuÃ­a TÃ©cnica de Despliegue Permanente â€” GeoVisor PDU Anta (2024-2034)</title>
   <link rel="icon" type="image/png" href="escudo_muni_anta.png">
   
-  <!-- Tipografía Inter & FontAwesome -->
+  <!-- TipografÃ­a Inter & FontAwesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -118,7 +118,7 @@
       gap: 2rem;
     }
 
-    /* Sidebar de Navegación */
+    /* Sidebar de NavegaciÃ³n */
     .doc-sidebar {
       position: sticky;
       top: 1.5rem;
@@ -270,7 +270,7 @@
       margin-top: 2px;
     }
 
-    /* Bloques de Código */
+    /* Bloques de CÃ³digo */
     pre {
       background: #0F172A;
       color: #F8FAFC;
@@ -370,7 +370,7 @@
       margin: 0 0.5rem;
     }
 
-    /* Pie de Página */
+    /* Pie de PÃ¡gina */
     .doc-footer {
       max-width: 1180px;
       margin: 2rem auto;
@@ -429,10 +429,10 @@
     <div class="doc-header-content">
       <img src="escudo_muni_anta.png" alt="Escudo de la Municipalidad de Anta" class="doc-escudo">
       <div class="doc-header-titles">
-        <h2>MUNICIPALIDAD PROVINCIAL DE ANTA — GERENCIA DE DESARROLLO URBANO Y RURAL</h2>
-        <h1>Protocolo Técnico de Despliegue Permanente del GeoVisor PDU Anta</h1>
+        <h2>MUNICIPALIDAD PROVINCIAL DE ANTA â€” GERENCIA DE DESARROLLO URBANO Y RURAL</h2>
+        <h1>Protocolo TÃ©cnico de Despliegue Permanente del GeoVisor PDU Anta</h1>
         <div class="doc-header-badges">
-          <span class="badge-doc badge-dorada"><i class="fa-solid fa-scroll"></i> Ordenanza Municipal N° 04-2025-A-MPA/C</span>
+          <span class="badge-doc badge-dorada"><i class="fa-solid fa-scroll"></i> Ordenanza Municipal NÂ° 04-2025-A-MPA/C</span>
           <span class="badge-doc"><i class="fa-solid fa-map-location-dot"></i> PDU Anta (2024 - 2034)</span>
           <span class="badge-doc"><i class="fa-solid fa-server"></i> Infraestructura 24/7 y Alta Disponibilidad</span>
         </div>
@@ -443,17 +443,17 @@
   <!-- Cuerpo Principal -->
   <div class="doc-container">
     
-    <!-- Índice Lateral Fijo -->
+    <!-- Ãndice Lateral Fijo -->
     <aside class="doc-sidebar">
       <div class="doc-sidebar-title">
-        <i class="fa-solid fa-list-check"></i> Contenido de la Guía
+        <i class="fa-solid fa-list-check"></i> Contenido de la GuÃ­a
       </div>
       <ul class="doc-nav-list">
-        <li class="doc-nav-item"><a href="#sec1" class="doc-nav-link">1. Fundamentos Arquitectónicos</a></li>
+        <li class="doc-nav-item"><a href="#sec1" class="doc-nav-link">1. Fundamentos ArquitectÃ³nicos</a></li>
         <li class="doc-nav-item"><a href="#sec2" class="doc-nav-link">2. Requisitos Servidor Municipal</a></li>
-        <li class="doc-nav-item"><a href="#sec3" class="doc-nav-link">3. Opción A: Servidor On-Premise</a></li>
-        <li class="doc-nav-item"><a href="#sec4" class="doc-nav-link">4. Opción B: Servidor Cloud Linux</a></li>
-        <li class="doc-nav-item"><a href="#sec5" class="doc-nav-link">5. Opción C: Contenedores Docker</a></li>
+        <li class="doc-nav-item"><a href="#sec3" class="doc-nav-link">3. OpciÃ³n A: Servidor On-Premise</a></li>
+        <li class="doc-nav-item"><a href="#sec4" class="doc-nav-link">4. OpciÃ³n B: Servidor Cloud Linux</a></li>
+        <li class="doc-nav-item"><a href="#sec5" class="doc-nav-link">5. OpciÃ³n C: Contenedores Docker</a></li>
         <li class="doc-nav-item"><a href="#sec6" class="doc-nav-link">6. Enlace de Dominio Fijo Municipal</a></li>
         <li class="doc-nav-item"><a href="#sec7" class="doc-nav-link">7. Respaldo y Cumplimiento Legal</a></li>
         <li class="doc-nav-item"><a href="#sec8" class="doc-nav-link">8. Blindaje de Ciberseguridad (SEC-05)</a></li>
@@ -466,82 +466,82 @@
     <!-- Contenido del Documento -->
     <main class="doc-content">
 
-      <!-- Sección 1 -->
+      <!-- SecciÃ³n 1 -->
       <section id="sec1" class="section-block">
-        <h2 class="section-title"><i class="fa-solid fa-cubes"></i> 1. Fundamentos Arquitectónicos del GeoVisor</h2>
+        <h2 class="section-title"><i class="fa-solid fa-cubes"></i> 1. Fundamentos ArquitectÃ³nicos del GeoVisor</h2>
         <p>
-          El <strong>GeoVisor del Plan de Desarrollo Urbano de Anta (2024 - 2034)</strong> está desarrollado sobre el motor analítico <strong>R Shiny</strong> con soporte espacial de alto rendimiento (bibliotecas compiladas en C/C++: <code>GDAL</code>, <code>GEOS</code> y <code>PROJ</code> vinculadas al paquete <code>sf</code>).
+          El <strong>GeoVisor del Plan de Desarrollo Urbano de Anta (2024 - 2034)</strong> estÃ¡ desarrollado sobre el motor analÃ­tico <strong>R Shiny</strong> con soporte espacial de alto rendimiento (bibliotecas compiladas en C/C++: <code>GDAL</code>, <code>GEOS</code> y <code>PROJ</code> vinculadas al paquete <code>sf</code>).
         </p>
         <p>
-          A diferencia de un sitio web estático tradicional (HTML/CSS), un GeoVisor reactivo opera mediante un <strong>proceso servidor activo</strong> que mantiene un socket de comunicación bidireccional (WebSocket) con cada ciudadano conectado para realizar en tiempo real:
+          A diferencia de un sitio web estÃ¡tico tradicional (HTML/CSS), un GeoVisor reactivo opera mediante un <strong>proceso servidor activo</strong> que mantiene un socket de comunicaciÃ³n bidireccional (WebSocket) con cada ciudadano conectado para realizar en tiempo real:
         </p>
         <ul>
-          <li><strong>Intersección geométrica puntual:</strong> Localización del lote mediante coordenadas UTM 18S (WGS84) o GPS móvil frente a los 3,664 polígonos zonificados del PDU.</li>
-          <li><strong>Análisis de afectaciones viales:</strong> Búsqueda espacial de proximidad con los 1,673 tramos viales, secciones normativas y áreas de afectación.</li>
-          <li><strong>Generación dinámica de certificados:</strong> Compilación en memoria y descarga de la Ficha Informativa de Zonificación Oficial con código QR de verificación.</li>
-          <li><strong>Validación de acceso ciudadano (Estilo SUNARP):</strong> Control temporal de 10 minutos por sesión y tope de 2 periodos diarios por DNI según la Directiva de Seguridad de la Información (Ley N° 29733).</li>
+          <li><strong>IntersecciÃ³n geomÃ©trica puntual:</strong> LocalizaciÃ³n del lote mediante coordenadas UTM 18S (WGS84) o GPS mÃ³vil frente a los 3,664 polÃ­gonos zonificados del PDU.</li>
+          <li><strong>AnÃ¡lisis de afectaciones viales:</strong> BÃºsqueda espacial de proximidad con los 1,673 tramos viales, secciones normativas y Ã¡reas de afectaciÃ³n.</li>
+          <li><strong>GeneraciÃ³n dinÃ¡mica de certificados:</strong> CompilaciÃ³n en memoria y descarga de la Ficha Informativa de ZonificaciÃ³n Oficial con cÃ³digo QR de verificaciÃ³n.</li>
+          <li><strong>ValidaciÃ³n de acceso ciudadano (Estilo SUNARP):</strong> Control temporal de 10 minutos por sesiÃ³n y tope de 2 periodos diarios por DNI segÃºn la Directiva de Seguridad de la InformaciÃ³n (Ley NÂ° 29733).</li>
         </ul>
 
         <div class="arch-diagram">
-          <div class="arch-step-box"><i class="fa-solid fa-users"></i> Ciudadano<br><small>antapat.github.io</small></div>
+          <div class="arch-step-box"><i class="fa-solid fa-users"></i> Ciudadano<br><small>gduranta.github.io</small></div>
           <span class="arch-arrow"><i class="fa-solid fa-arrow-right"></i></span>
-          <div class="arch-step-box"><i class="fa-solid fa-shield-halved"></i> Cloudflare Tunnel<br><small>Túnel HTTPS Seguro</small></div>
+          <div class="arch-step-box"><i class="fa-solid fa-shield-halved"></i> Cloudflare Tunnel<br><small>TÃºnel HTTPS Seguro</small></div>
           <span class="arch-arrow"><i class="fa-solid fa-arrow-right"></i></span>
           <div class="arch-step-box" style="border-color: #B68A2C;"><i class="fa-solid fa-server"></i> Servidor Municipal<br><small>R Shiny (Puerto 3838)</small></div>
         </div>
       </section>
 
-      <!-- Sección 2 -->
+      <!-- SecciÃ³n 2 -->
       <section id="sec2" class="section-block">
-        <h2 class="section-title"><i class="fa-solid fa-server"></i> 2. Requisitos Técnicos para Depositar la Aplicación en el Servidor Municipal (Dossier OTI)</h2>
+        <h2 class="section-title"><i class="fa-solid fa-server"></i> 2. Requisitos TÃ©cnicos para Depositar la AplicaciÃ³n en el Servidor Municipal (Dossier OTI)</h2>
         <p>
-          Para que el equipo de la <strong>Oficina de Tecnologías de la Información (OTI)</strong> o el área de Sistemas de la Municipalidad Provincial de Anta aloje e implemente formalmente el GeoVisor en la infraestructura institucional (física, virtualizada o en la nube), el entorno de hospedaje debe cumplir con el siguiente pliego de condiciones técnicas:
+          Para que el equipo de la <strong>Oficina de TecnologÃ­as de la InformaciÃ³n (OTI)</strong> o el Ã¡rea de Sistemas de la Municipalidad Provincial de Anta aloje e implemente formalmente el GeoVisor en la infraestructura institucional (fÃ­sica, virtualizada o en la nube), el entorno de hospedaje debe cumplir con el siguiente pliego de condiciones tÃ©cnicas:
         </p>
 
-        <h3 class="subsection-title"><i class="fa-solid fa-microchip"></i> 2.1 Requisitos de Hardware y Capacidad de Cómputo</h3>
+        <h3 class="subsection-title"><i class="fa-solid fa-microchip"></i> 2.1 Requisitos de Hardware y Capacidad de CÃ³mputo</h3>
         <p>
-          Las capas cartográficas (3,664 polígonos zonificados y 1,673 ejes viales) se cargan e indexan en la memoria RAM del servidor para ofrecer respuestas inmediatas a las consultas ciudadanas sin depender de llamadas lentas a bases de datos externas.
+          Las capas cartogrÃ¡ficas (3,664 polÃ­gonos zonificados y 1,673 ejes viales) se cargan e indexan en la memoria RAM del servidor para ofrecer respuestas inmediatas a las consultas ciudadanas sin depender de llamadas lentas a bases de datos externas.
         </p>
         <div class="table-responsive">
           <table>
             <thead>
               <tr>
                 <th>Recurso</th>
-                <th>Requisito Mínimo</th>
-                <th>Requisito Óptimo Recomendado</th>
-                <th>Finalidad Técnica</th>
+                <th>Requisito MÃ­nimo</th>
+                <th>Requisito Ã“ptimo Recomendado</th>
+                <th>Finalidad TÃ©cnica</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td><strong>Entorno</strong></td>
-                <td>Servidor Físico dedicado o VM</td>
-                <td>Máquina Virtual dedicada (VMware / Proxmox / Hyper-V)</td>
+                <td>Servidor FÃ­sico dedicado o VM</td>
+                <td>MÃ¡quina Virtual dedicada (VMware / Proxmox / Hyper-V)</td>
                 <td>Aislamiento operativo y facilidad de snapshots/backups.</td>
               </tr>
               <tr>
                 <td><strong>Procesador (CPU)</strong></td>
                 <td>2 vCPU (x86_64 @ 2.2 GHz)</td>
                 <td>4 vCPU o superior</td>
-                <td>Cálculo de intersecciones geométricas y generación de PDFs.</td>
+                <td>CÃ¡lculo de intersecciones geomÃ©tricas y generaciÃ³n de PDFs.</td>
               </tr>
               <tr>
                 <td><strong>Memoria RAM</strong></td>
                 <td>4 GB libres garantizados</td>
                 <td>8 GB a 16 GB de RAM</td>
-                <td>Retención de capas Shapefile en memoria y concurrencia.</td>
+                <td>RetenciÃ³n de capas Shapefile en memoria y concurrencia.</td>
               </tr>
               <tr>
                 <td><strong>Disco Duro</strong></td>
                 <td>30 GB libres (SSD SATA)</td>
                 <td>60 GB libres en SSD NVMe</td>
-                <td>Lectura ultrarrápida de capas y almacenamiento de logs de auditoría.</td>
+                <td>Lectura ultrarrÃ¡pida de capas y almacenamiento de logs de auditorÃ­a.</td>
               </tr>
               <tr>
-                <td><strong>Energía / Contingencia</strong></td>
+                <td><strong>EnergÃ­a / Contingencia</strong></td>
                 <td>Red municipal con estabilizador</td>
-                <td>Conexión a banco de baterías UPS institucional</td>
-                <td>Garantizar continuidad ante cortes eléctricos intempestivos.</td>
+                <td>ConexiÃ³n a banco de baterÃ­as UPS institucional</td>
+                <td>Garantizar continuidad ante cortes elÃ©ctricos intempestivos.</td>
               </tr>
             </tbody>
           </table>
@@ -549,25 +549,25 @@
 
         <h3 class="subsection-title"><i class="fa-solid fa-code"></i> 2.2 Requisitos de Software y Dependencias de Sistema</h3>
         <p>
-          El servidor municipal debe contar con el siguiente stack de tecnologías instalado y configurado:
+          El servidor municipal debe contar con el siguiente stack de tecnologÃ­as instalado y configurado:
         </p>
         <ul>
           <li><strong>Sistema Operativo Homologado:</strong>
             <ul>
-              <li><strong>Linux (Estándar OTI):</strong> Ubuntu Server 22.04 LTS o 24.04 LTS (64 bits) / Debian 12.</li>
+              <li><strong>Linux (EstÃ¡ndar OTI):</strong> Ubuntu Server 22.04 LTS o 24.04 LTS (64 bits) / Debian 12.</li>
               <li><strong>Windows:</strong> Windows Server 2019 / 2022 o Windows 10/11 Pro (64 bits).</li>
             </ul>
           </li>
-          <li><strong>Motor Analítico Base:</strong> R versión <strong>4.3.0 o superior</strong> (actualmente probado en R 4.4 / 4.6.1 x64).</li>
-          <li><strong>Librerías C/C++ Geoespaciales Mandatorias (Nivel Sistema Operativo):</strong>
+          <li><strong>Motor AnalÃ­tico Base:</strong> R versiÃ³n <strong>4.3.0 o superior</strong> (actualmente probado en R 4.4 / 4.6.1 x64).</li>
+          <li><strong>LibrerÃ­as C/C++ Geoespaciales Mandatorias (Nivel Sistema Operativo):</strong>
             <ul>
-              <li><code>GDAL &gt;= 3.4.0</code>: Motor de lectura, reproyección y parsing de formatos GIS (Shapefile, GeoJSON, KML).</li>
-              <li><code>GEOS &gt;= 3.10.0</code>: Motor de topología y cálculo de intersección espacial vectorial (detección de lotes dentro de zonas urbanas).</li>
-              <li><code>PROJ &gt;= 8.2.0</code>: Transformación de sistemas de coordenadas geodésicas (Datum WGS84 EPSG:4326 a UTM Zona 18 Sur EPSG:32718).</li>
+              <li><code>GDAL &gt;= 3.4.0</code>: Motor de lectura, reproyecciÃ³n y parsing de formatos GIS (Shapefile, GeoJSON, KML).</li>
+              <li><code>GEOS &gt;= 3.10.0</code>: Motor de topologÃ­a y cÃ¡lculo de intersecciÃ³n espacial vectorial (detecciÃ³n de lotes dentro de zonas urbanas).</li>
+              <li><code>PROJ &gt;= 8.2.0</code>: TransformaciÃ³n de sistemas de coordenadas geodÃ©sicas (Datum WGS84 EPSG:4326 a UTM Zona 18 Sur EPSG:32718).</li>
             </ul>
           </li>
           <li><strong>Paquetes R Requeridos (Instalados en la biblioteca global del servidor):</strong>
-            <pre><code># Comando de verificación e instalación en R:
+            <pre><code># Comando de verificaciÃ³n e instalaciÃ³n en R:
 install.packages(c("shiny", "bslib", "leaflet", "sf", "DT", 
                    "htmltools", "scales", "RColorBrewer", "digest"))</code></pre>
           </li>
@@ -577,80 +577,80 @@ install.packages(c("shiny", "bslib", "leaflet", "sf", "DT",
         <div class="callout callout-warning">
           <i class="fa-solid fa-triangle-exclamation"></i>
           <div>
-            <strong>Requisito Crítico de Conectividad (WebSockets):</strong>
-            El cortafuegos (Firewall / UTM Fortinet / pfSense) o Proxy Inverso municipal <strong>DEBE tener expresamente habilitado el tráfico WebSocket (protocolos <code>ws://</code> y <code>wss://</code>)</strong>. La reactividad de Shiny, el movimiento del mapa Leaflet y la validación de DNI dependen de este canal bidireccional continuo.
+            <strong>Requisito CrÃ­tico de Conectividad (WebSockets):</strong>
+            El cortafuegos (Firewall / UTM Fortinet / pfSense) o Proxy Inverso municipal <strong>DEBE tener expresamente habilitado el trÃ¡fico WebSocket (protocolos <code>ws://</code> y <code>wss://</code>)</strong>. La reactividad de Shiny, el movimiento del mapa Leaflet y la validaciÃ³n de DNI dependen de este canal bidireccional continuo.
           </div>
         </div>
         <ul>
-          <li><strong>Dirección IP del Servidor:</strong> Asignación de una IP local fija/estática dentro de la red o DMZ municipal (ej. <code>192.168.10.50</code> o VLAN de servidores).</li>
+          <li><strong>DirecciÃ³n IP del Servidor:</strong> AsignaciÃ³n de una IP local fija/estÃ¡tica dentro de la red o DMZ municipal (ej. <code>192.168.10.50</code> o VLAN de servidores).</li>
           <li><strong>Puertos de Red:</strong>
             <ul>
               <li><strong>Puerto Interno 3838 (TCP):</strong> Utilizado por el motor R Shiny para escuchar peticiones de la red local o proxy inverso.</li>
-              <li><strong>Puerto Externo 443 (HTTPS / TCP):</strong> Acceso público seguro cifrado hacia los ciudadanos.</li>
-              <li><strong>Puerto Externo 80 (HTTP / TCP):</strong> Redirección forzada automática a HTTPS.</li>
+              <li><strong>Puerto Externo 443 (HTTPS / TCP):</strong> Acceso pÃºblico seguro cifrado hacia los ciudadanos.</li>
+              <li><strong>Puerto Externo 80 (HTTP / TCP):</strong> RedirecciÃ³n forzada automÃ¡tica a HTTPS.</li>
             </ul>
           </li>
-          <li><strong>Salida a Internet Saliente (Puerto 443):</strong> Permite la descarga en tiempo real de los mosaicos de mapas base satelitales (OpenStreetMap y Esri World Imagery) y la sincronización con el túnel seguro.</li>
+          <li><strong>Salida a Internet Saliente (Puerto 443):</strong> Permite la descarga en tiempo real de los mosaicos de mapas base satelitales (OpenStreetMap y Esri World Imagery) y la sincronizaciÃ³n con el tÃºnel seguro.</li>
         </ul>
 
         <h3 class="subsection-title"><i class="fa-solid fa-folder-tree"></i> 2.4 Estructura de Archivos, Permisos y Almacenamiento</h3>
         <p>
-          Para mantener la seguridad del servidor según las buenas prácticas de la Contraloría y Gobierno Digital:
+          Para mantener la seguridad del servidor segÃºn las buenas prÃ¡cticas de la ContralorÃ­a y Gobierno Digital:
         </p>
         <ul>
-          <li><strong>Usuario de Ejecución sin Privilegios:</strong> La aplicación debe ejecutarse bajo un usuario de servicio sin permisos de superusuario/administrador (ej. usuario <code>shiny</code> en Linux o cuenta de servicio dedicada en Windows).</li>
+          <li><strong>Usuario de EjecuciÃ³n sin Privilegios:</strong> La aplicaciÃ³n debe ejecutarse bajo un usuario de servicio sin permisos de superusuario/administrador (ej. usuario <code>shiny</code> en Linux o cuenta de servicio dedicada en Windows).</li>
           <li><strong>Permisos de Solo Lectura (Read-Only):</strong>
             <ul>
-              <li><code>app.R</code>, carpeta <code>R/</code> (lógica del sistema).</li>
+              <li><code>app.R</code>, carpeta <code>R/</code> (lÃ³gica del sistema).</li>
               <li>Carpeta <code>data/</code> (Shapefiles oficiales inmutables aprobados por Ordenanza).</li>
-              <li>Carpeta <code>www/</code> (estilos CSS, imágenes institucionales).</li>
+              <li>Carpeta <code>www/</code> (estilos CSS, imÃ¡genes institucionales).</li>
             </ul>
           </li>
           <li><strong>Permisos de Lectura y Escritura (Read-Write):</strong>
             <ul>
-              <li>Exclusivamente sobre la carpeta <code>outputs/</code>: necesaria para registrar la bitácora de auditoría seudonimizada (<code>control_acceso.log</code>) y el estado temporal de sesiones ciudadanas (<code>usuarios_sesion.rds</code>).</li>
+              <li>Exclusivamente sobre la carpeta <code>outputs/</code>: necesaria para registrar la bitÃ¡cora de auditorÃ­a seudonimizada (<code>control_acceso.log</code>) y el estado temporal de sesiones ciudadanas (<code>usuarios_sesion.rds</code>).</li>
             </ul>
           </li>
         </ul>
 
         <h3 class="subsection-title"><i class="fa-solid fa-globe"></i> 2.5 Requisitos de Identidad Digital y Dominio Institucional</h3>
         <ul>
-          <li><strong>Subdominio Gubernamental Oficial:</strong> Creación de un registro DNS tipo <code>pdu.munianta.gob.pe</code> o <code>geovisor.munianta.gob.pe</code> administrado por la municipalidad (Punto.pe / PCM).</li>
-          <li><strong>Certificado Digital SSL/TLS:</strong> Certificado de seguridad vigente emitido para el dominio (Let's Encrypt o certificado comercial TLS 1.2 / 1.3) para asegurar el candado de navegación segura.</li>
-          <li><strong>Alternativa sin IP pública:</strong> Si la municipalidad no dispone de IP pública estática o puertos abiertos, se puede emplear el conector oficial <strong>Cloudflare Zero Trust</strong> (gratuito) para enlazar el dominio municipal directamente con el servidor sin exponer la red interna a ataques.</li>
+          <li><strong>Subdominio Gubernamental Oficial:</strong> CreaciÃ³n de un registro DNS tipo <code>pdu.munianta.gob.pe</code> o <code>geovisor.munianta.gob.pe</code> administrado por la municipalidad (Punto.pe / PCM).</li>
+          <li><strong>Certificado Digital SSL/TLS:</strong> Certificado de seguridad vigente emitido para el dominio (Let's Encrypt o certificado comercial TLS 1.2 / 1.3) para asegurar el candado de navegaciÃ³n segura.</li>
+          <li><strong>Alternativa sin IP pÃºblica:</strong> Si la municipalidad no dispone de IP pÃºblica estÃ¡tica o puertos abiertos, se puede emplear el conector oficial <strong>Cloudflare Zero Trust</strong> (gratuito) para enlazar el dominio municipal directamente con el servidor sin exponer la red interna a ataques.</li>
         </ul>
 
-        <h3 class="subsection-title"><i class="fa-solid fa-box-archive"></i> 2.6 Procedimiento de Entrega del Paquete de la Aplicación</h3>
+        <h3 class="subsection-title"><i class="fa-solid fa-box-archive"></i> 2.6 Procedimiento de Entrega del Paquete de la AplicaciÃ³n</h3>
         <p>
           Para transferir el GeoVisor al servidor municipal, la OTI puede emplear cualquiera de estos dos canales oficiales:
         </p>
         <ol>
-          <li><strong>Opción Git (Recomendada para Actualizaciones Frecuentes):</strong>
-            <pre><code>git clone https://github.com/antapat/pdu_anta_2024_2034.git /srv/shiny-server/pdu_anta</code></pre>
+          <li><strong>OpciÃ³n Git (Recomendada para Actualizaciones Frecuentes):</strong>
+            <pre><code>git clone https://github.com/gduranta/pdu_anta_2024_2034.git /srv/shiny-server/pdu_anta</code></pre>
             Permite actualizar capas o normativas en el futuro con un simple <code>git pull</code>.
           </li>
-          <li><strong>Opción Paquete Cerrado (Despliegue Aislado / Offline):</strong>
-            Copiar la carpeta raíz completa <code>pdu_anta_2024_2034</code> en la unidad del servidor, preservando íntegras las subcarpetas <code>data/</code>, <code>R/</code>, <code>www/</code> y <code>docs/</code>.
+          <li><strong>OpciÃ³n Paquete Cerrado (Despliegue Aislado / Offline):</strong>
+            Copiar la carpeta raÃ­z completa <code>pdu_anta_2024_2034</code> en la unidad del servidor, preservando Ã­ntegras las subcarpetas <code>data/</code>, <code>R/</code>, <code>www/</code> y <code>docs/</code>.
           </li>
         </ol>
       </section>
 
-      <!-- Sección 3 -->
+      <!-- SecciÃ³n 3 -->
       <section id="sec3" class="section-block">
-        <h2 class="section-title"><i class="fa-solid fa-desktop"></i> 3. Opción A: Servidor en la Municipalidad (Windows 10 / 11 / Server)</h2>
+        <h2 class="section-title"><i class="fa-solid fa-desktop"></i> 3. OpciÃ³n A: Servidor en la Municipalidad (Windows 10 / 11 / Server)</h2>
         <p>
-          Esta opción aprovecha una computadora dedicada dentro de la oficina de la Gerencia de Desarrollo Urbano y Rural (GDUR), sin pagar mensualidades por servicios en la nube.
+          Esta opciÃ³n aprovecha una computadora dedicada dentro de la oficina de la Gerencia de Desarrollo Urbano y Rural (GDUR), sin pagar mensualidades por servicios en la nube.
         </p>
 
-        <h3 class="subsection-title">Paso 3.1: Configuración de Energía y BIOS</h3>
+        <h3 class="subsection-title">Paso 3.1: ConfiguraciÃ³n de EnergÃ­a y BIOS</h3>
         <ol>
-          <li><strong>Suspender la suspensión del equipo:</strong> En Windows, ir a <em>Configuración &gt; Sistema &gt; Energía y batería</em> y configurar <em>"Al estar enchufado, suspender el equipo tras:"</em> en <strong>NUNCA</strong>.</li>
-          <li><strong>Auto-encendido tras corte eléctrico (BIOS):</strong> Reiniciar el equipo, entrar al BIOS (tecla <code>F2</code> o <code>Supr</code>) y en la pestaña <em>Power Management</em> activar <strong>"Restore on AC Power Loss" &gt; Power On</strong>. Con esto, si se corta la luz en la municipalidad, la máquina se prenderá sola apenas regrese el suministro.</li>
+          <li><strong>Suspender la suspensiÃ³n del equipo:</strong> En Windows, ir a <em>ConfiguraciÃ³n &gt; Sistema &gt; EnergÃ­a y baterÃ­a</em> y configurar <em>"Al estar enchufado, suspender el equipo tras:"</em> en <strong>NUNCA</strong>.</li>
+          <li><strong>Auto-encendido tras corte elÃ©ctrico (BIOS):</strong> Reiniciar el equipo, entrar al BIOS (tecla <code>F2</code> o <code>Supr</code>) y en la pestaÃ±a <em>Power Management</em> activar <strong>"Restore on AC Power Loss" &gt; Power On</strong>. Con esto, si se corta la luz en la municipalidad, la mÃ¡quina se prenderÃ¡ sola apenas regrese el suministro.</li>
         </ol>
 
-        <h3 class="subsection-title">Paso 3.2: Ejecución Continua como Servicio de Windows (NSSM)</h3>
+        <h3 class="subsection-title">Paso 3.2: EjecuciÃ³n Continua como Servicio de Windows (NSSM)</h3>
         <p>
-          Para que el visor arranque automáticamente incluso si ningún usuario inicia sesión en Windows, se utiliza el gestor libre <strong>NSSM (Non-Sucking Service Manager)</strong>:
+          Para que el visor arranque automÃ¡ticamente incluso si ningÃºn usuario inicia sesiÃ³n en Windows, se utiliza el gestor libre <strong>NSSM (Non-Sucking Service Manager)</strong>:
         </p>
         <pre><code># 1. Descargar nssm.exe en la carpeta del proyecto
 # 2. Abrir PowerShell como Administrador e instalar el servicio:
@@ -662,20 +662,20 @@ nssm.exe start GeoVisorAnta</code></pre>
         <div class="callout callout-success">
           <i class="fa-solid fa-circle-check"></i>
           <div>
-            <strong>Autonomía 100%:</strong> Con este servicio configurado, el motor de Shiny permanecerá corriendo en el puerto local <code>3838</code> en segundo plano de forma silenciosa y permanente.
+            <strong>AutonomÃ­a 100%:</strong> Con este servicio configurado, el motor de Shiny permanecerÃ¡ corriendo en el puerto local <code>3838</code> en segundo plano de forma silenciosa y permanente.
           </div>
         </div>
       </section>
 
-      <!-- Sección 4 -->
+      <!-- SecciÃ³n 4 -->
       <section id="sec4" class="section-block">
-        <h2 class="section-title"><i class="fa-brands fa-linux"></i> 4. Opción B: Servidor Cloud Linux (Ubuntu Server 22.04 / 24.04 LTS)</h2>
+        <h2 class="section-title"><i class="fa-brands fa-linux"></i> 4. OpciÃ³n B: Servidor Cloud Linux (Ubuntu Server 22.04 / 24.04 LTS)</h2>
         <p>
-          Es el estándar de excelencia para portales institucionales de alto tráfico. Puede contratarse en cualquier proveedor de hosting en la nube (DigitalOcean, AWS, Hetzner, o servidores del Estado Peruano / GORE Cusco).
+          Es el estÃ¡ndar de excelencia para portales institucionales de alto trÃ¡fico. Puede contratarse en cualquier proveedor de hosting en la nube (DigitalOcean, AWS, Hetzner, o servidores del Estado Peruano / GORE Cusco).
         </p>
 
-        <h3 class="subsection-title">Paso 4.1: Instalación de Dependencias Espaciales</h3>
-        <pre><code># Actualizar repositorios e instalar librerías geoespaciales C++
+        <h3 class="subsection-title">Paso 4.1: InstalaciÃ³n de Dependencias Espaciales</h3>
+        <pre><code># Actualizar repositorios e instalar librerÃ­as geoespaciales C++
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y software-properties-common dirmngr gnupg apt-transport-https
 sudo apt install -y gdal-bin libgdal-dev libgeos-dev libproj-dev libudunits2-dev libssl-dev
@@ -683,23 +683,23 @@ sudo apt install -y gdal-bin libgdal-dev libgeos-dev libproj-dev libudunits2-dev
 # Instalar R base y desarrollo
 sudo apt install -y r-base r-base-dev</code></pre>
 
-        <h3 class="subsection-title">Paso 4.2: Instalación de Shiny Server</h3>
+        <h3 class="subsection-title">Paso 4.2: InstalaciÃ³n de Shiny Server</h3>
         <pre><code># Descargar y desplegar Shiny Server Open Source
 wget https://download3.rstudio.org/ubuntu-18.04/x86_64/shiny-server-1.5.22.1017-amd64.deb
 sudo gdebi shiny-server-1.5.22.1017-amd64.deb
 
 # Clonar el proyecto en el directorio del servidor
 cd /srv/shiny-server
-sudo git clone https://github.com/antapat/pdu_anta_2024_2034.git pdu_anta
+sudo git clone https://github.com/gduranta/pdu_anta_2024_2034.git pdu_anta
 sudo systemctl enable shiny-server
 sudo systemctl start shiny-server</code></pre>
       </section>
 
-      <!-- Sección 5 -->
+      <!-- SecciÃ³n 5 -->
       <section id="sec5" class="section-block">
-        <h2 class="section-title"><i class="fa-brands fa-docker"></i> 5. Opción C: Contenedores Docker (Portabilidad Total)</h2>
+        <h2 class="section-title"><i class="fa-brands fa-docker"></i> 5. OpciÃ³n C: Contenedores Docker (Portabilidad Total)</h2>
         <p>
-          Permite empacar todo el GeoVisor (código, capas shapefile, entorno R y dependencias del sistema operativo) en una imagen inmutable.
+          Permite empacar todo el GeoVisor (cÃ³digo, capas shapefile, entorno R y dependencias del sistema operativo) en una imagen inmutable.
         </p>
         <pre><code># Archivo: Dockerfile
 FROM rocker/geospatial:4.4.0
@@ -719,17 +719,17 @@ CMD ["Rscript", "run_server.R"]</code></pre>
 docker run -d --name geovisor-live --restart always -p 3838:3838 geovisor-anta</code></pre>
       </section>
 
-      <!-- Sección 6 -->
+      <!-- SecciÃ³n 6 -->
       <section id="sec6" class="section-block">
-        <h2 class="section-title"><i class="fa-solid fa-link"></i> 6. Enlace de Dominio Fijo y Transmisión Segura</h2>
+        <h2 class="section-title"><i class="fa-solid fa-link"></i> 6. Enlace de Dominio Fijo y TransmisiÃ³n Segura</h2>
         
         <h3 class="subsection-title">6.1 Enlace Gratuito Mediante GitHub Pages (Implementado Actualmente)</h3>
         <p>
-          Es el método que acabamos de configurar con éxito:
+          Es el mÃ©todo que acabamos de configurar con Ã©xito:
         </p>
         <ul>
-          <li><strong>Dirección Oficial Permanente:</strong> <code>https://antapat.github.io/pdu_anta_2024_2034/</code></li>
-          <li><strong>Mecanismo:</strong> Al encender el servidor con <code>iniciar_servidor_github_pages.bat</code>, el túnel seguro de Cloudflare transmite los datos espaciales y actualiza automáticamente el estado en GitHub Pages en 1 clic.</li>
+          <li><strong>DirecciÃ³n Oficial Permanente:</strong> <code>https://gduranta.github.io/pdu_anta_2024_2034/</code></li>
+          <li><strong>Mecanismo:</strong> Al encender el servidor con <code>iniciar_servidor_github_pages.bat</code>, el tÃºnel seguro de Cloudflare transmite los datos espaciales y actualiza automÃ¡ticamente el estado en GitHub Pages en 1 clic.</li>
         </ul>
 
         <h3 class="subsection-title">6.2 Enlace con Dominio Propio Institucional (Ej. <code>pdu.munianta.gob.pe</code>)</h3>
@@ -738,52 +738,52 @@ docker run -d --name geovisor-live --restart always -p 3838:3838 geovisor-anta</
         </p>
         <ol>
           <li>Crear una cuenta gratuita en <strong>Cloudflare Zero Trust</strong>.</li>
-          <li>En la sección <em>Access &gt; Tunnels</em>, crear un <strong>Named Tunnel</strong> llamado <code>pdu-anta-server</code>.</li>
-          <li>Apuntar el registro DNS: <code>pdu.munianta.gob.pe</code> al ID del túnel.</li>
+          <li>En la secciÃ³n <em>Access &gt; Tunnels</em>, crear un <strong>Named Tunnel</strong> llamado <code>pdu-anta-server</code>.</li>
+          <li>Apuntar el registro DNS: <code>pdu.munianta.gob.pe</code> al ID del tÃºnel.</li>
           <li>Instalar el servicio permanente en Windows con el token asignado:
             <pre><code>tools\cloudflared.exe service install [TOKEN_PROVISTO_POR_CLOUDFLARE]</code></pre>
           </li>
         </ol>
       </section>
 
-      <!-- Sección 7 -->
+      <!-- SecciÃ³n 7 -->
       <section id="sec7" class="section-block">
         <h2 class="section-title"><i class="fa-solid fa-shield-halved"></i> 7. Respaldo y Cumplimiento Legal</h2>
         <p>
-          En estricto cumplimiento de la <strong>Ley N° 29733 (Ley de Protección de Datos Personales del Perú)</strong> y la <strong>Directiva de Seguridad R.D. N° 019-2013-JUS/DGPDP</strong>:
+          En estricto cumplimiento de la <strong>Ley NÂ° 29733 (Ley de ProtecciÃ³n de Datos Personales del PerÃº)</strong> y la <strong>Directiva de Seguridad R.D. NÂ° 019-2013-JUS/DGPDP</strong>:
         </p>
         <div class="callout callout-info">
           <i class="fa-solid fa-user-shield"></i>
           <div>
-            <strong>Privacidad por Diseño (Privacy by Design):</strong> El GeoVisor <strong>NO almacena números de DNI en texto claro</strong>. Todo registro en <code>outputs/usuarios_sesion.rds</code> y <code>outputs/control_acceso.log</code> se realiza mediante un código seudonimizado (Hash SHA-256 criptográfico con Salt de sistema).
+            <strong>Privacidad por DiseÃ±o (Privacy by Design):</strong> El GeoVisor <strong>NO almacena nÃºmeros de DNI en texto claro</strong>. Todo registro en <code>outputs/usuarios_sesion.rds</code> y <code>outputs/control_acceso.log</code> se realiza mediante un cÃ³digo seudonimizado (Hash SHA-256 criptogrÃ¡fico con Salt de sistema).
           </div>
         </div>
 
-        <h3 class="subsection-title">Procedimiento Periódico de Mantenimiento</h3>
+        <h3 class="subsection-title">Procedimiento PeriÃ³dico de Mantenimiento</h3>
         <ul>
-          <li><strong>Respaldo de Cartografía:</strong> Copiar la carpeta <code>data/</code> a un disco externo o almacenamiento seguro cada vez que se emita una actualización de la zonificación por Ordenanza Municipal.</li>
-          <li><strong>Respaldo de Auditoría:</strong> El archivo <code>outputs/control_acceso.log</code> registra el historial de visitas para estadísticas municipales. Debe archivarse anualmente por la GDUR.</li>
-          <li><strong>Actualización de Capas:</strong> Si se aprueba una modificación urbana, solo se reemplazan los archivos Shapefile en <code>data/</code> y se reinicia el servidor R. El visor actualizará instantáneamente las capas sin alterar la configuración del servidor.</li>
+          <li><strong>Respaldo de CartografÃ­a:</strong> Copiar la carpeta <code>data/</code> a un disco externo o almacenamiento seguro cada vez que se emita una actualizaciÃ³n de la zonificaciÃ³n por Ordenanza Municipal.</li>
+          <li><strong>Respaldo de AuditorÃ­a:</strong> El archivo <code>outputs/control_acceso.log</code> registra el historial de visitas para estadÃ­sticas municipales. Debe archivarse anualmente por la GDUR.</li>
+          <li><strong>ActualizaciÃ³n de Capas:</strong> Si se aprueba una modificaciÃ³n urbana, solo se reemplazan los archivos Shapefile en <code>data/</code> y se reinicia el servidor R. El visor actualizarÃ¡ instantÃ¡neamente las capas sin alterar la configuraciÃ³n del servidor.</li>
         </ul>
       </section>
 
-      <!-- Sección 8 -->
+      <!-- SecciÃ³n 8 -->
       <section id="sec8" class="section-block">
-        <h2 class="section-title"><i class="fa-solid fa-shield-halved"></i> 8. Blindaje Integral de Ciberseguridad y Mitigación de Vulnerabilidades (SEC-01 a SEC-05)</h2>
+        <h2 class="section-title"><i class="fa-solid fa-shield-halved"></i> 8. Blindaje Integral de Ciberseguridad y MitigaciÃ³n de Vulnerabilidades (SEC-01 a SEC-05)</h2>
         
         <p>
-          En el marco del proceso de auditoría y hardening del GeoVisor del PDU de Anta, se implementaron controles técnicos avanzados para neutralizar cinco (5) vectores de riesgo de seguridad, en cumplimiento del marco normativo nacional establecido por el <strong>Centro Nacional de Seguridad Digital (CNSD / PCM)</strong> y la <strong>Ley N° 29733 (Ley de Protección de Datos Personales del Perú)</strong>.
+          En el marco del proceso de auditorÃ­a y hardening del GeoVisor del PDU de Anta, se implementaron controles tÃ©cnicos avanzados para neutralizar cinco (5) vectores de riesgo de seguridad, en cumplimiento del marco normativo nacional establecido por el <strong>Centro Nacional de Seguridad Digital (CNSD / PCM)</strong> y la <strong>Ley NÂ° 29733 (Ley de ProtecciÃ³n de Datos Personales del PerÃº)</strong>.
         </p>
 
-        <!-- Subsección SEC-05 Destacada -->
+        <!-- SubsecciÃ³n SEC-05 Destacada -->
         <div style="border: 2px solid #B68A2C; border-radius: 8px; padding: 1.5rem; background: #FFFBEB; margin: 1.5rem 0;">
           <h3 class="subsection-title" style="color: #92400E; margin-top: 0;">
-            <i class="fa-solid fa-shield-virus"></i> 8.1 Vulnerabilidad SEC-05: Políticas de Enmarcado y Mitigación de Clickjacking (CWE-1021)
+            <i class="fa-solid fa-shield-virus"></i> 8.1 Vulnerabilidad SEC-05: PolÃ­ticas de Enmarcado y MitigaciÃ³n de Clickjacking (CWE-1021)
           </h3>
           
           <p><strong>El Vector de Ataque y Amenaza:</strong></p>
           <p>
-            Si el servidor no define de forma estricta las políticas de procedencia de marcos (<code>frame-ancestors</code> en Content Security Policy), portales fraudulentos o actores maliciosos podrían incrustar el GeoVisor en páginas falsas (phishing) mediante etiquetas <code>&lt;iframe&gt;</code>. De esta forma, simularían la imagen institucional de la <strong>Municipalidad Provincial de Anta</strong> para capturar números de DNI de los ciudadanos o realizar ataques de Clickjacking (superposición de elementos transparentes para engañar al usuario).
+            Si el servidor no define de forma estricta las polÃ­ticas de procedencia de marcos (<code>frame-ancestors</code> en Content Security Policy), portales fraudulentos o actores maliciosos podrÃ­an incrustar el GeoVisor en pÃ¡ginas falsas (phishing) mediante etiquetas <code>&lt;iframe&gt;</code>. De esta forma, simularÃ­an la imagen institucional de la <strong>Municipalidad Provincial de Anta</strong> para capturar nÃºmeros de DNI de los ciudadanos o realizar ataques de Clickjacking (superposiciÃ³n de elementos transparentes para engaÃ±ar al usuario).
           </p>
 
           <p><strong>Blindaje Implementado en Cuatro (4) Capas Complementarias (Defensa en Profundidad):</strong></p>
@@ -795,17 +795,17 @@ docker run -d --name geovisor-live --restart always -p 3838:3838 geovisor-anta</
             <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
               Se inyectan encabezados HTTP estrictos a nivel de protocolo web antes de que cualquier contenido sea transmitido al navegador:
             </p>
-            <pre style="background: #0F172A; color: #38BDF8; padding: 0.75rem; border-radius: 4px; font-size: 0.82rem; overflow-x: auto;"><code># Restringe la incrustación únicamente al portal de GitHub Pages y subdominios municipales
-add_header Content-Security-Policy "frame-ancestors 'self' https://antapat.github.io https://*.munianta.gob.pe;" always;
+            <pre style="background: #0F172A; color: #38BDF8; padding: 0.75rem; border-radius: 4px; font-size: 0.82rem; overflow-x: auto;"><code># Restringe la incrustaciÃ³n Ãºnicamente al portal de GitHub Pages y subdominios municipales
+add_header Content-Security-Policy "frame-ancestors 'self' https://gduranta.github.io https://*.munianta.gob.pe;" always;
 
-# Impide ataques de adivinación de tipo MIME (MIME Sniffing)
+# Impide ataques de adivinaciÃ³n de tipo MIME (MIME Sniffing)
 add_header X-Content-Type-Options "nosniff" always;
 
-# Protección de privacidad en el encabezado Referrer
+# ProtecciÃ³n de privacidad en el encabezado Referrer
 add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
-# Política de permisos de periféricos (Solo autoriza geolocalización GPS oficial)
-add_header Permissions-Policy "geolocation=(self 'https://antapat.github.io'), microphone=(), camera=()" always;</code></pre>
+# PolÃ­tica de permisos de perifÃ©ricos (Solo autoriza geolocalizaciÃ³n GPS oficial)
+add_header Permissions-Policy "geolocation=(self 'https://gduranta.github.io'), microphone=(), camera=()" always;</code></pre>
           </div>
 
           <div style="background: white; border-radius: 6px; padding: 1rem; border-left: 4px solid #0284C7; margin-bottom: 1rem;">
@@ -813,20 +813,20 @@ add_header Permissions-Policy "geolocation=(self 'https://antapat.github.io'), m
               <i class="fa-solid fa-cloud"></i> Capa 2: Borde Cloudflare Zero Trust (Archivo <code>deploy/cloudflare/config.yml</code>)
             </h4>
             <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
-              Para la transmisión mediante túnel cifrado (Cloudflare Tunnel), las peticiones provenientes de sitios de terceros no autorizados son filtradas en la red perimetral (Edge) de Cloudflare antes de tocar el servidor municipal.
+              Para la transmisiÃ³n mediante tÃºnel cifrado (Cloudflare Tunnel), las peticiones provenientes de sitios de terceros no autorizados son filtradas en la red perimetral (Edge) de Cloudflare antes de tocar el servidor municipal.
             </p>
           </div>
 
           <div style="background: white; border-radius: 6px; padding: 1rem; border-left: 4px solid #B68A2C; margin-bottom: 1rem;">
             <h4 style="font-size: 0.95rem; font-weight: 700; color: #B68A2C; margin-bottom: 0.4rem;">
-              <i class="fa-solid fa-code"></i> Capa 3: Motor R Shiny y Validación Activa de Origen en Cliente (<code>app.R</code> / <code>run_server.R</code>)
+              <i class="fa-solid fa-code"></i> Capa 3: Motor R Shiny y ValidaciÃ³n Activa de Origen en Cliente (<code>app.R</code> / <code>run_server.R</code>)
             </h4>
             <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
-              En el propio código de la aplicación se ejecuta una doble salvaguarda:
+              En el propio cÃ³digo de la aplicaciÃ³n se ejecuta una doble salvaguarda:
             </p>
             <ul style="font-size: 0.88rem; margin-left: 1.2rem; margin-bottom: 0.5rem;">
-              <li><strong>Encabezados Nativos HTTP en R:</strong> Mediante <code>shinyOptions(httpResponseHeaders = list(...))</code>, el servidor <code>httpuv</code> emite directamente la política de procedencia de marco.</li>
-              <li><strong>Frame Busting Activo en JavaScript:</strong> Si la aplicación se carga dentro de un <code>iframe</code>, un script en <code>tags$head</code> comprueba el origen del documento padre (<code>document.referrer</code>). Si no proviene de <code>antapat.github.io</code> ni <code>*.munianta.gob.pe</code>, destruye de inmediato el DOM (impidiendo mostrar el formulario de DNI o el mapa) y redirige al portal oficial.</li>
+              <li><strong>Encabezados Nativos HTTP en R:</strong> Mediante <code>shinyOptions(httpResponseHeaders = list(...))</code>, el servidor <code>httpuv</code> emite directamente la polÃ­tica de procedencia de marco.</li>
+              <li><strong>Frame Busting Activo en JavaScript:</strong> Si la aplicaciÃ³n se carga dentro de un <code>iframe</code>, un script en <code>tags$head</code> comprueba el origen del documento padre (<code>document.referrer</code>). Si no proviene de <code>gduranta.github.io</code> ni <code>*.munianta.gob.pe</code>, destruye de inmediato el DOM (impidiendo mostrar el formulario de DNI o el mapa) y redirige al portal oficial.</li>
             </ul>
           </div>
 
@@ -835,7 +835,7 @@ add_header Permissions-Policy "geolocation=(self 'https://antapat.github.io'), m
               <i class="fa-solid fa-window-maximize"></i> Capa 4: Portal Contenedor en GitHub Pages (<code>docs/index.html</code>)
             </h4>
             <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
-              El portal institucional en GitHub Pages incorpora defensas anti-enmarcado para asegurar que la propia portada no pueda ser incrustada en portales fraudulentos externos. Si se detecta un intento de enmarcado no autorizado, la página rompe el marco y se abre a pantalla completa oficial (<code>window.top.location.href = window.self.location.href</code>).
+              El portal institucional en GitHub Pages incorpora defensas anti-enmarcado para asegurar que la propia portada no pueda ser incrustada en portales fraudulentos externos. Si se detecta un intento de enmarcado no autorizado, la pÃ¡gina rompe el marco y se abre a pantalla completa oficial (<code>window.top.location.href = window.self.location.href</code>).
             </p>
           </div>
         </div>
@@ -845,10 +845,10 @@ add_header Permissions-Policy "geolocation=(self 'https://antapat.github.io'), m
           <table>
             <thead>
               <tr>
-                <th style="width: 100px;">Código</th>
+                <th style="width: 100px;">CÃ³digo</th>
                 <th>Vulnerabilidad Identificada</th>
                 <th style="width: 110px;">Severidad</th>
-                <th>Mitigación Técnica Aplicada en el Código</th>
+                <th>MitigaciÃ³n TÃ©cnica Aplicada en el CÃ³digo</th>
               </tr>
             </thead>
             <tbody>
@@ -856,57 +856,57 @@ add_header Permissions-Policy "geolocation=(self 'https://antapat.github.io'), m
                 <td><strong>SEC-01</strong></td>
                 <td>Bypass de Control de Acceso en Servidor (CWE-306)</td>
                 <td><span class="badge-doc" style="background:#DC2626; color:white;">Alta</span></td>
-                <td>En <code>app.R</code> se blindaron los eventos reactivos de consulta territorial (<code>gps_location_device</code>, <code>btn_consultar_punto</code>, <code>btn_consultar_poligono</code>) con validación estricta de <code>sesion_vigente()</code>. Si la sesión expiró o no se validó DNI, la consulta se rechaza y se cierra la sesión en el servidor.</td>
+                <td>En <code>app.R</code> se blindaron los eventos reactivos de consulta territorial (<code>gps_location_device</code>, <code>btn_consultar_punto</code>, <code>btn_consultar_poligono</code>) con validaciÃ³n estricta de <code>sesion_vigente()</code>. Si la sesiÃ³n expirÃ³ o no se validÃ³ DNI, la consulta se rechaza y se cierra la sesiÃ³n en el servidor.</td>
               </tr>
               <tr>
                 <td><strong>SEC-02</strong></td>
-                <td>Sal Criptográfica Pública y Fija en Código (CWE-327)</td>
+                <td>Sal CriptogrÃ¡fica PÃºblica y Fija en CÃ³digo (CWE-327)</td>
                 <td><span class="badge-doc" style="background:#D97706; color:white;">Media</span></td>
-                <td>En <code>R/mod_acceso_dni.R</code> se eliminó la sal estática pública. Ahora se genera dinámicamente un secreto criptográfico único de 256 bits almacenado en <code>outputs/.pdu_secret_key</code> (ignorado por Git) o en variable de entorno <code>PDU_PEPPER_KEY</code>, cumpliendo con la Ley N° 29733.</td>
+                <td>En <code>R/mod_acceso_dni.R</code> se eliminÃ³ la sal estÃ¡tica pÃºblica. Ahora se genera dinÃ¡micamente un secreto criptogrÃ¡fico Ãºnico de 256 bits almacenado en <code>outputs/.pdu_secret_key</code> (ignorado por Git) o en variable de entorno <code>PDU_PEPPER_KEY</code>, cumpliendo con la Ley NÂ° 29733.</td>
               </tr>
               <tr>
                 <td><strong>SEC-03</strong></td>
                 <td>Agotamiento de Memoria y Fuga de Temporales (CWE-400 / CWE-459)</td>
                 <td><span class="badge-doc" style="background:#D97706; color:white;">Media</span></td>
-                <td>En <code>app.R</code> se implementaron directivas <code>on.exit(unlink(temp_dir, recursive = TRUE, force = TRUE))</code> para borrar inmediatamente los archivos Shapefile subidos y se estableció un límite máximo de 1,000 vértices por polígono para prevenir bloqueos de GEOS.</td>
+                <td>En <code>app.R</code> se implementaron directivas <code>on.exit(unlink(temp_dir, recursive = TRUE, force = TRUE))</code> para borrar inmediatamente los archivos Shapefile subidos y se estableciÃ³ un lÃ­mite mÃ¡ximo de 1,000 vÃ©rtices por polÃ­gono para prevenir bloqueos de GEOS.</td>
               </tr>
               <tr>
                 <td><strong>SEC-04</strong></td>
-                <td>Exposición de Información en Repositorio Público (CWE-200)</td>
+                <td>ExposiciÃ³n de InformaciÃ³n en Repositorio PÃºblico (CWE-200)</td>
                 <td><span class="badge-doc" style="background:#2563EB; color:white;">Informativa</span></td>
-                <td>Se estableció la arquitectura definitiva de desacoplamiento: en producción, los datos espaciales y el motor R Shiny se alojan exclusivamente en el servidor físico o cloud municipal de la OTI, manteniendo en GitHub Pages únicamente el archivo estático ligero <code>docs/index.html</code>.</td>
+                <td>Se estableciÃ³ la arquitectura definitiva de desacoplamiento: en producciÃ³n, los datos espaciales y el motor R Shiny se alojan exclusivamente en el servidor fÃ­sico o cloud municipal de la OTI, manteniendo en GitHub Pages Ãºnicamente el archivo estÃ¡tico ligero <code>docs/index.html</code>.</td>
               </tr>
               <tr>
                 <td><strong>SEC-05</strong></td>
-                <td>Clickjacking y Suplantación en Iframes (CWE-1021)</td>
+                <td>Clickjacking y SuplantaciÃ³n en Iframes (CWE-1021)</td>
                 <td><span class="badge-doc" style="background:#DC2626; color:white;">Alta</span></td>
-                <td>Implementación en profundidad de la política <code>frame-ancestors 'self' https://antapat.github.io https://*.munianta.gob.pe;</code> en Nginx, Cloudflare Tunnel, Shiny Server y validación activa de origen en JavaScript con bloqueo instantáneo del DOM.</td>
+                <td>ImplementaciÃ³n en profundidad de la polÃ­tica <code>frame-ancestors 'self' https://gduranta.github.io https://*.munianta.gob.pe;</code> en Nginx, Cloudflare Tunnel, Shiny Server y validaciÃ³n activa de origen en JavaScript con bloqueo instantÃ¡neo del DOM.</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <h3 class="subsection-title">8.3 Archivos de Configuración de Seguridad Provistos para la OTI</h3>
+        <h3 class="subsection-title">8.3 Archivos de ConfiguraciÃ³n de Seguridad Provistos para la OTI</h3>
         <p>
-          En la carpeta <code>deploy/</code> y la raíz del repositorio se han integrado los archivos de configuración listos para producción:
+          En la carpeta <code>deploy/</code> y la raÃ­z del repositorio se han integrado los archivos de configuraciÃ³n listos para producciÃ³n:
         </p>
         <ul>
-          <li><code>deploy/nginx/geovisor_anta.conf</code>: Configuración completa de Nginx con SSL/TLS, WebSockets y encabezados CSP (SEC-05).</li>
-          <li><code>deploy/cloudflare/config.yml</code>: Configuración del agente <code>cloudflared</code> para túnel seguro.</li>
-          <li><code>deploy/systemd/geovisor-pdu-anta.service</code>: Archivo de servicio Linux Systemd con sandboxing y reinicio automático ante fallos.</li>
+          <li><code>deploy/nginx/geovisor_anta.conf</code>: ConfiguraciÃ³n completa de Nginx con SSL/TLS, WebSockets y encabezados CSP (SEC-05).</li>
+          <li><code>deploy/cloudflare/config.yml</code>: ConfiguraciÃ³n del agente <code>cloudflared</code> para tÃºnel seguro.</li>
+          <li><code>deploy/systemd/geovisor-pdu-anta.service</code>: Archivo de servicio Linux Systemd con sandboxing y reinicio automÃ¡tico ante fallos.</li>
           <li><code>deploy/postgres/init_pdu_sesiones.sql</code>: Script SQL oficial para inicializar la base de datos PostgreSQL/PostGIS transaccional ACID (CWE-362).</li>
-          <li><code>.Renviron.example</code>: Plantilla de variables de entorno con las credenciales de conexión de base de datos municipal.</li>
+          <li><code>.Renviron.example</code>: Plantilla de variables de entorno con las credenciales de conexiÃ³n de base de datos municipal.</li>
         </ul>
       </section>
 
     </main>
   </div>
 
-  <!-- Pie de Página Institucional -->
+  <!-- Pie de PÃ¡gina Institucional -->
   <footer class="doc-footer">
-    <p><strong>MUNICIPALIDAD PROVINCIAL DE ANTA — GERENCIA DE DESARROLLO URBANO Y RURAL</strong></p>
-    <p>Casa de la cultura: Avenida los Andes SN - Anta - Cusco - Perú · Mesa de Partes Virtual: mesadepartesvirtual@munianta.gob.pe</p>
-    <p>Plan de Desarrollo Urbano de Anta (2024 - 2034) · Documento Técnico de Implementación Tecnológica y Despliegue Permanente</p>
+    <p><strong>MUNICIPALIDAD PROVINCIAL DE ANTA â€” GERENCIA DE DESARROLLO URBANO Y RURAL</strong></p>
+    <p>Casa de la cultura: Avenida los Andes SN - Anta - Cusco - PerÃº Â· Mesa de Partes Virtual: mesadepartesvirtual@munianta.gob.pe</p>
+    <p>Plan de Desarrollo Urbano de Anta (2024 - 2034) Â· Documento TÃ©cnico de ImplementaciÃ³n TecnolÃ³gica y Despliegue Permanente</p>
   </footer>
 
 </body>
