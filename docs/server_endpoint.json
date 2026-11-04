@@ -1,10 +1,10 @@
 {
-    "url":  "https://network-really-float-salt.trycloudflare.com",
-    "status":  "online",
-    "updated_at":  "2026-11-04T13:13:06Z",
-    "institucion":  "Municipalidad Provincial de Anta",
-    "gerencia":  "Gerencia de Desarrollo Urbano y Rural (GDUR)",
-    "proyecto":  "Plan de Desarrollo Urbano de Anta (2024 - 2034)",
-    "ordenanza":  "Ordenanza Municipal No 04-2025-A-MPA/C",
-    "mesa_de_partes":  "mesadepartesvirtual@munianta.gob.pe"
+  "url": "https://38.210.175.182/PDU-ANTA/",
+  "status": "online",
+  "updated_at": "2026-11-04T21:00:00Z",
+  "institucion": "Municipalidad Provincial de Anta",
+  "gerencia": "Gerencia de Desarrollo Urbano y Rural (GDUR)",
+  "proyecto": "Plan de Desarrollo Urbano de Anta (2024 - 2034)",
+  "ordenanza": "Ordenanza Municipal No 04-2025-A-MPA/C",
+  "mesa_de_partes": "mesadepartesvirtual@munianta.gob.pe"
 }

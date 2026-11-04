@@ -386,6 +386,7 @@
     // Configuración del Portal GitHub Pages
     const CONFIG = {
       endpointFile: './server_endpoint.json',
+      defaultUrl: 'https://38.210.175.182/PDU-ANTA/',
       checkIntervalMs: 30000,
       timeoutMs: 8000
     };
@@ -442,6 +443,11 @@
         } catch (e) {
           console.warn('No se pudo leer server_endpoint.json:', e);
         }
+      }
+
+      // Fallback a URL municipal por defecto
+      if (!urlServidor || urlServidor === '') {
+        urlServidor = CONFIG.defaultUrl;
       }
 
       // Validar si tenemos URL
