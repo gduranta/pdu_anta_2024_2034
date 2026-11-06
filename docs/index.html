@@ -335,8 +335,8 @@
     </div>
 
     <div class="pdu-actions">
-      <!-- Botón de Acceso Directo / Pantalla Completa -->
-      <a id="btn_abrir_directo" href="https://38.210.175.182/PDU-ANTA/" target="_blank" class="pdu-direct-btn" title="Abrir GeoVisor en pestaña completa">
+      <!-- Botón de Acceso Directo / Pantalla Completa (se muestra cuando hay servidor activo) -->
+      <a id="btn_abrir_directo" href="#" target="_blank" class="pdu-direct-btn" style="display: none;" title="Abrir GeoVisor en pestaña completa">
         <i class="fa-solid fa-up-right-from-square"></i> Pantalla Completa
       </a>
 
@@ -411,7 +411,6 @@
     // Configuración del Portal GitHub Pages
     const CONFIG = {
       endpointFile: './server_endpoint.json',
-      defaultUrl: 'https://38.210.175.182/PDU-ANTA/',
       checkIntervalMs: 30000,
       timeoutMs: 8000
     };
@@ -470,11 +469,6 @@
         }
       }
 
-      // Fallback a URL municipal por defecto
-      if (!urlServidor || urlServidor === '') {
-        urlServidor = CONFIG.defaultUrl;
-      }
-
       // Validar si tenemos URL
       if (!urlServidor || urlServidor === '') {
         marcarServidorFueraDeLinea(
@@ -492,11 +486,23 @@
       if (iframeIniciado && urlNorm === urlActualNorm && !esManual) {
         statusDot.className = 'status-dot online';
         statusText.textContent = 'Servidor en Línea';
+        const btnDirecto = document.getElementById('btn_abrir_directo');
+        if (btnDirecto) {
+          btnDirecto.href = urlNorm;
+          btnDirecto.style.display = 'inline-flex';
+        }
         return;
       }
 
       serverUrlActual = urlNorm;
       iframeIniciado = true;
+
+      // Actualizar botón directo si existe
+      const btnDirecto = document.getElementById('btn_abrir_directo');
+      if (btnDirecto) {
+        btnDirecto.href = urlNorm;
+        btnDirecto.style.display = 'inline-flex';
+      }
 
       // Cargar iframe
       statusDot.className = 'status-dot connecting';
@@ -549,6 +555,8 @@
 
       iframeIniciado = false;
       serverUrlActual = '';
+      const btnDirecto = document.getElementById('btn_abrir_directo');
+      if (btnDirecto) btnDirecto.style.display = 'none';
       statusDot.className = 'status-dot offline';
       statusText.textContent = 'Fuera de Línea';
       
