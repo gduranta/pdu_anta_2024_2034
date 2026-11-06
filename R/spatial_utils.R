@@ -170,3 +170,84 @@ pdf_motor_disponible <- function() {
   quarto_disponible() || chrome_disponible()
 }
 
+#' Copia segura de archivos blindada contra 'could not allocate copy buffer' (CWE-400)
+#' Base R en Windows utiliza file.append() cuando el destino es un archivo, el cual intenta
+#' un malloc() contiguo de 1MB en el heap de C. En procesos con alto consumo geoespacial o
+#' fragmentación de memoria, esto detiene la ejecución.
+#' Esta función utiliza en primer lugar el API nativo del sistema operativo (CopyFileW vía
+#' copia a directorio contenedor o Shell), y en última instancia streaming binario en bloques pequeños.
+#'
+#' @param from Ruta del archivo origen
+#' @param to Ruta de destino (directorio existente o ruta de archivo destino)
+#' @param overwrite Sobrescribir si ya existe
+#' @return TRUE si la copia fue exitosa y verificada, FALSE de lo contrario
+pdu_safe_copy_file <- function(from, to, overwrite = TRUE) {
+  if (!is.character(from) || length(from) != 1L || !file.exists(from)) return(FALSE)
+  if (!is.character(to) || length(to) != 1L) return(FALSE)
+  
+  # Caso 1: Destino es un directorio existente -> file.copy nativo usa Win32 CopyFileW directamente
+  if (dir.exists(to)) {
+    return(isTRUE(file.copy(from, to, overwrite = overwrite)))
+  }
+  
+  dir_dest <- dirname(to)
+  if (!dir.exists(dir_dest)) {
+    dir.create(dir_dest, recursive = TRUE, showWarnings = FALSE)
+  }
+  
+  if (file.exists(to)) {
+    if (!overwrite) return(FALSE)
+    unlink(to, force = TRUE)
+  }
+  
+  # Caso 2: Si el nombre base coincide, copiar directo al directorio contenedor (usa CopyFileW del OS)
+  if (identical(basename(from), basename(to))) {
+    if (isTRUE(file.copy(from, dir_dest, overwrite = overwrite))) {
+      return(file.exists(to))
+    }
+  }
+  
+  # Caso 3: Copiar con nombre temporal al directorio contenedor y renombrar
+  tmp_dest <- file.path(dir_dest, paste0(".pdu_tmp_", as.hexmode(as.integer(runif(1, 1e5, 1e7))), "_", basename(from)))
+  if (isTRUE(file.copy(from, tmp_dest, overwrite = TRUE))) {
+    if (file.rename(tmp_dest, to)) {
+      return(TRUE)
+    }
+    unlink(tmp_dest, force = TRUE)
+  }
+  
+  # Caso 4: En Windows, invocar cmd.exe /c copy directamente con Win32
+  if (.Platform$OS.type == "windows") {
+    from_win <- normalizePath(from, winslash = "\\", mustWork = FALSE)
+    to_win <- normalizePath(to, winslash = "\\", mustWork = FALSE)
+    res <- tryCatch(
+      system2("cmd.exe", args = c("/c", "copy", "/Y", sprintf('"%s"', from_win), sprintf('"%s"', to_win)),
+              stdout = FALSE, stderr = FALSE),
+      error = function(e) 1L
+    )
+    if (identical(res, 0L) && file.exists(to)) {
+      sz_from <- file.info(from)$size
+      sz_to <- file.info(to)$size
+      if (!is.na(sz_from) && !is.na(sz_to) && sz_from == sz_to) return(TRUE)
+    }
+  }
+  
+  # Caso 5: Streaming binario en bloques pequeños (64 KB) con readBin/writeBin
+  # Evita solicitar un buffer contiguo de 1MB a malloc en un heap C fragmentado
+  tryCatch({
+    sz <- file.info(from)$size
+    if (is.na(sz)) return(FALSE)
+    if (sz == 0) return(file.create(to))
+    
+    con_in <- file(from, "rb")
+    on.exit(close(con_in), add = TRUE)
+    con_out <- file(to, "wb")
+    on.exit(close(con_out), add = TRUE)
+    
+    while ((n <- length(buf <- readBin(con_in, "raw", n = 65536L))) > 0L) {
+      writeBin(buf, con_out)
+    }
+    file.exists(to) && file.info(to)$size == sz
+  }, error = function(e) FALSE)
+}
+

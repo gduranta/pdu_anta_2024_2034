@@ -49,3 +49,26 @@ test_that("al menos un motor PDF está disponible en el entorno local", {
   expect_true(pdf_motor_disponible())
 })
 
+test_that("pdu_safe_copy_file copia archivos correctamente sin depender de file.append", {
+  f_src <- tempfile(fileext = ".txt")
+  cat("Contenido de prueba PDU Anta\n", file = f_src)
+  on.exit(unlink(f_src), add = TRUE)
+  
+  # Copiar a un directorio existente
+  dir_test <- tempfile("pdu_test_dir_")
+  dir.create(dir_test, recursive = TRUE)
+  on.exit(unlink(dir_test, recursive = TRUE), add = TRUE)
+  
+  ok1 <- pdu_safe_copy_file(f_src, dir_test)
+  expect_true(ok1)
+  expect_true(file.exists(file.path(dir_test, basename(f_src))))
+  
+  # Copiar a un archivo con nombre diferente
+  f_dst <- file.path(dir_test, "copia_renombrada.txt")
+  ok2 <- pdu_safe_copy_file(f_src, f_dst)
+  expect_true(ok2)
+  expect_true(file.exists(f_dst))
+  expect_equal(readLines(f_dst), readLines(f_src))
+})
+
+

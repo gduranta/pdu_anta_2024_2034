@@ -1161,7 +1161,7 @@ server <- function(input, output, session) {
         dir.create(temp_dir, showWarnings = FALSE, recursive = TRUE)
         for (k in 1:nrow(f_df)) {
           dest_k <- file.path(temp_dir, basename(f_df$name[k]))
-          file.copy(f_df$datapath[k], dest_k, overwrite = TRUE)
+          pdu_safe_copy_file(f_df$datapath[k], dest_k, overwrite = TRUE)
         }
         shp_target <- file.path(temp_dir, basename(f_df$name[idx_shp[1]]))
         poly_subido <- tryCatch(st_read(shp_target, quiet = TRUE), error = function(e) NULL)
@@ -2212,6 +2212,7 @@ server <- function(input, output, session) {
     # temporal propio evita depender del directorio de trabajo del servidor y
     # evita colisiones entre descargas simultáneas de distintas sesiones.
     if (quarto_disponible()) {
+      gc(verbose = FALSE) # Compactar y liberar heap de C antes de operaciones de I/O
       qmd_path <- normalizePath("constancia_pdu_template.qmd", winslash = "/", mustWork = TRUE)
       render_dir <- tempfile("constancia_quarto_")
       dir.create(render_dir, recursive = TRUE, showWarnings = FALSE)
@@ -2222,7 +2223,7 @@ server <- function(input, output, session) {
       temp_pdf_name <- basename(temp_pdf_out)
       on.exit(unlink(render_dir, recursive = TRUE, force = TRUE), add = TRUE)
 
-      if (!file.copy(qmd_path, render_qmd, overwrite = TRUE)) {
+      if (!pdu_safe_copy_file(qmd_path, render_qmd, overwrite = TRUE)) {
         stop("No se pudo preparar la plantilla temporal para generar la constancia.")
       }
       # La plantilla carga los logotipos y funciones de R mediante rutas relativas.
@@ -2236,7 +2237,7 @@ server <- function(input, output, session) {
       # copiamos estrictamente la captura cartográfica requerida para la constancia.
       dir.create(file.path(render_dir, "outputs"), recursive = TRUE, showWarnings = FALSE)
       if (file.exists(mapa_png_rel)) {
-        file.copy(mapa_png_rel, file.path(render_dir, mapa_png_rel), overwrite = TRUE)
+        pdu_safe_copy_file(mapa_png_rel, file.path(render_dir, mapa_png_rel), overwrite = TRUE)
       }
       saveRDS(payload, temp_rds)
 
@@ -2294,7 +2295,7 @@ server <- function(input, output, session) {
         }
       }
 
-      if (pdf_valido(temp_pdf_out) && file.copy(temp_pdf_out, destino_file, overwrite = TRUE) && pdf_valido(destino_file)) {
+      if (pdf_valido(temp_pdf_out) && pdu_safe_copy_file(temp_pdf_out, destino_file, overwrite = TRUE) && pdf_valido(destino_file)) {
         return(invisible(destino_file))
       }
       if (is.null(render_error)) {
