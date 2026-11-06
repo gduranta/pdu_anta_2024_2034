@@ -95,8 +95,10 @@ ENTIDAD_OFICIAL <- "MUNICIPALIDAD PROVINCIAL DE ANTA"
 FECHA_APROBACION_PDU <- "11 de abril de 2025"
 FECHA_ACTUALIZACION_PDU <- "04 de septiembre del 2026"
 ORDENANZA_APROBACION_PDU <- "ORDENANZA MUNICIPAL Nº 04-2025-A-MPA/C"
-ORDENANZA_ACTUALIZACION_PDU <- "ORDENANZA MUNICIPAL N°008-2026-A-MPA-C"
+ORDENANZA_ACTUALIZACION_PDU <- "ORDENANZA MUNICIPAL N° 008-2026-A-MPA-C"
 URL_EL_PERUANO_PDU <- "https://busquedas.elperuano.pe/dispositivo/NL/2407024-1"
+URL_EL_PERUANO_ACTUALIZACION <- "https://busquedas.elperuano.pe/dispositivo/NL/2562153-1"
+URL_DRIVE_ACTUALIZACION_PDF <- "https://drive.google.com/file/d/1oNypOYrGf5BQyvw-hy4zkts4hfahW8_p/view?usp=drive_link"
 GERENCIA_OFICIAL <- "GERENCIA DE DESARROLLO URBANO Y RURAL"
 SUBGERENCIA_OFICIAL <- "SUB GERENCIA DE PLANEAMIENTO URBANO Y ACONDICIONAMIENTO TERRITORIAL"
 SUBGERENCIA_ROL <- "Gerencia de Desarrollo Urbano y Rural — Sub Gerencia de Planeamiento Urbano y Acondicionamiento Territorial"
@@ -1368,8 +1370,58 @@ server <- function(input, output, session) {
     ))
     
     bb <- st_bbox(poly_4326)
-    leafletProxy("mapa_pdu", session = session) %>%
+    proxy_map <- leafletProxy("mapa_pdu", session = session) %>%
       clearGroup("consulta_activa") %>%
+      addPolygons(
+        data = poly_4326,
+        group = "consulta_activa",
+        color = "#D80808",
+        weight = 3.5,
+        opacity = 1,
+        fillColor = "#D80808",
+        fillOpacity = 0.22,
+        dashArray = "6, 4",
+        label = paste0("Polígono Consultado (", format(round(area_total_m2, 1), big.mark = ","), " m²)"),
+        popup = paste0(
+          "<div style='font-family:Inter, sans-serif; font-size:12px; min-width:210px;'>",
+          "<div style='background:#174A3A; color:white; padding:6px 10px; font-weight:bold; border-radius:4px 4px 0 0;'>POLÍGONO CONSULTADO</div>",
+          "<div style='padding:8px; border:1px solid #174A3A; border-top:none; border-radius:0 0 4px 4px; background:#FFFFFF;'>",
+          "<b>Área:</b> ", format(round(area_total_m2, 2), big.mark = ","), " m² (", round(area_total_m2 / 10000, 3), " ha)<br>",
+          "<b>Perímetro:</b> ", format(round(perimetro_m, 2), big.mark = ","), " ml<br>",
+          "<b>Distrito(s):</b> ", paste(distritos_list, collapse = ", "),
+          "</div></div>"
+        ),
+        highlightOptions = highlightOptions(
+          weight = 4.5,
+          color = "#991B1B",
+          fillOpacity = 0.35,
+          bringToFront = TRUE
+        )
+      )
+
+    # Vértices destacados en el mapa
+    tryCatch({
+      coords_pts <- sf::st_coordinates(poly_4326)
+      if (nrow(coords_pts) > 0) {
+        coords_df <- unique(as.data.frame(coords_pts[, c("X", "Y"), drop = FALSE]))
+        if (nrow(coords_df) <= 150) {
+          proxy_map <- proxy_map %>%
+            addCircleMarkers(
+              lng = coords_df$X,
+              lat = coords_df$Y,
+              group = "consulta_activa",
+              radius = 4.5,
+              color = "#880000",
+              weight = 1.8,
+              fillColor = "#FFFFFF",
+              fillOpacity = 1,
+              label = paste0("Vértice ", seq_len(nrow(coords_df)))
+            )
+        }
+      }
+    }, error = function(e) NULL)
+
+    proxy_map %>%
       fitBounds(
         lng1 = as.numeric(bb["xmin"]), lat1 = as.numeric(bb["ymin"]),
         lng2 = as.numeric(bb["xmax"]), lat2 = as.numeric(bb["ymax"])

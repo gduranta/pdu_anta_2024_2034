@@ -197,7 +197,7 @@ mod_informacion_pdu_ui <- function(proyecto_nombre = NULL) {
                   tags$h5(class = "fw-bold mb-2", style = "color: #86651F;", "ORDENANZA MUNICIPAL N° 008-2026-A-MPA-C"),
                   tags$p(
                     class = "small text-secondary mb-3",
-                    "Aprueba la ", tags$b("actualización, adecuación técnica y precisiones normativas"),
+                    "Aprueba la ", tags$b("actualización parcial, adecuación técnica y precisiones normativas"),
                     " del Plan de Desarrollo Urbano de Anta (2024 - 2034) para consolidar su concordancia territorial, delimitación de sectores, parámetros urbanísticos y dinámica conurbada."
                   ),
                   div(
@@ -205,14 +205,21 @@ mod_informacion_pdu_ui <- function(proyecto_nombre = NULL) {
                     style = "background-color: #FBF7EB; border-left: 3px solid #B68A2C;",
                     tags$small(
                       class = "fw-semibold", style = "color: #86651F;",
-                      icon("circle-check"), " Instrumento legal vigente aplicable en la jurisdicción provincial"
+                      icon("newspaper"), " Publicada oficialmente en el Diario Oficial El Peruano"
                     )
                   )
                 ),
                 div(
                   class = "d-flex flex-wrap gap-2 pt-2 border-top",
                   tags$a(
-                    href = "https://drive.google.com/file/d/1psRABp2ZBRCYYomNMXjbOJIdWyE37Ivp/view?usp=drive_link",
+                    href = "https://busquedas.elperuano.pe/dispositivo/NL/2562153-1",
+                    target = "_blank",
+                    rel = "noopener",
+                    class = "btn btn-outline-success btn-sm fw-bold",
+                    icon("arrow-up-right-from-square"), " Ver en El Peruano"
+                  ),
+                  tags$a(
+                    href = "https://drive.google.com/file/d/1oNypOYrGf5BQyvw-hy4zkts4hfahW8_p/view?usp=drive_link",
                     target = "_blank",
                     rel = "noopener",
                     class = "btn btn-outline-warning btn-sm fw-bold text-dark",
