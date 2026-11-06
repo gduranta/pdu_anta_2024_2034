@@ -75,13 +75,13 @@ supabase_paleta_desde_columnas <- function(col_nombres, col_hex) {
     tryCatch({
       m <- jsonlite::fromJSON(ruta)
       return(list(
-        visitas_total = max(1, as.numeric(m$visitas_total %||% 1)),
+        visitas_total = max(0, as.numeric(m$visitas_total %||% 0)),
         constancias_total = max(0, as.numeric(m$constancias_total %||% 0)),
         consultas_total = max(0, as.numeric(m$consultas_total %||% 0))
       ))
     }, error = function(e) NULL)
   }
-  list(visitas_total = 1, constancias_total = 0, consultas_total = 0)
+  list(visitas_total = 0, constancias_total = 0, consultas_total = 0)
 }
 
 .local_metricas_guardar <- function(m) {

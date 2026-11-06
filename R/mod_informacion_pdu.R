@@ -219,12 +219,18 @@ mod_informacion_pdu_ui <- function(proyecto_nombre = NULL) {
                     icon("arrow-up-right-from-square"), " Ver en El Peruano"
                   ),
                   tags$a(
+                    href = "https://drive.google.com/file/d/1psRABp2ZBRCYYomNMXjbOJIdWyE37Ivp/view?usp=drive_link",
+                    target = "_blank",
+                    rel = "noopener",
+                    class = "btn btn-outline-secondary btn-sm",
+                    icon("file-pdf"), " Descargar Ordenanza (PDF)"
+                  ),
+                  tags$a(
                     href = "https://drive.google.com/file/d/1oNypOYrGf5BQyvw-hy4zkts4hfahW8_p/view?usp=drive_link",
                     target = "_blank",
                     rel = "noopener",
-                    class = "btn btn-outline-warning btn-sm fw-bold text-dark",
-                    style = "border-color: #B68A2C;",
-                    icon("file-pdf"), " Descargar Ordenanza de Actualización (PDF)"
+                    class = "btn btn-outline-secondary btn-sm",
+                    icon("file-lines"), " Facsímil El Peruano (PDF)"
                   )
                 )
               )
