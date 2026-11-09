@@ -245,7 +245,7 @@ mod_privacidad_ui <- function() {
             tags$h5(class = "fw-bold mb-0 text-dark", "3. Carácter Obligatorio o Facultativo de la Entrega de Datos")
           ),
           tags$ul(class = "small text-secondary mb-0", style = "line-height: 1.7;",
-            tags$li(tags$b("Datos de control de uso: "), "El número de DNI y la fecha de emisión se usan para limitar el tiempo y la frecuencia de uso. El sistema no verifica la identidad con una fuente oficial."),
+            tags$li(tags$b("Datos de control de uso: "), "El número de DNI y la fecha de emisión se usan para administrar el tiempo y la frecuencia de uso."),
             tags$li(tags$b("Datos Facultativos (GPS Móvil): "), "La geolocalización GPS en el mapa es estrictamente voluntaria (Opt-In) y solo se procesa bajo autorización expresa en el navegador para centrar el mapa en la posición actual del usuario. Las coordenadas no son almacenadas.")
           )
         ),

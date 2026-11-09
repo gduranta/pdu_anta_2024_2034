@@ -119,9 +119,9 @@ mapa_pdu_compartido <- local({
       addProviderTiles(providers$OpenStreetMap, group = "OpenStreetMap") %>%
       addProviderTiles(providers$Esri.WorldImagery, group = "Satélite") %>%
       addProviderTiles(providers$Esri.WorldTopoMap, group = "Topográfico") %>%
-      
 
-      
+
+
       # Capas vectoriales del visor.
       addPolygons(
         data = capas_mapa$ambito, group = "Ámbito PDU Anta",
@@ -201,25 +201,25 @@ mapa_pdu_compartido <- local({
           unname(zonif_bbox["ymax"]), unname(zonif_bbox["xmax"])
         ))
       )) %>%
-      
+
       addLayersControl(
         baseGroups = c("OpenStreetMap", "Satélite", "Topográfico"),
         overlayGroups = c("Zonificación PDU", "Ámbito PDU Anta", "Servidumbre Alta Tensión", "Líneas de Alta Tensión", "Zona de influencia del ferrocarril", "Vía Férrea (Tren)"),
         options = layersControlOptions(collapsed = TRUE)
       ) %>%
-      
+
       fitBounds(
         lng1 = unname(zonif_bbox["xmin"]),
         lat1 = unname(zonif_bbox["ymin"]),
         lng2 = unname(zonif_bbox["xmax"]),
         lat2 = unname(zonif_bbox["ymax"])
       ) %>%
-      
+
       htmlwidgets::onRender(sprintf("
         function(el, x) {
           var map = this;
           var zonifBounds = [[%f, %f], [%f, %f]];
-          
+
           function enfocarZonificacionMobile() {
             if (!map) return;
             map.invalidateSize();
@@ -229,12 +229,12 @@ mapa_pdu_compartido <- local({
               animate: false
             });
           }
-          
+
           // Re-intentos escalonados conforme el viewport móvil calcula el 100dvh y el layout se estabiliza
           setTimeout(enfocarZonificacionMobile, 150);
           setTimeout(enfocarZonificacionMobile, 600);
           setTimeout(enfocarZonificacionMobile, 1400);
-          
+
           // Soporte ante giros de pantalla (portrait/landscape) y redimensionamiento
           window.addEventListener('resize', function() {
             map.invalidateSize();
@@ -242,12 +242,12 @@ mapa_pdu_compartido <- local({
           window.addEventListener('orientationchange', function() {
             setTimeout(enfocarZonificacionMobile, 350);
           });
-          
+
           // Re-ajustar al cambiar de pestaña en Bootstrap
           document.addEventListener('shown.bs.tab', function() {
             setTimeout(enfocarZonificacionMobile, 200);
           });
-          
+
           // Re-ajustar si el usuario colapsa o despliega el sidebar de bslib
           document.addEventListener('bslib.sidebar.toggle', function() {
             setTimeout(enfocarZonificacionMobile, 350);
@@ -347,7 +347,7 @@ ui <- page_navbar(
 
               // 3. Entornos locales de desarrollo y pruebas internas autorizadas
               if (!esAutorizado && (
-                parentOrigin.indexOf('localhost') !== -1 || 
+                parentOrigin.indexOf('localhost') !== -1 ||
                 parentOrigin.indexOf('127.0.0.1') !== -1
               )) {
                 esAutorizado = true;
@@ -629,19 +629,19 @@ ui <- page_navbar(
     )
   ),
   fillable = "tab_visor",
-  
+
   # --- PESTAÑA PRINCIPAL: VISOR Y CONSULTAS ---
   nav_panel(
     title = "Visor Territorial y Consultas",
     value = "tab_visor",
     icon = icon("layer-group"),
-    
+
     layout_sidebar(
       fillable = TRUE,
       sidebar = sidebar(
         width = 410,
         title = div(class = "fw-bold", style = "color: #174A3A;", icon("sliders"), " Panel de Consulta"),
-        
+
         # Botón GPS móvil nativo
         tags$button(
           id = "btn_gps_movil",
@@ -650,24 +650,24 @@ ui <- page_navbar(
           onclick = "obtenerUbicacionGPS()",
           icon("location-crosshairs"), " 📍 Mi Ubicación Actual (GPS Móvil)"
         ),
-        
+
         tabsetPanel(
           id = "tab_modo_consulta",
           type = "pills",
-          
+
           # --- MODO 1: CONSULTA PUNTUAL ---
           tabPanel(
             title = "Punto",
             icon = icon("location-dot"),
             div(class = "mt-3"),
-            
+
             radioButtons(
               "tipo_coordenada", "Sistema de Coordenadas:",
               choices = c("UTM Zona 18S" = "utm", "Coordenadas WGS84" = "geo"),
               selected = "utm",
               inline = TRUE
             ),
-            
+
             conditionalPanel(
               condition = "input.tipo_coordenada == 'utm'",
               div(
@@ -676,7 +676,7 @@ ui <- page_navbar(
                 div(class = "col-6", numericInput("in_norte", "Norte (Y - m)", value = 8510700, step = 1))
               )
             ),
-            
+
             conditionalPanel(
               condition = "input.tipo_coordenada == 'geo'",
               div(
@@ -685,7 +685,7 @@ ui <- page_navbar(
                 div(class = "col-6", numericInput("in_lng", "Longitud (°)", value = -72.1742, step = 0.0001))
               )
             ),
-            
+
             actionButton(
               "btn_consultar_punto", "Ubicar y Consultar Punto",
               class = "btn btn-success w-100 fw-bold mb-2",
@@ -693,31 +693,31 @@ ui <- page_navbar(
               icon = icon("magnifying-glass-location")
             )
           ),
-          
+
           # --- MODO 2: CONSULTA POR POLÍGONO (PREDIO / LOTE) ---
           tabPanel(
             title = "Polígono de Predio",
             icon = icon("draw-polygon"),
             div(class = "mt-3"),
-            
+
             p(class = "small text-muted mb-2",
               "Ingrese los vértices del predio o cargue un archivo para consultar la zonificación urbana y las fajas de servidumbre normativas."
             ),
-            
+
             radioButtons(
               "poligono_input_tipo", "Formato de Vértices:",
               choices = c("UTM 18S (Este Norte)" = "utm", "WGS84 (Lat Lng)" = "geo"),
               selected = "utm",
               inline = TRUE
             ),
-            
+
             textAreaInput(
               "txt_vertices_poligono", "Vértices del Polígono (un punto por línea):",
               value = "805900 8510600\n806250 8510600\n806250 8510850\n805900 8510850",
               rows = 4,
               placeholder = "805900 8510600\n806250 8510600\n806250 8510850\n805900 8510850"
             ),
-            
+
             fileInput(
               "file_poligono", "O subir archivo de lote (Shapefile ZIP / SHP, GeoJSON, KML, CSV):",
               multiple = TRUE,
@@ -725,7 +725,7 @@ ui <- page_navbar(
               buttonLabel = "Examinar...",
               placeholder = "Seleccione un archivo del predio"
             ),
-            
+
             actionButton(
               "btn_consultar_poligono", "Calcular Intersección del Polígono",
               class = "btn btn-success w-100 fw-bold mb-2",
@@ -734,13 +734,13 @@ ui <- page_navbar(
             )
           )
         ),
-        
+
         hr(class = "my-3"),
-        
+
         # Acceso al Reporte Informativo y Descarga
         uiOutput("ui_botones_descarga")
       ),
-      
+
       # Contenedor del Mapa Leaflet
       div(
         class = "h-100 position-relative",
@@ -748,13 +748,13 @@ ui <- page_navbar(
       )
     )
   ),
-  
+
   # --- PESTAÑA 2: CERTIFICADO INFORMATIVO DIRECTO EN APP ---
   nav_panel(
     title = "Ficha Informativa",
     value = "tab_certificado",
     icon = icon("file-invoice"),
-    
+
     div(
       class = "container-fluid px-lg-5 px-2 px-sm-3 py-3",
       div(
@@ -769,18 +769,18 @@ ui <- page_navbar(
       uiOutput("ui_certificado_completo_view")
     )
   ),
-  
+
   # --- PESTAÑA DESPLEGABLE: NORMATIVA E INFORMACIÓN ---
   nav_menu(
     title = "Normativa e Información",
     icon = icon("book-open"),
-    
+
     # 3.1: CATÁLOGO DE ZONIFICACIÓN Y LEYENDA
     mod_catalogo_zonas_ui(total_subzonas = nrow(df_parametros)),
-    
+
     # 3.2: INFORMACIÓN INSTITUCIONAL DEL PDU
     mod_informacion_pdu_ui(),
-    
+
     # 3.3: TÉRMINOS Y CONDICIONES / POLÍTICA DE PRIVACIDAD
     mod_privacidad_ui()
   ),
@@ -803,7 +803,7 @@ ui <- page_navbar(
 # 2. LÓGICA DEL SERVIDOR (SERVER)
 # ------------------------------------------------------------------------------
 server <- function(input, output, session) {
-  
+
   # ============================================================================
   # CONTROL DE TIEMPO DE CONSULTA (ETAPA 1 - GUÍA PDU ANTA)
   # Duración fija de 600 segundos (10 minutos) por sesión con desconexión activa
@@ -925,7 +925,7 @@ server <- function(input, output, session) {
   poligono_actual <- reactiveVal(NULL)
   cache_mapa_certificado_uri <- reactiveVal(NULL)
   cache_mapa_key <- reactiveVal("")
-  
+
   # ----------------------------------------------------------------------------
   # 2.1 RENDERIZADO BASE DEL MAPA LEAFLET
   # ----------------------------------------------------------------------------
@@ -943,7 +943,7 @@ server <- function(input, output, session) {
       )
   }, once = TRUE)
 
-  
+
   # ----------------------------------------------------------------------------
   # 2.2 CONSULTAS PUNTUALES Y EVENTO GPS
   # ----------------------------------------------------------------------------
@@ -953,11 +953,11 @@ server <- function(input, output, session) {
     poligono_actual(NULL)
     cache_mapa_certificado_uri(NULL)
     cache_mapa_key("")
-    
+
     pt_4326 <- st_sfc(st_point(c(lng, lat)), crs = 4326)
     pt_utm <- st_transform(pt_4326, 32718)
     coords_utm <- st_coordinates(pt_utm)
-    
+
     punto_actual(list(
       geom_4326 = pt_4326,
       geom_utm = pt_utm,
@@ -967,7 +967,7 @@ server <- function(input, output, session) {
       norte = round(coords_utm[2], 2),
       precision = precision
     ))
-    
+
     updateNumericInput(session, "in_lat", value = round(lat, 6))
     updateNumericInput(session, "in_lng", value = round(lng, 6))
     updateNumericInput(session, "in_este", value = round(coords_utm[1], 1))
@@ -975,7 +975,7 @@ server <- function(input, output, session) {
 
     proxy_map <- leafletProxy("mapa_pdu") %>%
       clearGroup("consulta_activa")
-      
+
     # Círculo de radio de precisión estimada (GPS / Wi-Fi)
     if (!is.null(precision) && is.numeric(precision) && precision > 5) {
       proxy_map <- proxy_map %>%
@@ -1014,7 +1014,7 @@ server <- function(input, output, session) {
       )
     }, error = function(e) NULL)
   }
-  
+
   # Clic en el mapa
   observeEvent(input$mapa_pdu_click, {
     if (!sesion_vigente()) {
@@ -1027,7 +1027,7 @@ server <- function(input, output, session) {
       showNotification(conditionMessage(e), type = "error")
     })
   })
-  
+
   # GPS Móvil desde botón HTML / JS
   observeEvent(input$gps_location_device, {
     if (!sesion_vigente()) {
@@ -1040,7 +1040,7 @@ server <- function(input, output, session) {
     tryCatch(fijar_punto_consulta(loc$lng, loc$lat, precision = acc), error = function(e) {
       showNotification(conditionMessage(e), type = "error")
     })
-    
+
     if (acc > 30) {
       showNotification(
         HTML(paste0(
@@ -1057,12 +1057,12 @@ server <- function(input, output, session) {
       )
     }
   })
-  
+
   # Manejo institucional de avisos y errores de GPS (RStudio Viewer / Navegador)
   observeEvent(input$gps_error_event, {
     err <- input$gps_error_event
     req(err)
-    
+
     codigo <- suppressWarnings(as.integer(err$code))
     mensaje_html <- if (isTRUE(codigo == 1)) { # PERMISSION_DENIED
       HTML(paste0(
@@ -1083,7 +1083,7 @@ server <- function(input, output, session) {
     } else {
       HTML("<b>Aviso de ubicación:</b> Su dispositivo o navegador no tiene soporte de geolocalización activo en este momento.")
     }
-    
+
     showNotification(
       mensaje_html,
       type = "warning",
@@ -1091,7 +1091,7 @@ server <- function(input, output, session) {
       closeButton = TRUE
     )
   })
-  
+
   # GPS Leaflet nativo
   observeEvent(input$mapa_pdu_location, {
     if (!sesion_vigente()) { cerrar_sesion_pdu("tiempo_agotado"); return() }
@@ -1101,7 +1101,7 @@ server <- function(input, output, session) {
       showNotification(conditionMessage(e), type = "error")
     })
   })
-  
+
   # Botón consultar punto manual
   observeEvent(input$btn_consultar_punto, {
     if (!sesion_vigente()) {
@@ -1121,7 +1121,7 @@ server <- function(input, output, session) {
       }
     }, error = function(e) showNotification(conditionMessage(e), type = "error"))
   })
-  
+
   # ----------------------------------------------------------------------------
   # 2.3 CONSULTA POR POLÍGONO DE PREDIO (INTERSECCIÓN Y ZONIFICACIÓN MÚLTIPLE)
   # ----------------------------------------------------------------------------
@@ -1133,14 +1133,14 @@ server <- function(input, output, session) {
     tryCatch({
       modo_activo("poligono")
       punto_actual(NULL)
-    
+
     coords_mat <- NULL
-    
+
     # 1. Intentar leer archivo espacial subido (.zip, .shp múltiple, .geojson, .kml, .csv)
     if (!is.null(input$file_poligono) && nrow(input$file_poligono) > 0) {
       f_df <- input$file_poligono
       poly_subido <- NULL
-      
+
       # A. Caso archivo ZIP con Shapefile
       idx_zip <- which(tolower(tools::file_ext(f_df$name)) == "zip")
       if (length(idx_zip) > 0) {
@@ -1152,7 +1152,7 @@ server <- function(input, output, session) {
           poly_subido <- tryCatch(st_read(shp_list[1], quiet = TRUE), error = function(e) NULL)
         }
       }
-      
+
       # B. Caso selección múltiple de Shapefile (.shp, .dbf, .shx, .prj, .cpg)
       idx_shp <- which(tolower(tools::file_ext(f_df$name)) == "shp")
       if (is.null(poly_subido) && length(idx_shp) > 0) {
@@ -1166,13 +1166,13 @@ server <- function(input, output, session) {
         shp_target <- file.path(temp_dir, basename(f_df$name[idx_shp[1]]))
         poly_subido <- tryCatch(st_read(shp_target, quiet = TRUE), error = function(e) NULL)
       }
-      
+
       # C. Caso GeoJSON, JSON, KML, GML
       idx_vec <- which(tolower(tools::file_ext(f_df$name)) %in% c("geojson", "json", "kml", "gml"))
       if (is.null(poly_subido) && length(idx_vec) > 0) {
         poly_subido <- tryCatch(st_read(f_df$datapath[idx_vec[1]], quiet = TRUE), error = function(e) NULL)
       }
-      
+
       # D. Caso CSV / TXT tabular con coordenadas
       idx_txt <- which(tolower(tools::file_ext(f_df$name)) %in% c("csv", "txt", "dat"))
       if (is.null(poly_subido) && length(idx_txt) > 0) {
@@ -1189,7 +1189,7 @@ server <- function(input, output, session) {
           }
         }
       }
-      
+
       # Si se extrajo un objeto sf válido desde el archivo subido:
       if (!is.null(poly_subido) && nrow(poly_subido) > 0) {
         poly_4326 <- normalizar_poligono_predio(poly_subido)
@@ -1198,13 +1198,13 @@ server <- function(input, output, session) {
         return()
       }
     }
-    
+
     # 2. Si no hay archivo o es texto manual de vértices:
     if (is.null(coords_mat)) {
       lineas <- unlist(strsplit(input$txt_vertices_poligono, "[\r\n]+"))
       lineas <- trimws(lineas)
       lineas <- lineas[lineas != ""]
-      
+
       if (length(lineas) < 3) {
         showNotification("Debe ingresar al menos 3 vértices o subir un archivo Shapefile / GeoJSON válido.", type = "error")
         return()
@@ -1213,7 +1213,7 @@ server <- function(input, output, session) {
         showNotification("Por seguridad del servidor municipal, el polígono no puede exceder 1,000 vértices.", type = "error")
         return()
       }
-      
+
       parsed <- lapply(lineas, function(l) {
         nums <- as.numeric(unlist(regmatches(l, gregexpr("[-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?", l))))
         if (length(nums) >= 2) return(nums[1:2]) else return(NULL)
@@ -1221,16 +1221,16 @@ server <- function(input, output, session) {
       parsed <- do.call(rbind, parsed[!sapply(parsed, is.null)])
       coords_mat <- parsed
     }
-    
+
     if (is.null(coords_mat) || nrow(coords_mat) < 3) {
       showNotification("No se pudieron extraer vértices válidos para el polígono.", type = "error")
       return()
     }
-    
+
     if (!all(coords_mat[1, ] == coords_mat[nrow(coords_mat), ])) {
       coords_mat <- rbind(coords_mat, coords_mat[1, ])
     }
-    
+
     if (input$poligono_input_tipo == "geo") {
       # La interfaz recibe Latitud Longitud; sf requiere X=Longitud, Y=Latitud.
       coords_mat <- coords_mat[, c(2, 1), drop = FALSE]
@@ -1245,21 +1245,21 @@ server <- function(input, output, session) {
       showNotification(conditionMessage(e), type = "error", duration = 8)
     })
   })
-  
+
   procesar_poligono_sf <- function(poly_4326) {
     poly_4326 <- normalizar_poligono_predio(poly_4326)
     poly_utm <- st_transform(poly_4326, 32718)
     area_total_m2 <- sum(as.numeric(st_area(poly_utm)), na.rm = TRUE)
     perimetro_m <- sum(as.numeric(st_length(st_boundary(poly_utm))), na.rm = TRUE)
-    
+
     # 1. Ámbito PDU
     area_en_ambito <- area_interseccion_unica_m2(poly_4326, capas$ambito)
     pct_en_ambito <- if (ambito_disponible) min(100, (area_en_ambito / area_total_m2) * 100) else NA_real_
-    
+
     # 2. Distritos
     inter_dist <- if (nrow(capas$distritos)) st_intersection(poly_4326, capas$distritos) else capas$distritos
     distritos_list <- if (nrow(inter_dist) > 0) unique(inter_dist$NOMBDIST) else if (nrow(capas$ambito) > 0 && "NOMBDIST" %in% names(capas$ambito)) capas$ambito$NOMBDIST[1] else "Anta"
-    
+
     # 3. Alta Tensión (Servidumbre Eléctrica)
     area_at_m2 <- area_interseccion_unica_m2(poly_4326, capas$alta_tension_buffer)
     pct_at <- min(100, (area_at_m2 / area_total_m2) * 100)
@@ -1269,7 +1269,7 @@ server <- function(input, output, session) {
       volt_l <- unique(na.omit(inter_at$TENS_NOMIN))
       paste0(paste(nom_l, collapse = " / "), " (", paste(volt_l, collapse = ", "), ")")
     } else ""
-    
+
     # 4. Ferrocarril (Zona de Influencia / Derecho de Vía)
     area_ffcc_m2 <- area_interseccion_unica_m2(poly_4326, capas$ferrocarril_buffer)
     pct_ffcc <- min(100, (area_ffcc_m2 / area_total_m2) * 100)
@@ -1278,20 +1278,20 @@ server <- function(input, output, session) {
       nom_f <- unique(na.omit(inter_ffcc$NOM_FERR))
       tramo_f <- unique(na.omit(inter_ffcc$TRAMO_FERR))
       paste0(paste(nom_f, collapse = " / "), " (Tramo: ", paste(tramo_f, collapse = ", "), ")")
-    } else "" 
-    
+    } else ""
+
     # 5. Sistema Vial Propuesto Intersectado o Colindante (Buffer estricto de 25 metros indexado)
     res_vias <- pdu_buscar_vias_colindantes(poly_utm, vias_utm_compartidas, dist_max_m = 25.0)
     idx_vias_cercanas <- res_vias$indices
     dists_vias_sub <- res_vias$distancias
-    
+
     tabla_vias_predio <- data.frame(
       SIS_VIAL = character(), COD_VIA_PR = character(), SECCION_VI = character(), DISTANCIA_M = numeric(), stringsAsFactors = FALSE
     )
-    
+
     if (length(idx_vias_cercanas) > 0) {
       vias_sub <- capas$vias[idx_vias_cercanas, ]
-      
+
       tabla_vias_predio <- data.frame(
         SIS_VIAL = vias_sub$SIS_VIAL,
         COD_VIA_PR = vias_sub$COD_VIA_PR,
@@ -1302,7 +1302,7 @@ server <- function(input, output, session) {
         distinct(SIS_VIAL, COD_VIA_PR, SECCION_VI, .keep_all = TRUE) %>%
         arrange(DISTANCIA_M)
     }
-    
+
     # 6. Intersección con Zonificación (Múltiples zonas con filtrado previo de candidatos)
     idx_z_cand <- suppressMessages(st_intersects(poly_4326, capas$zonificacion)[[1]])
     inter_zonif <- if (length(idx_z_cand) > 0) {
@@ -1310,18 +1310,18 @@ server <- function(input, output, session) {
     } else {
       capas$zonificacion[0, , drop = FALSE]
     }
-    
+
     tabla_zonif <- data.frame(
       COD_ZONA = character(), COD_S_ZONA = character(), SUB_ZONA = character(),
       AREA_M2 = numeric(), PCT_LOTE = numeric(), stringsAsFactors = FALSE
     )
-    
+
     lista_parametros_zonas <- list()
-    
+
     if (nrow(inter_zonif) > 0) {
       inter_zonif_utm <- st_transform(inter_zonif, 32718)
       inter_zonif$AREA_INTER_M2 <- as.numeric(st_area(inter_zonif_utm))
-      
+
       tabla_zonif <- inter_zonif %>%
         st_drop_geometry() %>%
         group_by(COD_ZONA, COD_S_ZONA, SUB_ZONA) %>%
@@ -1331,14 +1331,14 @@ server <- function(input, output, session) {
           PCT_LOTE = round((AREA_M2 / area_total_m2) * 100, 3)
         ) %>%
         arrange(desc(AREA_M2))
-      
+
       # Extraer ficha de parámetros para cada zona intersectada
       for (i in 1:nrow(tabla_zonif)) {
         cod_sz <- trimws(tabla_zonif$COD_S_ZONA[i])
         cod_z <- trimws(tabla_zonif$COD_ZONA[i])
-        
+
         m_idx <- which(trimws(df_parametros$COD_S_ZONA) == cod_sz)
-        
+
         if (length(m_idx) > 0) {
           p_row <- pdu_buscar_parametros(df_parametros, cod_sz)[[1]]
           p_row$AREA_AFECTADA_M2 <- tabla_zonif$AREA_M2[i]
@@ -1347,10 +1347,10 @@ server <- function(input, output, session) {
         }
       }
     }
-    
+
     cache_mapa_certificado_uri(NULL)
     cache_mapa_key("")
-    
+
     poligono_actual(list(
       poly_4326 = poly_4326,
       poly_utm = poly_utm,
@@ -1369,7 +1369,7 @@ server <- function(input, output, session) {
       tabla_zonif = tabla_zonif,
       lista_parametros_zonas = lista_parametros_zonas
     ))
-    
+
     bb <- st_bbox(poly_4326)
     proxy_map <- leafletProxy("mapa_pdu", session = session) %>%
       clearGroup("consulta_activa") %>%
@@ -1427,7 +1427,7 @@ server <- function(input, output, session) {
         lng1 = as.numeric(bb["xmin"]), lat1 = as.numeric(bb["ymin"]),
         lng2 = as.numeric(bb["xmax"]), lat2 = as.numeric(bb["ymax"])
       )
-      
+
     # Consulta temporal en memoria; no persistir coordenadas ni geometría.
     tryCatch({
       z_prin <- if (nrow(tabla_zonif) > 0) tabla_zonif$COD_S_ZONA[1] else "SIN_ZONA"
@@ -1446,13 +1446,13 @@ server <- function(input, output, session) {
       )
     }, error = function(e) NULL)
   }
-  
+
   # ----------------------------------------------------------------------------
   # 2.4 RETIRO DE LA FICHA TÉCNICA DEL PANEL LATERAL
   # (La información técnica se despliega exclusivamente en el Módulo Reporte Informativo)
   # ----------------------------------------------------------------------------
   output$ui_ficha_resultado <- renderUI(NULL)
-  
+
   # ----------------------------------------------------------------------------
   # 2.6 ACCIONES DE CONSULTA Y ACCESO AL REPORTE INFORMATIVO
   # ----------------------------------------------------------------------------
@@ -1460,7 +1460,7 @@ server <- function(input, output, session) {
     modo <- modo_activo()
     hay_consulta <- (modo == "punto" && !is.null(punto_actual())) ||
                     (modo == "poligono" && !is.null(poligono_actual()))
-    
+
     if (!hay_consulta) {
       return(
         div(
@@ -1470,10 +1470,10 @@ server <- function(input, output, session) {
         )
       )
     }
-    
+
     pt_data <- punto_actual()
     poly_data <- poligono_actual()
-    
+
     div(
       class = "card border-0 shadow-sm p-3 mb-2",
       style = "background-color: #F8FAFC; border-left: 4px solid #008800 !important; border-radius: 8px;",
@@ -1508,26 +1508,26 @@ server <- function(input, output, session) {
       )
     )
   })
-  
+
   # Navegación entre pestañas
   observeEvent(input$btn_abrir_certificado_tab, {
     nav_select("main_navbar", "tab_certificado")
   })
-  
+
   observeEvent(input$btn_volver_al_visor, {
     nav_select("main_navbar", "tab_visor")
   })
-  
+
   observeEvent(input$btn_ir_a_consultar, {
     nav_select("main_navbar", "tab_visor")
   })
-  
+
   # Botón de descarga en la cabecera de la pestaña del certificado
   output$ui_boton_descarga_certificado_tab <- renderUI({
     modo <- modo_activo()
     if (modo == "punto" && is.null(punto_actual())) return(NULL)
     if (modo == "poligono" && is.null(poligono_actual())) return(NULL)
-    
+
     tagList(
       if (pdf_motor_disponible()) downloadButton(
         "btn_descargar_pdf_tab", "📥 Descargar Ficha Informativa (PDF)",
@@ -1538,7 +1538,7 @@ server <- function(input, output, session) {
       )
     )
   })
-  
+
   # Renderizado dinámico del Certificado Informativo completo dentro de la App
   output$ui_certificado_completo_view <- renderUI({
     modo <- modo_activo()
@@ -1562,7 +1562,7 @@ server <- function(input, output, session) {
         )
       )
     }
-    
+
     # Si hay consulta activa, generar y presentar el certificado en ancho completo
     doc_html <- generar_html_certificado()
     div(
@@ -1571,14 +1571,14 @@ server <- function(input, output, session) {
       doc_html
     )
   })
-  
+
   # Función auxiliar para generar el HTML completo del certificado con mapa oficial, logos, escala, rosa de vientos y datos
   generar_html_certificado <- function() {
     modo <- modo_activo()
-    
+
     escudo_b64 <- tryCatch(knitr::image_uri("www/escudo_muni_anta.png"), error = function(e) "")
     logo_pdu_b64 <- tryCatch(knitr::image_uri("www/pdu_actualizado_sf.png"), error = function(e) "")
-    
+
     # Estilo CSS optimizado para formato A4 en 2 páginas completas con encabezados y pies de página numerados
     css_certificado <- "
       @page { size: A4 portrait; margin: 6mm 8mm 6mm 8mm; }
@@ -1601,29 +1601,29 @@ server <- function(input, output, session) {
       }
       .cert-page:last-child { page-break-after: auto; }
       .cert-page-body { flex-grow: 1; display: flex; flex-direction: column; }
-      
+
       .header-banner { background: linear-gradient(135deg, #006633, #008800); color: white; padding: 5px 12px; border-radius: 4px; margin-bottom: 4px; border-bottom: 3px solid #B88808; width: 100%; box-sizing: border-box; }
       .header-banner-p2 { margin-bottom: 5px; padding: 4px 10px; }
       .header-title { font-size: 1.05rem; font-weight: 700; color: #FFFFFF; margin: 0; line-height: 1.15; letter-spacing: 0.2px; }
       .header-subtitle { font-size: 0.80rem; color: #F8F888; margin: 0; font-weight: 600; }
       .header-meta { font-size: 0.66rem; color: rgba(255,255,255,0.90); margin: 0; }
-      
+
       .project-box { background: #FFF7D6; border: 1px solid #B88808; border-radius: 4px; padding: 3px 8px; font-size: 0.74rem; margin-bottom: 3px; line-height: 1.2; width: 100%; box-sizing: border-box; }
       .legal-notice-box { background: #FFFBEB; border: 1px solid #F59E0B; border-left: 4px solid #D97706; border-radius: 4px; padding: 3px 8px; font-size: 0.71rem; color: #78350F; margin-bottom: 3px; line-height: 1.2; width: 100%; box-sizing: border-box; }
-      
+
       .section-heading { color: #006633; border-bottom: 1.5px solid #98C838; padding-bottom: 1px; margin-top: 4px; margin-bottom: 3px; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; }
       .table-cert { width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 0.78rem; }
       .table-cert th { background-color: #F2F3EF; color: #202020; font-weight: 600; padding: 2.5px 6px; border: 1px solid #CBD5E1; }
       .table-cert td { padding: 2.5px 6px; border: 1px solid #CBD5E1; }
       .table-compact th { width: 24%; }
-      
+
       .mapa-container { width: 100%; flex: 1 1 auto; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; min-height: 0; margin-top: 3px; margin-bottom: 2px; }
       .mapa-img-fullpage { width: 100%; height: auto; max-height: 228mm; object-fit: contain; display: block; box-sizing: border-box; }
-      
+
       .cert-footer { width: 100%; border-top: 1px solid #CBD5E1; padding-top: 3px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.66rem; color: #64748B; box-sizing: border-box; }
       .cert-footer-left { text-align: left; }
       .cert-footer-right { text-align: right; white-space: nowrap; font-weight: 700; color: #006633; }
-      
+
       .badge-vial { background: #B88808; color: white; padding: 1.5px 6px; border-radius: 3px; font-weight: bold; font-size: 0.74rem; display: inline-block; }
       .sub-card-param { background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; margin-bottom: 4px; padding: 4px 6px; }
       .sub-card-header { font-weight: 700; color: #006633; margin-bottom: 2px; border-bottom: 1px solid #E2E8F0; padding-bottom: 2px; font-size: 0.78rem; }
@@ -1636,13 +1636,13 @@ server <- function(input, output, session) {
       .small { font-size: 0.76rem; } .badge { display:inline-block; padding:2px 6px; border-radius:3px; color:#fff; }
       .bg-success { background:#008800; } .me-2 { margin-right:6px; } .ms-2 { margin-left:6px; }
       .mb-0 { margin-bottom:0; } .mb-1 { margin-bottom:3px; } .mb-2 { margin-bottom:4px; }
-      
+
       @media screen {
         .cert-page { min-height: auto; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px dashed #CBD5E1; }
         .cert-page:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .mapa-img-fullpage { max-height: 850px; }
       }
-      
+
       @media print {
         @page { size: A4 portrait; margin: 6mm 8mm 6mm 8mm; }
         body { margin: 0; padding: 0; }
@@ -1657,7 +1657,7 @@ server <- function(input, output, session) {
         .page-break { display: none !important; }
         .mapa-img-fullpage { width: 100% !important; max-height: 228mm !important; }
       }
-      
+
       @media (max-width: 768px) {
         body { font-size: 11.5px; padding: 0; }
         .cert-card { width: 100% !important; max-width: 100% !important; margin: 0; padding: 0; }
@@ -1674,10 +1674,10 @@ server <- function(input, output, session) {
         .section-heading { font-size: 0.78rem; }
       }
     "
-    
+
     fecha_consulta_str <- format(Sys.time(), "%d/%m/%Y a las %H:%M horas")
     codigo_consulta <- paste0("PDU-ANTA-", format(Sys.time(), "%Y%m%d%H%M"))
-    
+
     # Encabezado institucional oficial para Página 1
     header_banner_p1 <- div(
       class = "header-banner",
@@ -1701,7 +1701,7 @@ server <- function(input, output, session) {
         )
       )
     )
-    
+
     # Encabezado institucional oficial para Página 2
     header_banner_p2 <- div(
       class = "header-banner header-banner-p2",
@@ -1725,21 +1725,21 @@ server <- function(input, output, session) {
         )
       )
     )
-    
+
     # Pie de página institucional numerado para Página 1
     footer_p1 <- div(
       class = "cert-footer",
       div(class = "cert-footer-left", tags$b("Municipalidad Provincial de Anta"), " — Gerencia de Desarrollo Urbano y Rural — Sub Gerencia de Planeamiento Urbano y Acondicionamiento Territorial | PDU Anta 2024 - 2034"),
       div(class = "cert-footer-right", tags$b("Página 1 de 2"))
     )
-    
+
     # Pie de página institucional numerado para Página 2
     footer_p2 <- div(
       class = "cert-footer",
       div(class = "cert-footer-left", tags$b("Municipalidad Provincial de Anta"), " — Gerencia de Desarrollo Urbano y Rural — Sub Gerencia de Planeamiento Urbano y Acondicionamiento Territorial | PDU Anta 2024 - 2034"),
       div(class = "cert-footer-right", tags$b("Página 2 de 2"))
     )
-    
+
     if (modo == "punto") {
       pt_data <- punto_actual()
       pt_sf <- st_sf(geometry = pt_data$geom_4326)
@@ -1753,32 +1753,32 @@ server <- function(input, output, session) {
         volt_l <- unique(na.omit(capas$alta_tension_buffer$TENS_NOMIN[idx_at]))
         paste0(paste(nom_l, collapse = " / "), " (", paste(volt_l, collapse = ", "), ")")
       } else ""
-      
+
       idx_ffcc <- which(st_intersects(pt_sf, capas$ferrocarril_buffer, sparse = FALSE)[1, ])
       en_serv_ffcc <- length(idx_ffcc) > 0
       lineas_ffcc_pt_txt <- if (en_serv_ffcc) {
         nom_f <- unique(na.omit(capas$ferrocarril_buffer$NOM_FERR[idx_ffcc]))
         tramo_f <- unique(na.omit(capas$ferrocarril_buffer$TRAMO_FERR[idx_ffcc]))
         paste0(paste(nom_f, collapse = " / "), " (Tramo: ", paste(tramo_f, collapse = ", "), ")")
-      } else "" 
-      
+      } else ""
+
       # Vía propuesta colindante (Buffer estricto 25m indexado)
       res_v <- pdu_buscar_vias_colindantes(pt_data$geom_utm, vias_utm_compartidas, dist_max_m = 25.0)
       idx_min_v <- res_v$min_idx
       min_dist_v <- res_v$min_dist
-      
+
       sis_vial_txt <- "No colindante / No identificado"
       cod_via_txt <- "N/A"
       seccion_vial_txt <- "No especificada"
       dist_v_txt <- "N/A"
-      
+
       if (length(min_dist_v) > 0 && min_dist_v <= 25) {
         sis_vial_txt <- capas$vias$SIS_VIAL[idx_min_v]
         cod_via_txt <- capas$vias$COD_VIA_PR[idx_min_v]
         seccion_vial_txt <- capas$vias$SECCION_VI[idx_min_v]
         dist_v_txt <- paste0(round(min_dist_v, 3), " m")
       }
-      
+
       idx_zonif_punto <- st_intersects(pt_sf, capas$zonificacion)[[1]]
       zonificacion_ambigua <- length(idx_zonif_punto) > 1
       if (length(idx_zonif_punto) > 0) {
@@ -1789,13 +1789,13 @@ server <- function(input, output, session) {
       } else {
         cod_zona <- cod_s_zona <- sub_zona <- NA_character_
       }
-      
+
       p_norm <- NULL
       if (!is.na(cod_s_zona) && cod_s_zona != "") {
         m_idx <- which(trimws(df_parametros$COD_S_ZONA) == trimws(cod_s_zona))
         if (length(m_idx) > 0) p_norm <- pdu_buscar_parametros(df_parametros, cod_s_zona)[[1]]
       }
-      
+
       clave_mapa <- paste0("pt_", round(pt_data$lng, 6), "_", round(pt_data$lat, 6))
       mapa_img_uri <- if (identical(cache_mapa_key(), clave_mapa) && !is.null(cache_mapa_certificado_uri())) {
         cache_mapa_certificado_uri()
@@ -1805,7 +1805,7 @@ server <- function(input, output, session) {
         cache_mapa_certificado_uri(uri)
         uri
       }
-      
+
       doc_html <- tags$html(
         tags$head(
           tags$meta(charset = "utf-8"),
@@ -1816,7 +1816,7 @@ server <- function(input, output, session) {
         tags$body(
           div(
             class = "cert-card",
-            
+
             # --- PÁGINA 1: HOJA DEL PLANO CARTOGRÁFICO OFICIAL OFICIAL ---
             div(
               class = "cert-page",
@@ -1837,7 +1837,7 @@ server <- function(input, output, session) {
               ),
               footer_p1
             ),
-            
+
             # --- PÁGINA 2: DATOS Y PARÁMETROS NORMATIVOS ---
             div(
               class = "cert-page cert-page-technical",
@@ -1881,7 +1881,7 @@ server <- function(input, output, session) {
                     pdu_filas_reglamento(p_norm)
                   )
                 ),
-                
+
                 if (length(unique(capas$zonificacion$COD_S_ZONA[idx_zonif_punto])) > 1) tagList(
                   tags$div(class = "section-heading", "OTRAS SUBZONAS INTERSECTADAS"),
                   div(class = "alert alert-warning", "El punto intersecta varias subzonas. Verifique el límite cartográfico; se incluyen todas las fichas aplicables."),
@@ -1899,7 +1899,7 @@ server <- function(input, output, session) {
           )
         )
       )
-      
+
     } else {
       # CERTIFICADO COMPLETO DE PREDIO CON ZONIFICACIÓN MÚLTIPLE, VÍAS Y MAPA
       poly_data <- poligono_actual()
@@ -1912,7 +1912,7 @@ server <- function(input, output, session) {
         cache_mapa_certificado_uri(uri)
         uri
       }
-      
+
       doc_html <- tags$html(
         tags$head(
           tags$meta(charset = "utf-8"),
@@ -1923,7 +1923,7 @@ server <- function(input, output, session) {
         tags$body(
           div(
             class = "cert-card",
-            
+
             # --- PÁGINA 1: HOJA DEL PLANO CARTOGRÁFICO OFICIAL OFICIAL ---
             div(
               class = "cert-page",
@@ -1944,7 +1944,7 @@ server <- function(input, output, session) {
               ),
               footer_p1
             ),
-            
+
             # --- PÁGINA 2: CERTIFICADO INFORMATIVO NORMATIVO ---
             div(
               class = "cert-page",
@@ -1963,7 +1963,7 @@ server <- function(input, output, session) {
                     tags$tr(tags$th("Zona de Influencia Ferrocarril:"), tags$td(if (poly_data$pct_ffcc > 0) tags$b(class = "text-warning", paste0("⚠️ Proximidad: ", poly_data$area_ffcc_m2, " m² (", poly_data$pct_ffcc, "% del predio)", if (!is.null(poly_data$lineas_ffcc_txt) && nzchar(poly_data$lineas_ffcc_txt)) paste0(" — Vía: ", poly_data$lineas_ffcc_txt) else "")) else "✓ Sin proximidad"))
                   )
                 ),
-                
+
                                 tags$div(class = "section-heading", "2. DESGLOSE DE ZONIFICACIÓN EN EL LOTE"),
                 tags$table(
                   class = "table-cert mb-2",
@@ -1986,14 +1986,14 @@ server <- function(input, output, session) {
                     }
                   )
                 ),
-                
+
                 tags$div(class = "section-heading", "3. AFECTACIONES POR INFRAESTRUCTURA"),
                 tags$ul(
                   class = "cert-list",
                   tags$li(if (poly_data$pct_at > 0) tags$b(class = "text-danger", paste0("⚠️ Servidumbre Alta Tensión: ", poly_data$area_at_m2, " m² (", poly_data$pct_at, "% del predio)", if (!is.null(poly_data$lineas_at_txt) && nzchar(poly_data$lineas_at_txt)) paste0(" — Línea: ", poly_data$lineas_at_txt) else "", ". Prohibida edificación dentro de la faja.")) else "✓ Sin afectación por fajas de servidumbre de líneas de alta tensión (CNE)."),
                   tags$li(if (poly_data$pct_ffcc > 0) tags$b(class = "text-warning", paste0("⚠️ Zona de influencia del ferrocarril: ", poly_data$area_ffcc_m2, " m² (", poly_data$pct_ffcc, "% del predio)", if (!is.null(poly_data$lineas_ffcc_txt) && nzchar(poly_data$lineas_ffcc_txt)) paste0(" — Vía: ", poly_data$lineas_ffcc_txt) else "", ". Requiere verificación sectorial ante el MTC.")) else "✓ Sin proximidad a la zona de influencia del ferrocarril (D.S. 032-2005-MTC).")
                 ),
-                
+
                 tags$div(class = "section-heading", "4. PARÁMETROS URBANÍSTICOS POR ZONA"),
                 if (length(poly_data$lista_parametros_zonas) > 0) {
                   lapply(poly_data$lista_parametros_zonas, function(p_row) {
@@ -2031,16 +2031,16 @@ server <- function(input, output, session) {
         )
       )
     }
-    
+
     return(doc_html)
   }
-  
+
   # Función centralizada para generar la Constancia Informativa en PDF (Typst / Chrome)
   generar_constancia_pdf <- function(destino_file) {
     modo <- modo_activo()
     if (modo == "punto" && is.null(punto_actual())) stop("No hay datos de consulta puntual activa.")
     if (modo == "poligono" && is.null(poligono_actual())) stop("No hay datos de consulta por predio activa.")
-    
+
     dir.create("outputs", showWarnings = FALSE)
     codigo_consulta <- paste0("PDU-ANTA-", format(Sys.time(), "%Y%m%d%H%M"))
     temp_id <- paste0("constancia_", format(Sys.time(), "%Y%m%d_%H%M%S"), "_", sample(1000:9999, 1))
@@ -2048,7 +2048,7 @@ server <- function(input, output, session) {
     on.exit({
       if (file.exists(mapa_png_rel)) unlink(mapa_png_rel)
     }, add = TRUE)
-    
+
     if (modo == "punto") {
       pt_data <- punto_actual()
       pt_sf <- st_sf(geometry = pt_data$geom_4326)
@@ -2062,19 +2062,19 @@ server <- function(input, output, session) {
         volt_l <- unique(na.omit(capas$alta_tension_buffer$TENS_NOMIN[idx_at]))
         paste0(paste(nom_l, collapse = " / "), " (", paste(volt_l, collapse = ", "), ")")
       } else ""
-      
+
       idx_ffcc <- which(st_intersects(pt_sf, capas$ferrocarril_buffer, sparse = FALSE)[1, ])
       en_serv_ffcc <- length(idx_ffcc) > 0
       lineas_ffcc_pt_txt <- if (en_serv_ffcc) {
         nom_f <- unique(na.omit(capas$ferrocarril_buffer$NOM_FERR[idx_ffcc]))
         tramo_f <- unique(na.omit(capas$ferrocarril_buffer$TRAMO_FERR[idx_ffcc]))
         paste0(paste(nom_f, collapse = " / "), " (Tramo: ", paste(tramo_f, collapse = ", "), ")")
-      } else "" 
-      
+      } else ""
+
       res_v <- pdu_buscar_vias_colindantes(pt_data$geom_utm, vias_utm_compartidas, dist_max_m = 25.0)
       idx_min_v <- res_v$min_idx
       min_dist_v <- res_v$min_dist
-      
+
       tabla_vias <- data.frame(
         SIS_VIAL = character(), COD_VIA_PR = character(),
         SECCION_VI = character(), DISTANCIA_M = numeric(), stringsAsFactors = FALSE
@@ -2088,7 +2088,7 @@ server <- function(input, output, session) {
           stringsAsFactors = FALSE
         )
       }
-      
+
       idx_zonif_punto <- st_intersects(pt_sf, capas$zonificacion)[[1]]
       if (length(idx_zonif_punto) > 0) {
         zonif_match <- capas$zonificacion[idx_zonif_punto[1], ]
@@ -2098,7 +2098,7 @@ server <- function(input, output, session) {
       } else {
         cod_zona <- cod_s_zona <- sub_zona <- NA_character_
       }
-      
+
       sz_intersectadas <- capas$zonificacion$COD_S_ZONA[idx_zonif_punto]
       sz_validas <- intersect(unique(sz_intersectadas), df_parametros$COD_S_ZONA)
       lista_parametros <- if (length(sz_validas) > 0) {
@@ -2106,7 +2106,7 @@ server <- function(input, output, session) {
       } else {
         list()
       }
-      
+
       tabla_zonif <- data.frame()
       if (!is.na(cod_zona)) {
         tabla_zonif <- data.frame(
@@ -2118,7 +2118,7 @@ server <- function(input, output, session) {
           stringsAsFactors = FALSE
         )
       }
-      
+
       # Reutilizar mapa en caché para evitar regeneración costosa con ggplot
       mapa_ok <- FALSE
       uri_cached <- cache_mapa_certificado_uri()
@@ -2134,7 +2134,7 @@ server <- function(input, output, session) {
       if (!mapa_ok) {
         generar_mapa_certificado(pt_sf, es_poligono = FALSE, ruta_salida_png = mapa_png_rel, capas_pdu = capas, pal_subzonas = colores_subzonas, ancho_in = 7.6, alto_in = 8.85)
       }
-      
+
       payload <- list(
         codigo_consulta = codigo_consulta,
         fecha_hora = format(Sys.time(), "%d/%m/%Y %H:%M"),
@@ -2160,7 +2160,7 @@ server <- function(input, output, session) {
         escudo_path = "www/escudo_muni_anta.png",
         logo_pdu_path = "www/pdu_actualizado_sf.png"
       )
-      
+
     } else {
       poly_data <- poligono_actual()
       # Reutilizar mapa en caché para evitar regeneración costosa con ggplot
@@ -2178,7 +2178,7 @@ server <- function(input, output, session) {
       if (!mapa_ok) {
         generar_mapa_certificado(poly_data$poly_4326, es_poligono = TRUE, ruta_salida_png = mapa_png_rel, capas_pdu = capas, pal_subzonas = colores_subzonas, ancho_in = 7.6, alto_in = 8.35)
       }
-      
+
       payload <- list(
         codigo_consulta = codigo_consulta,
         fecha_hora = format(Sys.time(), "%d/%m/%Y %H:%M"),
@@ -2207,7 +2207,7 @@ server <- function(input, output, session) {
         logo_pdu_path = "www/pdu_actualizado_sf.png"
       )
     }
-    
+
     # 1. Renderizado principal con Quarto + Typst. Renderizar en un directorio
     # temporal propio evita depender del directorio de trabajo del servidor y
     # evita colisiones entre descargas simultáneas de distintas sesiones.
@@ -2303,7 +2303,7 @@ server <- function(input, output, session) {
       }
       message("No se pudo generar la constancia con Quarto: ", render_error)
     }
-    
+
     # 2. Fallback con Chrome / pagedown si Quarto no estuviera instalado
     if (chrome_disponible()) {
       temp_html <- tempfile(fileext = ".html")
@@ -2329,10 +2329,10 @@ server <- function(input, output, session) {
         return(invisible(destino_file))
       }
     }
-    
+
     stop("No fue posible generar la constancia en PDF.")
   }
-  
+
   # Descarga PDF Oficial (Botón en el panel lateral)
   output$btn_descargar_pdf <- downloadHandler(
     filename = function() {
@@ -2367,11 +2367,11 @@ server <- function(input, output, session) {
     },
     contentType = "application/pdf"
   )
-  
+
   # ----------------------------------------------------------------------------
   # 2.7 MÓDULO REACTIVO SUPABASE, BUZÓN CIUDADANO Y CATÁLOGO DINÁMICO
   # ----------------------------------------------------------------------------
-  
+
   # Contadores públicos persistentes. La visita se deduplica en Supabase por
   # navegador y día; no se almacena IP ni información personal.
   metricas_supa <- reactiveVal(supabase_obtener_metricas())
@@ -2409,7 +2409,7 @@ server <- function(input, output, session) {
   estado_supa <- reactive({
     supabase_ping()
   })
-  
+
   # Indicador de estado en el Navbar superior
   output$ui_status_supabase_pill <- renderUI({
     info <- estado_supa()
@@ -2433,7 +2433,7 @@ server <- function(input, output, session) {
       )
     }
   })
-  
+
   # Tarjeta de diagnóstico de base de datos en la pestaña de Buzón
   output$ui_card_estado_supabase <- renderUI({
     info <- estado_supa()
@@ -2460,11 +2460,11 @@ server <- function(input, output, session) {
       )
     )
   })
-  
+
   # Avisos Municipales traídos en tiempo real de Supabase
   output$ui_lista_avisos_municipales <- renderUI({
     df_av <- tryCatch(supabase_obtener_avisos(limite = 4), error = function(e) data.frame())
-    
+
     if (nrow(df_av) == 0) {
       return(
         div(
@@ -2473,13 +2473,13 @@ server <- function(input, output, session) {
         )
       )
     }
-    
+
     tagList(
       lapply(1:nrow(df_av), function(i) {
         av <- df_av[i, ]
         col_border <- if (av$nivel == "warning") "#D97706" else if (av$nivel == "success") "#059669" else "#1B4D3E"
         bg_card <- if (av$nivel == "warning") "#FFFBEB" else if (av$nivel == "success") "#ECFDF5" else "#F8FAFC"
-        
+
         div(
           class = "p-3 mb-2 rounded-2 border",
           style = paste0("background-color:", bg_card, "; border-left: 4px solid ", col_border, " !important;"),
@@ -2490,7 +2490,7 @@ server <- function(input, output, session) {
       })
     )
   })
-  
+
   # Catálogo normativo dinámico con filtro de búsqueda
   mod_catalogo_zonas_server(input, output, session, df_parametros, colores_subzonas, colores_zonas)
 }
