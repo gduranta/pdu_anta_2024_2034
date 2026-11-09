@@ -332,6 +332,9 @@ ui <- page_navbar(
               if (document.referrer) {
                 parentOrigin = (new URL(document.referrer)).origin.toLowerCase();
               }
+              if (!parentOrigin && window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
+                parentOrigin = window.location.ancestorOrigins[0].toLowerCase();
+              }
 
               var esAutorizado = false;
 

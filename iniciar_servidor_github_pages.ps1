@@ -35,8 +35,21 @@ $rOut = Join-Path $outputs "shiny_stdout.log"
 $endpointFile = Join-Path $raiz "docs\server_endpoint.json"
 $rProcess = $null
 $cfProcess = $null
+$branch = $null
+$urlPublica = ""
 
 try {
+    # Limpieza preventiva de procesos huérfanos o puertos ocupados
+    Get-Process -Name 'cloudflared' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    $conexionesPrevias = Get-NetTCPConnection -LocalPort $Puerto -ErrorAction SilentlyContinue
+    if ($conexionesPrevias) {
+        $pidsPrevios = $conexionesPrevias | Select-Object -ExpandProperty OwningProcess -Unique
+        foreach ($p in $pidsPrevios) {
+            if ($p -gt 4) { Stop-Process -Id $p -Force -ErrorAction SilentlyContinue }
+        }
+        Start-Sleep -Milliseconds 500
+    }
+
     $env:PDU_SHINY_HOST = "127.0.0.1"
     $env:PDU_SHINY_PORT = "$Puerto"
     if (Test-Path $rLog) { Remove-Item -LiteralPath $rLog -Force }
@@ -113,4 +126,28 @@ try {
     Remove-Item Env:PDU_SHINY_HOST -ErrorAction SilentlyContinue
     Remove-Item Env:PDU_SHINY_PORT -ErrorAction SilentlyContinue
     Write-Host "Servidor y túnel detenidos." -ForegroundColor Yellow
+
+    if (-not $SinGitPush -and $branch -and $urlPublica) {
+        try {
+            Write-Host "Actualizando endpoint a fuera de línea en GitHub Pages..." -ForegroundColor Cyan
+            $offlineData = [ordered]@{
+                url = ""
+                status = "offline"
+                updated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+                institucion = "Municipalidad Provincial de Anta"
+                gerencia = "Gerencia de Desarrollo Urbano y Rural (GDUR)"
+                proyecto = "Plan de Desarrollo Urbano de Anta (2024 - 2034)"
+                ordenanza = "Ordenanza Municipal No 04-2025-A-MPA/C"
+                mesa_de_partes = "mesadepartesvirtual@munianta.gob.pe"
+            }
+            $jsonOff = $offlineData | ConvertTo-Json -Depth 4
+            [System.IO.File]::WriteAllText($endpointFile, $jsonOff, [System.Text.UTF8Encoding]::new($false))
+            & git -C $raiz add -f -- docs/server_endpoint.json
+            & git -C $raiz commit --only -m "chore(pages): servidor fuera de linea [skip ci]" -- docs/server_endpoint.json
+            & git -C $raiz push origin $branch
+            Write-Host "GitHub Pages marcado fuera de línea." -ForegroundColor Gray
+        } catch {
+            Write-Warning "No se pudo actualizar el estado fuera de línea en GitHub."
+        }
+    }
 }
