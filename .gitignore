@@ -1,39 +1,77 @@
+# ==============================================================================
+# GEOVISOR PDU ANTA - .gitignore para Repositorio Público (GitHub Pages)
+# El código fuente, datos territoriales y herramientas de servidor se ejecutan
+# exclusivamente en el computador municipal local y no forman parte del repositorio público.
+# ==============================================================================
+
+# Entorno R y proyecto local
 .Rhistory
 .RData
 .Ruserdata
 .Rproj.user/
+*.Rproj
 .codex_spreadsheet/
-outputs/
-data_pdu/
-/aprobacion/
-/normativa/
 renv/library/
 renv/staging/
 rsconnect/
 *.lock
-
-.Rproj.user
 .httr-oauth
 .DS_Store
-.quarto
+.quarto/
 .env
 .Renviron
-datos_supabase.R
-# Datos espaciales crudos y temporales (no subir a GitHub)
-/data/
-/shp_pdu_anta/
+.Renviron.example
+.gitattributes
 
-# Secciones viales y planos gráficos
-/seccion_vias/
-/secciones_viales/
-/data/secciones_viales/
+# Código fuente del backend (R Shiny y módulos)
+app.R
+run_server.R
+R/
+scripts/
+tests/
+DESCRIPTION
+manifest.json
+patch_app.py
+*.qmd
+*.Rmd
+demo.*
+presentacion.*
+test_*.R
 
-/.quarto/
-*.docx
+# Datos territoriales y cartografía oficial (Privacidad Institucional)
+data/
+data_pdu/
+shp_pdu_anta/
+seccion_vias/
+secciones_viales/
+ejemplos/
+aprobacion/
+normativa/
+documentacion/
+BASE_DATOS_DATA.md
+DOCUMENTACION_IMPLEMENTACION.md
+
+# Archivos de salida, temporales y bitácoras
+outputs/
 scratch/
-TOMO III_REGLAMENTO_2024-2034.docx
-**/*.quarto_ipynb
+*.docx
+*.pdf
 
-# Herramientas y túneles locales
-/tools/
+# Recursos del servidor y activos de renderizado
+www/
+logo/
+deploy/
+tools/
 *.exe
+
+# Scripts de automatización y despliegue local
+iniciar_servidor_*.bat
+iniciar_servidor_*.ps1
+guia_despliegue_servidor_permanente.html
+_extensions/
+
+# ÚNICAMENTE SE PUBLICA EN ESTE REPOSITORIO:
+# - docs/ (Portal público de entrada en GitHub Pages)
+# - README.md
+# - LICENSE
+# - .gitignore
