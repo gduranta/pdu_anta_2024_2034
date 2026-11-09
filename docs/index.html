@@ -137,25 +137,6 @@
       color: #E2E8F0;
     }
 
-    .pdu-direct-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.70rem;
-      font-weight: 700;
-      padding: 2px 9px;
-      border-radius: 12px;
-      background: #B68A2C;
-      color: #0F2D24;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-
-    .pdu-direct-btn:hover {
-      background: #FDE68A;
-      color: #0F2D24;
-      transform: translateY(-1px);
-    }
 
     .status-dot {
       width: 7px;
@@ -335,11 +316,6 @@
     </div>
 
     <div class="pdu-actions">
-      <!-- Botón de Acceso Directo / Pantalla Completa (se muestra cuando hay servidor activo) -->
-      <a id="btn_abrir_directo" href="#" target="_blank" class="pdu-direct-btn" style="display: none;" title="Abrir GeoVisor en pestaña completa">
-        <i class="fa-solid fa-up-right-from-square"></i> Pantalla Completa
-      </a>
-
       <!-- Indicador de Estado del Servidor -->
       <div id="status_pill" class="status-pill" title="Servicio Territorial Oficial">
         <span id="status_dot" class="status-dot connecting"></span>
@@ -486,23 +462,11 @@
       if (iframeIniciado && urlNorm === urlActualNorm && !esManual) {
         statusDot.className = 'status-dot online';
         statusText.textContent = 'Servidor en Línea';
-        const btnDirecto = document.getElementById('btn_abrir_directo');
-        if (btnDirecto) {
-          btnDirecto.href = urlNorm;
-          btnDirecto.style.display = 'inline-flex';
-        }
         return;
       }
 
       serverUrlActual = urlNorm;
       iframeIniciado = true;
-
-      // Actualizar botón directo si existe
-      const btnDirecto = document.getElementById('btn_abrir_directo');
-      if (btnDirecto) {
-        btnDirecto.href = urlNorm;
-        btnDirecto.style.display = 'inline-flex';
-      }
 
       // Cargar iframe
       statusDot.className = 'status-dot connecting';
@@ -555,8 +519,6 @@
 
       iframeIniciado = false;
       serverUrlActual = '';
-      const btnDirecto = document.getElementById('btn_abrir_directo');
-      if (btnDirecto) btnDirecto.style.display = 'none';
       statusDot.className = 'status-dot offline';
       statusText.textContent = 'Fuera de Línea';
       
